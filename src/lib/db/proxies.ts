@@ -1,3 +1,5 @@
+// Convention: when type === "vercel", the `notes` column stores JSON { relayAuth: "<token>" }
+// used by proxyFetch.ts to route requests through the Vercel edge relay instead of an undici ProxyAgent.
 import { randomUUID } from "crypto";
 import { getDbInstance } from "./core";
 import { backupDbFile } from "./backup";
@@ -113,8 +115,20 @@ function mapAssignmentRow(row: unknown): ProxyAssignmentRecord {
   };
 }
 
+function extractRelayAuth(notes: unknown): string | undefined {
+  if (typeof notes !== "string") return undefined;
+  try {
+    const parsed = JSON.parse(notes) as { relayAuth?: string };
+    return parsed.relayAuth || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function toRegistryProxyResolution(row: unknown, level: ProxyScope, levelId: string | null) {
   const record = toRecord(row);
+  const relayAuth =
+    record.type === "vercel" ? extractRelayAuth(record.notes) : undefined;
   return {
     proxy: {
       type: record.type,
@@ -122,6 +136,7 @@ function toRegistryProxyResolution(row: unknown, level: ProxyScope, levelId: str
       port: record.port,
       username: record.username,
       password: record.password,
+      ...(relayAuth !== undefined ? { relayAuth } : {}),
     },
     level,
     levelId,
@@ -651,11 +666,13 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
 
     const accountAssignment = db
       .prepare(
-        "SELECT p.id, p.type, p.host, p.port, p.username, p.password FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = 'account' AND a.scope_id = ? LIMIT 1"
+        "SELECT p.id, p.type, p.host, p.port, p.username, p.password, p.notes FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = 'account' AND a.scope_id = ? LIMIT 1"
       )
       .get(connectionId);
     if (accountAssignment) {
       const record = toRecord(accountAssignment);
+      const relayAuth =
+        record.type === "vercel" ? extractRelayAuth(record.notes) : undefined;
       return {
         proxy: {
           type: record.type,
@@ -663,6 +680,7 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
           port: record.port,
           username: record.username,
           password: record.password,
+          ...(relayAuth !== undefined ? { relayAuth } : {}),
         },
         level: "account",
         levelId: connectionId,
@@ -677,11 +695,13 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
     if (connection?.provider) {
       const providerAssignment = db
         .prepare(
-          "SELECT p.id, p.type, p.host, p.port, p.username, p.password FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = 'provider' AND a.scope_id = ? LIMIT 1"
+          "SELECT p.id, p.type, p.host, p.port, p.username, p.password, p.notes FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = 'provider' AND a.scope_id = ? LIMIT 1"
         )
         .get(connection.provider);
       if (providerAssignment) {
         const record = toRecord(providerAssignment);
+        const relayAuth =
+          record.type === "vercel" ? extractRelayAuth(record.notes) : undefined;
         return {
           proxy: {
             type: record.type,
@@ -689,6 +709,7 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
             port: record.port,
             username: record.username,
             password: record.password,
+            ...(relayAuth !== undefined ? { relayAuth } : {}),
           },
           level: "provider",
           levelId: connection.provider,
@@ -699,11 +720,13 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
 
     const globalAssignment = db
       .prepare(
-        "SELECT p.id, p.type, p.host, p.port, p.username, p.password FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = 'global' LIMIT 1"
+        "SELECT p.id, p.type, p.host, p.port, p.username, p.password, p.notes FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = 'global' LIMIT 1"
       )
       .get();
     if (globalAssignment) {
       const record = toRecord(globalAssignment);
+      const relayAuth =
+        record.type === "vercel" ? extractRelayAuth(record.notes) : undefined;
       return {
         proxy: {
           type: record.type,
@@ -711,6 +734,7 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
           port: record.port,
           username: record.username,
           password: record.password,
+          ...(relayAuth !== undefined ? { relayAuth } : {}),
         },
         level: "global",
         levelId: null,
@@ -734,7 +758,7 @@ export async function resolveProxyForScopeFromRegistry(scope: string, scopeId?: 
     if (normalizedScope === "global") {
       const globalAssignment = db
         .prepare(
-          "SELECT p.id, p.type, p.host, p.port, p.username, p.password FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = 'global' LIMIT 1"
+          "SELECT p.id, p.type, p.host, p.port, p.username, p.password, p.notes FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = 'global' LIMIT 1"
         )
         .get();
       return globalAssignment ? toRegistryProxyResolution(globalAssignment, "global", null) : null;
@@ -745,7 +769,7 @@ export async function resolveProxyForScopeFromRegistry(scope: string, scopeId?: 
 
     const assignment = db
       .prepare(
-        "SELECT p.id, p.type, p.host, p.port, p.username, p.password FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = ? AND a.scope_id = ? LIMIT 1"
+        "SELECT p.id, p.type, p.host, p.port, p.username, p.password, p.notes FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = ? AND a.scope_id = ? LIMIT 1"
       )
       .get(normalizedScope, normalizedScopeId);
 

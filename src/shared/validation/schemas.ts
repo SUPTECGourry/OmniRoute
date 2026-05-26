@@ -1339,7 +1339,7 @@ const proxyRegistryFieldsSchema = z
     type: z
       .preprocess(
         (value) => (typeof value === "string" ? value.trim().toLowerCase() : value),
-        z.enum(["http", "https", "socks5"])
+        z.enum(["http", "https", "socks5", "vercel"])
       )
       .optional()
       .default("http"),
@@ -1350,7 +1350,7 @@ const proxyRegistryFieldsSchema = z
     region: z.string().trim().max(64).nullable().optional(),
     notes: z.string().trim().max(1000).nullable().optional(),
     status: z.enum(["active", "inactive"]).optional().default("active"),
-    source: z.enum(["manual", "oneproxy", "dashboard-custom"]).optional(),
+    source: z.enum(["manual", "oneproxy", "dashboard-custom", "vercel-relay"]).optional(),
   })
   .strict();
 
