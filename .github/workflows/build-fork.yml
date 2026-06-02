@@ -21,7 +21,18 @@ jobs:
     name: Build Docker (validate on PR/push)
     # Always validate the Dockerfile builds, even in forks or on PRs.
     # This catches Docker-related breakage early (important for custom changes like xai-oauth + container fixes).
-    runs-on: ubuntu-latest
+    # Matrix includes arm64 using native arm runner for proper arm support.
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -34,21 +45,28 @@ jobs:
         with:
           context: .
           target: runner-base
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=docker-${{ matrix.arch }}
+          cache-to: type=gha,scope=docker-${{ matrix.arch }},mode=max
 
-  publish:
-    name: Build and Push Fork Image
+  build:
+    name: Build Docker (${{ matrix.platform }})
     if: github.repository == 'SUPTECGourry/OmniRoute'
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -60,30 +78,90 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=sha-
-            type=ref,event=tag
-          labels: |
-            org.opencontainers.image.title=omniroute
-            org.opencontainers.image.description=Unified AI proxy/router — fork image
-            org.opencontainers.image.url=https://github.com/SUPTECGourry/OmniRoute
-            org.opencontainers.image.source=https://github.com/SUPTECGourry/OmniRoute
-            org.opencontainers.image.licenses=MIT
-
-      - name: Build and push
+      - name: Build and push platform image by digest
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
           target: runner-base
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          tags: |
+            ${{ env.IMAGE_NAME }}
+          cache-from: type=gha,scope=docker-${{ matrix.arch }}
+          cache-to: type=gha,scope=docker-${{ matrix.arch }},mode=max
+        env:
+          DOCKER_BUILDKIT_INLINE_CACHE: 1
+
+      - name: Export digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/digests
+          digest="${DIGEST#sha256:}"
+          touch "/tmp/digests/${digest}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Publish multi-arch manifest
+    needs: build
+    if: github.repository == 'SUPTECGourry/OmniRoute'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ghcr.io/SUPTECGourry/omniroute
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          pattern: digests-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Create GHCR manifest
+        run: |
+          set -euo pipefail
+
+          tags=()
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            tags+=(-t "${IMAGE_NAME}:${{ github.ref_name }}")
+          else
+            tags+=(-t "${IMAGE_NAME}:latest")
+            tags+=(-t "${IMAGE_NAME}:sha-${{ github.sha }}")
+          fi
+
+          refs=()
+          while IFS= read -r digest_file; do
+            refs+=("${IMAGE_NAME}@sha256:$(basename "$digest_file")")
+          done < <(find /tmp/digests -type f | sort)
+
+          if [ "${#refs[@]}" -eq 0 ]; then
+            echo "No image digests were downloaded." >&2
+            exit 1
+          fi
+
+          docker buildx imagetools create "${tags[@]}" "${refs[@]}"
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect "${IMAGE_NAME}:latest" || true
