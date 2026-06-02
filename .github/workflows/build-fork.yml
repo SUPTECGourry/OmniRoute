@@ -14,7 +14,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/SUPTECGourry/omniroute
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner | lower }}/omniroute
 
 jobs:
   validate-build:
@@ -116,7 +116,7 @@ jobs:
     if: github.repository == 'SUPTECGourry/OmniRoute'
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: ghcr.io/SUPTECGourry/omniroute
+      IMAGE_NAME: ghcr.io/${{ github.repository_owner | lower }}/omniroute
     steps:
       - name: Checkout
         uses: actions/checkout@v6
