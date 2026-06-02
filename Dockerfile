@@ -38,6 +38,17 @@ RUN --mount=type=cache,target=/root/.npm \
   && npm rebuild better-sqlite3 \
   && node -e "require('better-sqlite3')(':memory:').close()"
 
+# Force-install all Linux platform packages for sqlite-vec (declared as
+# optionalDependencies of "sqlite-vec"). `npm ci --ignore-scripts` can cause
+# the platform-specific package (e.g. sqlite-vec-linux-x64) to be omitted in
+# some BuildKit / cross-platform buildx scenarios. Explicit install guarantees
+# the directories exist so the unconditional COPY steps below in runner-base
+# never produce "not found" during multi-arch (amd64+arm64) builds.
+npm install --no-save --ignore-scripts --legacy-peer-deps \
+  sqlite-vec-linux-x64@^0.1.9 \
+  sqlite-vec-linux-arm64@^0.1.9 \
+  || true
+
 # Use Turbopack for significant build speedup
 ENV OMNIROUTE_USE_TURBOPACK=1
 
@@ -77,11 +88,14 @@ COPY --from=builder /app/node_modules/@swc/helpers ./node_modules/@swc/helpers
 # Explicitly copy better-sqlite3 — native bindings are not reliably traced by
 # Next.js standalone output, but bootstrap-env requires SQLite before startup.
 COPY --from=builder /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
-# Explicitly copy sqlite-vec (+ linux-x64 optional native .so) for vector memory
-# search. The package uses dynamic platform require + loadExtension; standalone
-# + Turbopack tracing frequently misses the optional dep and the .so asset.
+# Explicitly copy sqlite-vec (+ linux-*-x64/arm64 optional native .so) for vector
+# memory search. The package uses dynamic platform require + loadExtension;
+# standalone + Turbopack tracing frequently misses the optional deps.
+# We copy *both* linux variants so multi-arch builds (which only install the
+# matching optional for the target platform) still succeed at COPY time.
 COPY --from=builder /app/node_modules/sqlite-vec ./node_modules/sqlite-vec
 COPY --from=builder /app/node_modules/sqlite-vec-linux-x64 ./node_modules/sqlite-vec-linux-x64
+COPY --from=builder /app/node_modules/sqlite-vec-linux-arm64 ./node_modules/sqlite-vec-linux-arm64
 
 # sql.js WASM fallback (used by DB init when better-sqlite3 load fails or in fallback paths).
 # Build isolation + Turbopack sometimes results in code referencing the WASM under a /ROOT/ path.
