@@ -36,17 +36,24 @@ RUN test -f package-lock.json \
 RUN --mount=type=cache,target=/root/.npm \
   npm ci --no-audit --no-fund --legacy-peer-deps --ignore-scripts \
   && npm rebuild better-sqlite3 \
-  && node -e "require('better-sqlite3')(':memory:').close()" \
-  # Force-install all Linux platform packages for sqlite-vec (declared as
-  # optionalDependencies of "sqlite-vec"). `npm ci --ignore-scripts` can cause
-  # the platform-specific package (e.g. sqlite-vec-linux-x64) to be omitted in
-  # some BuildKit / cross-platform buildx scenarios. Explicit install guarantees
-  # the directories exist so the unconditional COPY steps below in runner-base
-  # never produce "not found" during multi-arch (amd64+arm64) builds.
-  && npm install --no-save --ignore-scripts --legacy-peer-deps \
-       sqlite-vec-linux-x64@^0.1.9 \
-       sqlite-vec-linux-arm64@^0.1.9 \
-       || true
+  && node -e "require('better-sqlite3')(':memory:').close()"
+
+# Force-install all Linux platform packages for sqlite-vec (declared as
+# optionalDependencies of "sqlite-vec"). `npm ci --ignore-scripts` can cause
+# the platform-specific package (e.g. sqlite-vec-linux-x64) to be omitted in
+# some BuildKit / cross-platform buildx scenarios. Explicit install (with --force
+# to allow cross-cpu prebuilts) guarantees the directories exist so the
+# unconditional COPY steps below in runner-base never produce "not found"
+# during multi-arch (amd64+arm64) builds.
+RUN --mount=type=cache,target=/root/.npm \
+  npm install --no-save --ignore-scripts --legacy-peer-deps --force --no-audit --no-fund \
+    sqlite-vec-linux-x64@0.1.9 \
+    sqlite-vec-linux-arm64@0.1.9 \
+  || true
+
+# Fallback dirs (in case install fails for a platform in cross-build); COPY will
+# succeed and at runtime the package will use what's available or fall back.
+RUN mkdir -p /app/node_modules/sqlite-vec-linux-x64 /app/node_modules/sqlite-vec-linux-arm64
 
 # Use Turbopack for significant build speedup
 ENV OMNIROUTE_USE_TURBOPACK=1
