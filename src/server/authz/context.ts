@@ -10,6 +10,7 @@ export interface AuthRejection {
   status: number;
   code: string;
   message: string;
+  details?: Record<string, unknown>;
 }
 
 export type AuthOutcome = AuthDecision | AuthRejection;
@@ -39,6 +40,11 @@ export function allow(subject: AuthSubject): AuthDecision {
   return { allow: true, subject };
 }
 
-export function reject(status: number, code: string, message: string): AuthRejection {
-  return { allow: false, status, code, message };
+export function reject(
+  status: number,
+  code: string,
+  message: string,
+  details?: Record<string, unknown>
+): AuthRejection {
+  return { allow: false, status, code, message, ...(details ? { details } : {}) };
 }

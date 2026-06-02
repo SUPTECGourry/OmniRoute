@@ -33,7 +33,9 @@ export const clientApiPolicy: RoutePolicy = {
         return allow({ kind: "anonymous", id: "local" });
       }
 
-      return reject(401, "AUTH_002", "Authentication required");
+      return reject(401, "AUTH_002", "Authentication required", {
+        hint: "Provide a valid OmniRoute client API key (create one in the dashboard) via Authorization: Bearer ... or X-Api-Key, or set REQUIRE_API_KEY=false to allow unauthenticated /v1 access.",
+      });
     }
 
     const { validateApiKey } = await import("../../../lib/db/apiKeys");
@@ -52,7 +54,9 @@ export const clientApiPolicy: RoutePolicy = {
         );
         return allow({ kind: "anonymous", id: "local" });
       }
-      return reject(401, "AUTH_002", "Invalid API key");
+      return reject(401, "AUTH_002", "Invalid API key", {
+        hint: "This is the OmniRoute proxy API key (not the upstream xAI token). Log into the dashboard with INITIAL_PASSWORD, create a key under API Keys, then pass it as 'Authorization: Bearer <key>' or 'X-Api-Key: <key>' on /v1 calls. Set REQUIRE_API_KEY=false (and restart container) to allow anonymous access on trusted networks. The xAI OAuth connection only supplies credentials to api.x.ai.",
+      });
     }
 
     return allow({ kind: "client_api_key", id: maskKeyId(bearer) });

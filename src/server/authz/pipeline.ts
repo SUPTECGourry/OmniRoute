@@ -49,14 +49,16 @@ function rejectionResponse(
   classification: RouteClassification,
   requestId: string
 ): NextResponse {
+  const errorBody: Record<string, unknown> = {
+    code: outcome.code,
+    message: outcome.message,
+    correlation_id: requestId,
+  };
+  if (outcome.details) {
+    errorBody.details = outcome.details;
+  }
   const response = NextResponse.json(
-    {
-      error: {
-        code: outcome.code,
-        message: outcome.message,
-        correlation_id: requestId,
-      },
-    },
+    { error: errorBody },
     { status: outcome.status }
   );
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
