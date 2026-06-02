@@ -59,6 +59,10 @@ ENV PORT=20128
 ENV HOSTNAME=0.0.0.0
 ENV OMNIROUTE_MEMORY_MB=1024
 ENV NODE_OPTIONS="--max-old-space-size=${OMNIROUTE_MEMORY_MB}"
+# Raise the chatCore heap pressure guard well above baseline usage in the
+# full-featured image (many providers, i18n, etc.). The guard in chatCore.ts
+# will also adapt using OMNIROUTE_MEMORY_MB if this is not set.
+ENV HEAP_PRESSURE_THRESHOLD_MB=850
 
 # Data directory inside Docker — must match the volume mount in docker-compose.yml
 ENV DATA_DIR=/app/data
@@ -73,6 +77,18 @@ COPY --from=builder /app/node_modules/@swc/helpers ./node_modules/@swc/helpers
 # Explicitly copy better-sqlite3 — native bindings are not reliably traced by
 # Next.js standalone output, but bootstrap-env requires SQLite before startup.
 COPY --from=builder /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+# Explicitly copy sqlite-vec (+ linux-x64 optional native .so) for vector memory
+# search. The package uses dynamic platform require + loadExtension; standalone
+# + Turbopack tracing frequently misses the optional dep and the .so asset.
+COPY --from=builder /app/node_modules/sqlite-vec ./node_modules/sqlite-vec
+COPY --from=builder /app/node_modules/sqlite-vec-linux-x64 ./node_modules/sqlite-vec-linux-x64
+
+# sql.js WASM fallback (used by DB init when better-sqlite3 load fails or in fallback paths).
+# Build isolation + Turbopack sometimes results in code referencing the WASM under a /ROOT/ path.
+COPY --from=builder /app/node_modules/sql.js ./node_modules/sql.js
+RUN mkdir -p /ROOT/node_modules/sql.js/dist && \
+    cp /app/node_modules/sql.js/dist/sql-wasm.wasm /ROOT/node_modules/sql.js/dist/sql-wasm.wasm 2>/dev/null || true && \
+    chown -R node:node /ROOT 2>/dev/null || true
 # Explicitly copy pino transport dependencies — pino spawns a worker that requires
 # pino-abstract-transport at runtime; Next.js standalone trace does not capture it (#449)
 COPY --from=builder /app/node_modules/pino-abstract-transport ./node_modules/pino-abstract-transport

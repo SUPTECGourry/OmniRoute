@@ -336,3 +336,23 @@ test("devin-cli mapTokens: accepts object {accessToken} and returns string acces
   assert.equal(typeof mapped.accessToken, "string");
   assert.equal(mapped.accessToken, "sk-devin-test-token-1234567890");
 });
+
+// ─── xAI OAuth (xai-oauth) contract: fixed registered redirect_uri for public client ─
+test("xai-oauth provider: declares correct fixedPort and callbackPath for xAI allowlist", () => {
+  const provider = getProvider("xai-oauth");
+  assert.equal(provider.fixedPort, 56121);
+  assert.equal(provider.callbackPath, "/callback");
+  assert.equal(provider.flowType, "authorization_code_pkce");
+});
+
+test("xai-oauth: generateAuthData includes the exact registered redirect_uri (127.0.0.1:56121/callback)", () => {
+  const data = generateAuthData("xai-oauth", "http://127.0.0.1:56121/callback");
+  assert.ok(data.authUrl, "should produce authUrl");
+  assert.ok(data.authUrl.includes("auth.x.ai/oauth2/authorize"));
+  // Must be exactly the form registered (127 not localhost; /callback not /auth/callback)
+  assert.ok(
+    data.authUrl.includes("redirect_uri=http%3A%2F%2F127.0.0.1%3A56121%2Fcallback"),
+    "authUrl must embed the xAI-registered redirect_uri"
+  );
+  assert.ok(data.fixedPort === 56121 || data.fixedPort === undefined); // returned from generate
+});

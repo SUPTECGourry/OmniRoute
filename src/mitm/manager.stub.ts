@@ -23,3 +23,11 @@ export const startMitm = async (
 export const stopMitm = async (_sudoPassword: string): Promise<never> => {
   throw new Error(STUB_ERROR);
 };
+
+/**
+ * Stub for getAllAgentsStatus (used by agent-bridge dashboard route).
+ * Matches the real signature in manager.ts but throws at runtime if stub leaks.
+ */
+export function getAllAgentsStatus(): never[] {
+  throw new Error(STUB_ERROR);
+}

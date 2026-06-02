@@ -249,6 +249,20 @@ export const OAUTH_PROVIDERS = {
       "Requires the Devin CLI binary. Run `devin auth login` to authenticate, or provide your WINDSURF_API_KEY. Install: https://cli.devin.ai",
     website: "https://cli.devin.ai",
   },
+  "xai-oauth": {
+    id: "xai-oauth",
+    alias: "xai-oauth",
+    name: "xAI Grok OAuth (SuperGrok / X Premium+)",
+    icon: "auto_awesome",
+    color: "#1DA1F2",
+    textIcon: "XA",
+    website: "https://x.ai",
+    subscriptionRisk: true,
+    riskNoticeVariant: "oauth",
+    hasFree: true,
+    authHint:
+      "Sign in with your X Premium+ or SuperGrok subscription (accounts.x.ai). No separate XAI_API_KEY needed — uses your existing entitlement. Local callback uses 127.0.0.1:56121 (ssh -L 56121:127.0.0.1:56121 for remote).",
+  },
 };
 
 // Web / Cookie Providers

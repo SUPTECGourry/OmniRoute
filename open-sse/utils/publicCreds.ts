@@ -155,6 +155,11 @@ const EMBEDDED_DEFAULTS = {
     46, 36, 20, 8, 33, 22, 55, 4, 41, 121, 53, 50, 49, 24, 92, 90, 108, 35, 97, 36, 21, 44, 11, 69,
     3, 60, 35, 15, 126, 53, 71, 56, 52, 56, 43, 26, 27, 86, 58,
   ],
+  // xAI Grok OAuth (SuperGrok / X Premium+) — public PKCE client_id from xAI CLIs (OpenCode, Hermes, etc.)
+  xai_oauth_id: [
+    13, 92, 15, 89, 66, 91, 76, 70, 72, 29, 71, 70, 3, 65, 93, 84, 72, 23, 28, 87, 92, 88, 15, 95, 91,
+    22, 71, 87, 20, 66, 67, 86, 13, 81, 81, 21,
+  ],
 } as const;
 
 export type EmbeddedDefaultKey = keyof typeof EMBEDDED_DEFAULTS;

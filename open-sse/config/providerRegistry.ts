@@ -2700,6 +2700,29 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
     ],
   },
 
+  "xai-oauth": {
+    id: "xai-oauth",
+    alias: "xai-oauth",
+    format: "openai",
+    executor: "default",
+    baseUrl: "https://api.x.ai/v1/chat/completions",
+    authType: "oauth",
+    authHeader: "bearer",
+    oauth: {
+      clientIdEnv: "XAI_OAUTH_CLIENT_ID",
+      clientIdDefault: resolvePublicCred("xai_oauth_id"),
+      clientSecretEnv: "",
+      clientSecretDefault: "",
+      tokenUrl: "https://auth.x.ai/oauth2/token",
+    },
+    models: [
+      { id: "grok-4.3", name: "Grok 4.3 (OAuth)" },
+      { id: "grok-4.20-multi-agent-0309", name: "Grok 4.20 Multi Agent (OAuth)" },
+      { id: "grok-4.20-0309-reasoning", name: "Grok 4.20 Reasoning (OAuth)" },
+      { id: "grok-4.20-0309-non-reasoning", name: "Grok 4.20 (OAuth)" },
+    ],
+  },
+
   "chatgpt-web": {
     id: "chatgpt-web",
     alias: "cgpt-web",

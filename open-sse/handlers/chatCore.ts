@@ -234,7 +234,15 @@ const MEMORY_EXTRACTION_TEXT_LIMIT = 64 * 1024;
 // ── Global memory pressure guard ────────────────────────────────────────
 // Prevents OOM by rejecting new requests when V8 heap exceeds threshold.
 // Self-healing: no counters to leak, no cleanup needed.
-const HEAP_PRESSURE_THRESHOLD_MB = parseInt(process.env.HEAP_PRESSURE_THRESHOLD_MB || "200", 10);
+// The threshold adapts to OMNIROUTE_MEMORY_MB (used for --max-old-space-size)
+// so Docker (1024MB) and larger deploys don't trip the guard at 200MB baseline.
+const rawThreshold = process.env.HEAP_PRESSURE_THRESHOLD_MB;
+const configuredMem = parseInt(process.env.OMNIROUTE_MEMORY_MB || "512", 10);
+let defaultThreshold = 200;
+if (configuredMem > 300) {
+  defaultThreshold = Math.max(200, Math.floor(configuredMem * 0.7));
+}
+const HEAP_PRESSURE_THRESHOLD_MB = parseInt(rawThreshold || defaultThreshold.toString(), 10);
 
 function capMemoryExtractionText(value: string): string {
   if (value.length <= MEMORY_EXTRACTION_TEXT_LIMIT) return value;

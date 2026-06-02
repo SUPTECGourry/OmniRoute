@@ -363,6 +363,22 @@ export const TRAE_CONFIG = {
     "Authorize via trae.ai in the popup, or sign in to solo.trae.ai and paste the Cloud-IDE-JWT from the Authorization header (~14-day lifetime).",
 };
 
+// xAI Grok OAuth Configuration (SuperGrok / X Premium+)
+// Public PKCE client for accounts.x.ai / auth.x.ai (used by multiple CLIs: OpenCode, Hermes, OpenClaw, Kilo, etc.).
+// Token (access_token) is a standard Bearer for https://api.x.ai/v1 (chat + other surfaces).
+// Supports SuperGrok direct sub or X Premium+ (auto-linked).
+export const XAI_OAUTH_CONFIG = {
+  clientId: resolvePublicCred("xai_oauth_id", "XAI_OAUTH_CLIENT_ID"),
+  authorizeUrl: "https://auth.x.ai/oauth2/authorize",
+  tokenUrl: "https://auth.x.ai/oauth2/token",
+  scope: "openid profile email offline_access grok-cli:access api:access",
+  codeChallengeMethod: "S256",
+  // "plan=generic" appears in multiple third-party integrations; harmless if ignored by IdP.
+  extraParams: {
+    plan: "generic",
+  },
+};
+
 // Windsurf / Devin CLI Configuration
 //
 // 2026-05-29 (Phase 1 hotfix):
@@ -434,4 +450,5 @@ export const PROVIDERS = {
   WINDSURF: "windsurf",
   DEVIN_CLI: "devin-cli",
   TRAE: "trae",
+  XAI_OAUTH: "xai-oauth",
 };

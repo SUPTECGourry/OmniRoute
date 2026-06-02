@@ -9,8 +9,8 @@ import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 
 const GOOGLE_OAUTH_PROVIDERS = new Set(["antigravity", "agy", "gemini-cli"]);
 
-/** Providers that use a local callback server on a random port (PKCE browser flow). */
-const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex"]);
+/** Providers that use a local callback server on a fixed/random port (PKCE browser flow). */
+const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex", "xai-oauth"]);
 
 /**
  * Phase 1 hotfix (2026-05-29): windsurf & devin-cli only support import-token.
@@ -331,9 +331,9 @@ export default function OAuthModal({
         forceManual = true;
       }
 
-      // PKCE callback server providers (Codex, Windsurf, Devin CLI):
+      // PKCE callback server providers (Codex, xAI OAuth, Windsurf, Devin CLI):
       // On localhost, spin up a local callback server and poll for the result.
-      // Codex uses a fixed port 1455; Windsurf/Devin CLI use a random OS-assigned port.
+      // Codex 1455 (localhost), xAI OAuth 56121 (127.0.0.1 per registered allowlist); Windsurf/Devin use random (0).
       // On remote the server is unreachable — fall through to standard manual flow.
       if (PKCE_CALLBACK_SERVER_PROVIDERS.has(provider)) {
         if (isTrueLocalhost) {
@@ -391,7 +391,10 @@ export default function OAuthModal({
 
       // Authorization code flow
       // Redirect URI strategy:
-      // - Codex/OpenAI: always port 1455 (registered in OAuth app)
+      // - Codex: port 1455 (localhost form accepted by OpenAI for its public client)
+      // - xAI OAuth: 56121 + 127.0.0.1/callback (the exact redirect_uri registered for the
+      //   public client b1a00492... used by Hermes/OpenClaw/Kilo etc.; xAI strictly validates
+      //   the allowlist and requires the 127.0.0.1 form, not "localhost")
       // - Windsurf/Devin CLI (remote fallback): use localhost with OmniRoute port + /auth/callback
       //   (on true localhost the callback server handles it; this is only reached on remote)
       // - Google OAuth providers (antigravity, gemini-cli): default to loopback so the
@@ -405,6 +408,8 @@ export default function OAuthModal({
       let redirectUri: string;
       if (provider === "codex" || provider === "openai") {
         redirectUri = "http://localhost:1455/auth/callback";
+      } else if (provider === "xai-oauth") {
+        redirectUri = "http://127.0.0.1:56121/callback";
       } else if (provider === "windsurf" || provider === "devin-cli") {
         // Remote fallback: use OmniRoute's port with the /auth/callback path Windsurf expects.
         // On true localhost this code is never reached (callback server handles the flow above).

@@ -37,9 +37,12 @@ if (!globalThis.__codexCallbackState) {
 if (!globalThis.__windsurfCallbackState) {
   globalThis.__windsurfCallbackState = null;
 }
+if (!globalThis.__xaiOAuthCallbackState) {
+  globalThis.__xaiOAuthCallbackState = null;
+}
 
 /** Providers that use the PKCE browser callback flow (like Codex). */
-const PKCE_CALLBACK_PROVIDERS = new Set(["codex"]);
+const PKCE_CALLBACK_PROVIDERS = new Set(["codex", "xai-oauth"]);
 
 /**
  * Providers whose PKCE flow has been retired but whose import-token path is
@@ -121,6 +124,13 @@ export async function GET(
       const requestedRedirectUri =
         searchParams.get("redirect_uri") || "http://localhost:8080/callback";
       const redirectUri = resolveBrowserOAuthRedirectUri(provider, requestedRedirectUri);
+      // Log the redirect_uri for PKCE providers so logs reveal the exact value sent to IdP
+      // (helps debug "redirect_uri does not match any registered URI").
+      if (PKCE_CALLBACK_PROVIDERS.has(provider)) {
+        const providerData = getProvider(provider);
+        const clientIdForLog = providerData?.config?.clientId || "unknown";
+        console.log(`[OAuth] ${provider} /authorize redirect_uri=${redirectUri} client_id=${clientIdForLog}`);
+      }
       const authData = generateAuthData(provider, redirectUri);
       if (provider === "qoder" && !authData.authUrl) {
         return NextResponse.json({
@@ -202,9 +212,11 @@ export async function GET(
 }
 
 /**
- * Start PKCE callback server for Codex, Windsurf, or Devin CLI.
- * Codex uses fixed port 1455; Windsurf/Devin CLI use a random free port (port 0).
+ * Start PKCE callback server for Codex, xAI OAuth, Windsurf, or Devin CLI.
+ * Codex: fixed 1455 (localhost); xAI OAuth: fixed 56121 (127.0.0.1); Windsurf/Devin CLI: random (0).
+ * Uses the provider's declared fixedPort + callbackPath so there is a single source of truth.
  * Returns the auth URL and stores codeVerifier for later exchange.
+ * Logs the exact redirect_uri so "check the logs" shows what was sent to the IdP.
  */
 async function handleStartCallbackServer(provider: string, searchParams: URLSearchParams) {
   if (!PKCE_CALLBACK_PROVIDERS.has(provider)) {
@@ -215,7 +227,15 @@ async function handleStartCallbackServer(provider: string, searchParams: URLSear
   }
 
   const isWindsurf = provider === "windsurf" || provider === "devin-cli";
-  const stateKey = isWindsurf ? "__windsurfCallbackState" : "__codexCallbackState";
+  const isXai = provider === "xai-oauth";
+  let stateKey: string;
+  if (isXai) {
+    stateKey = "__xaiOAuthCallbackState";
+  } else if (isWindsurf) {
+    stateKey = "__windsurfCallbackState";
+  } else {
+    stateKey = "__codexCallbackState";
+  }
 
   // Clean up existing server if any
   if (globalThis[stateKey]?.close) {
@@ -228,16 +248,25 @@ async function handleStartCallbackServer(provider: string, searchParams: URLSear
   globalThis[stateKey] = null;
 
   try {
-    // Codex: fixed port 1455. Windsurf/Devin CLI: OS-assigned random port (0)
-    const serverPort = isWindsurf ? 0 : 1455;
+    const providerData = getProvider(provider);
+    // Windsurf/Devin CLI: OS-assigned random port (0).
+    // Others: use the provider module's fixedPort (single source of truth).
+    const serverPort = isWindsurf ? 0 : (providerData.fixedPort || (isXai ? 56121 : 1455));
+    const cbPath = providerData.callbackPath || (isXai ? "/callback" : "/auth/callback");
+    const loopbackHost = isXai ? "127.0.0.1" : "localhost";
+
     const { port, close } = await startLocalServer((params) => {
       if (globalThis[stateKey]) {
         globalThis[stateKey].callbackParams = params;
       }
     }, serverPort);
 
-    const redirectUri = `http://localhost:${port}/auth/callback`;
+    const redirectUri = `http://${loopbackHost}:${port}${cbPath}`;
     const authData = generateAuthData(provider, redirectUri);
+
+    // Log the exact redirect_uri (and client if available) for debugging "redirect_uri does not match" errors.
+    const clientIdForLog = providerData?.config?.clientId || "unknown";
+    console.log(`[OAuth] start-callback-server ${provider}: redirect_uri=${redirectUri} client_id=${clientIdForLog} (listening on ${port})`);
 
     globalThis[stateKey] = {
       callbackParams: null,
@@ -566,8 +595,13 @@ export async function POST(
         );
       }
 
-      // Windsurf and Devin CLI share __windsurfCallbackState; Codex uses its own slot
-      const stateKey = provider === "codex" ? "__codexCallbackState" : "__windsurfCallbackState";
+      // Windsurf/Devin CLI share __windsurf; Codex uses __codex; xAI OAuth uses its own.
+      const stateKey =
+        provider === "xai-oauth"
+          ? "__xaiOAuthCallbackState"
+          : provider === "codex"
+            ? "__codexCallbackState"
+            : "__windsurfCallbackState";
 
       if (!globalThis[stateKey]) {
         return NextResponse.json({

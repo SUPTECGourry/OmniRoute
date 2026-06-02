@@ -51,6 +51,13 @@ test("resolvePublicCred('windsurf_fb') returns an AIza-style Google API key", ()
   assert.match(v, /^A[I]za[A-Za-z0-9_-]{20,}$/);
 });
 
+test("resolvePublicCred('xai_oauth_id') returns the xAI Grok OAuth public client ID (UUID format)", () => {
+  const v = resolvePublicCred("xai_oauth_id");
+  // UUID v4-ish format used by xAI public client (b1a00492-...); shape assertion only (no literal)
+  assert.match(v, /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+  assert.equal(v.length, 36);
+});
+
 test("encode/decode roundtrip is stable across arbitrary plaintexts", () => {
   for (const sample of [
     "hello world",
