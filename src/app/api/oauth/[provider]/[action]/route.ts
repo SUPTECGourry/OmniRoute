@@ -709,9 +709,12 @@ export async function POST(
         });
       } catch (exchangeErr: any) {
         console.error("OAuth exchange error:", exchangeErr);
+        // Surface the real cause (e.g. "xAI OAuth token exchange failed: {...}", invalid_grant, redirect_uri mismatch, etc.)
+        // so pasting the callback code gives actionable feedback instead of a generic internal error.
+        const safeMsg = sanitizeErrorMessage(exchangeErr?.message) || "Exchange failed";
         return NextResponse.json(
-          { success: false, error: "Internal server error" },
-          { status: 500 }
+          { success: false, error: safeMsg },
+          { status: 400 }
         );
       }
     }

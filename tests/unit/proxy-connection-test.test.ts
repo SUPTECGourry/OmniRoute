@@ -297,6 +297,7 @@ test("OAuth test config covers all expected providers", () => {
     "cline",
     "kiro",
     "amazon-q",
+    "xai-oauth",
   ];
 
   // Reimport of OAUTH_TEST_CONFIG keys (verify by name)
@@ -316,6 +317,7 @@ test("OAuth test config covers all expected providers", () => {
     "cline",
     "kiro",
     "amazon-q",
+    "xai-oauth",
   ];
 
   for (const provider of expected) {

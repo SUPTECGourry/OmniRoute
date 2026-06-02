@@ -220,6 +220,83 @@ Endpoint tunnel panels (Cloudflare, Tailscale, ngrok) can be shown or hidden fro
 - Docker images bundle system CA roots and pass them to managed `cloudflared`, which avoids TLS trust failures when the tunnel bootstraps inside the container.
 - Set `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` if you want OmniRoute to use an existing binary instead of downloading one.
 
+## Remote OAuth Callback (xAI Grok / X Premium+ and Codex) — SSH Tunnel + --network host
+
+xAI OAuth (the "xAI Grok OAuth (SuperGrok / X Premium+)" provider) and Codex use a **fixed loopback callback port** that the IdP strictly validates:
+
+- xAI: `http://127.0.0.1:56121/callback` (the public client allowlist at xAI requires exactly this)
+- Codex: `http://localhost:1455/auth/callback`
+
+On a **remote server** (e.g. ampereserver02) accessed from your laptop browser, the redirect from accounts.x.ai (or OpenAI for Codex) will target `127.0.0.1` on *the laptop*. To make the authentication "reach the server":
+
+1. **Run the container with host networking** so the on-demand callback listener (a Node `http.Server` started at runtime by `/api/oauth/.../start-callback-server`) is visible on the host's loopback:
+
+   ```bash
+   # Podman (common on servers)
+   podman run -d \
+     --name omniroute \
+     --restart unless-stopped \
+     --network host \
+     -v omniroute-data:/app/data:U \
+     --userns=keep-id \
+     -e JWT_SECRET=... \
+     -e API_KEY_SECRET=... \
+     -e INITIAL_PASSWORD=... \
+     -e REQUIRE_API_KEY=false \
+     -e HEAP_PRESSURE_THRESHOLD_MB=850 \
+     ghcr.io/suptecgourry/omniroute:latest   # or your built tag; note lowercase (use tr to lower in CI)
+
+   # Docker equivalent (Linux)
+   docker run -d \
+     --name omniroute \
+     --restart unless-stopped \
+     --network host \
+     -v omniroute-data:/app/data \
+     -e ... \
+     yourimage:tag
+   ```
+
+   - `--network host` is required for the dynamic 56121 (or 1455) listener. Plain `-p 56121:56121` is usually not sufficient in rootless/passt modes because the server is started *after* the container is up.
+   - The main UI is still on 20128 (no need to publish it separately with host net).
+   - Use `:U` (podman) or correct uid/gid mapping so the node user inside can write to the volume.
+
+2. **From your laptop**, establish a local port forward (keep the ssh session alive):
+
+   ```bash
+   ssh -L 56121:127.0.0.1:56121 user@ampereserver02 -N
+   # For Codex use 1455 instead of 56121
+   ```
+
+3. In the browser on the laptop, open the remote dashboard (`http://ampereserver02:20128` or your host/IP). The UI detects it is not `localhost`/`127.0.0.1` and shows the manual paste flow + a dedicated **"Start listener on server + wait for capture (via tunnel)"** button for xAI/Codex.
+
+4. Click that button (it calls the start-callback-server API on the remote, which spins up the listener inside your container and returns a fresh auth URL + verifier). Finish the xAI login in the tab that opens.
+
+5. Because the ssh -L is active and the container has `--network host`, the post-login redirect from x.ai lands on the remote listener. The server captures the code and the poll loop (or your paste of the full `http://127.0.0.1:56121/callback?code=...`) completes the token exchange.
+
+If you only want the paste flow (no tunnel), the plain "paste the callback URL from your browser address bar" still works after the x.ai redirect (you may see a connection error on the laptop's 127 — that's expected; the URL in the bar contains the `code` you need).
+
+**Important: OmniRoute API key is still required for client calls**
+
+The xAI OAuth only authenticates *upstream* to api.x.ai. To call OmniRoute's `/v1/chat/completions` (or other endpoints) you still need a valid OmniRoute client API key:
+
+- Log into the dashboard with `INITIAL_PASSWORD`.
+- Go to "API Keys" (or the Keys tab) and create a new key (you can scope it to specific providers/combos if desired).
+- Use that key as the `api_key` / `Authorization: Bearer <omni-key>` when calling your server's `http://...:20128/v1/...` (or the public URL).
+- Set `REQUIRE_API_KEY=false` only if you fully trust the network / reverse proxy and want unauthenticated access to the LLM proxy.
+
+Example curl (after creating an OmniRoute key and having an xai-oauth account active via combo or default routing):
+
+```bash
+curl http://ampereserver02:20128/v1/chat/completions \
+  -H "Authorization: Bearer <your-omniroute-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"grok-4.3","messages":[{"role":"user","content":"hi via xai oauth"}]}'
+```
+
+Without a valid OmniRoute API key you will see exactly `{"error":{"message":"Invalid API key"}}` (AUTH_002) even if the upstream xai-oauth connection is perfect.
+
+See also the in-UI hints in the xAI provider card and the OAuth modal.
+
 ## Image Tags
 
 | Image                    | Tag      | Size   | Description           |
@@ -227,7 +304,7 @@ Endpoint tunnel panels (Cloudflare, Tailscale, ngrok) can be shown or hidden fro
 | `diegosouzapw/omniroute` | `latest` | ~250MB | Latest stable release |
 | `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Current version       |
 
-Multi-platform manifest: `linux/amd64` + `linux/arm64` native (Apple Silicon, AWS Graviton, Raspberry Pi). Docker selects the matching architecture automatically; pass `--platform linux/amd64` if you need to force AMD64 emulation on ARM hosts.
+Multi-platform manifest: `linux/amd64` + `linux/arm64` native (Apple Silicon, AWS Graviton, Raspberry Pi). Docker selects the matching architecture automatically; pass `--platform linux/amd64` if you need to force AMD64 emulation on ARM hosts. (Your fork build-fork.yml builds native arm64 on ubuntu-24.04-arm runners for ampereserver02-class hardware.)
 
 ## Important Notes
 

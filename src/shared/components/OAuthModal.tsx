@@ -171,6 +171,66 @@ export default function OAuthModal({
     [authData, provider, onSuccess, reauthConnection]
   );
 
+  // Start the server-side callback listener (for PKCE providers like xai-oauth/codex)
+  // even on remote deployments, then poll for capture. Intended for users who have
+  // set up `ssh -L 56121:127.0.0.1:56121 ...` (or equivalent for codex 1455) so the
+  // IdP redirect lands on the *remote* listener via the tunnel. This makes the
+  // "authentication reach the server".
+  const startRemoteCallbackListenerAndPoll = useCallback(async () => {
+    if (!PKCE_CALLBACK_SERVER_PROVIDERS.has(provider)) return;
+    try {
+      setError(null);
+      setPolling(true);
+
+      const serverRes = await fetch(`/api/oauth/${provider}/start-callback-server`);
+      const serverData = await serverRes.json();
+      if (!serverRes.ok) throw new Error(serverData.error || "Failed to start callback listener on server");
+
+      setAuthData({ ...serverData, redirectUri: serverData.redirectUri });
+
+      // Open the auth URL (new tab for remote). User must complete login while tunnel is live.
+      window.open(serverData.authUrl, "oauth_auth");
+
+      // Switch to waiting state (we will poll in background)
+      setStep("waiting");
+
+      const maxAttempts = 150;
+      for (let i = 0; i < maxAttempts; i++) {
+        await new Promise((r) => setTimeout(r, 2000));
+
+        const pollRes = await fetch(`/api/oauth/${provider}/poll-callback`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ connectionId: reauthConnection?.id }),
+        });
+        const pollData = await pollRes.json();
+
+        if (pollData.success) {
+          setStep("success");
+          setPolling(false);
+          onSuccess?.();
+          return;
+        }
+        if (pollData.error && !pollData.pending) {
+          throw new Error(pollData.errorDescription || pollData.error);
+        }
+      }
+
+      setPolling(false);
+      setStep("input");
+      setError(
+        "Timed out waiting for the callback to reach the server listener. " +
+          "Ensure your ssh -L tunnel is running and that the container was started with --network host. " +
+          "You can still paste the full callback URL (from the browser address bar after x.ai redirect) below."
+      );
+    } catch (err: any) {
+      console.warn("startRemoteCallbackListenerAndPoll failed", err);
+      setPolling(false);
+      setStep("input");
+      setError("Failed to start listener on server: " + (err?.message || String(err)));
+    }
+  }, [provider, reauthConnection, onSuccess]);
+
   // Save a raw API token directly (windsurf / devin-cli import-token path)
   const handleSaveToken = useCallback(async () => {
     const token = pasteToken.trim();
@@ -863,6 +923,44 @@ export default function OAuthModal({
                       {t("remoteAccessInfo")}
                     </div>
                   )}
+
+                  {/* Remote tunnel + server listener helper for xAI OAuth / Codex PKCE flows.
+                      This is the key to making "authentication reach the server" on a remote
+                      deployment like ampereserver02. The start-callback-server creates the
+                      Node http.Server on the fixed port (56121 for xai) *inside the container*.
+                      With --network host the listener is visible on the host's 127.0.0.1.
+                      The ssh -L from the laptop forwards the browser's post-x.ai redirect to it. */}
+                  {!isTrueLocalhost && PKCE_CALLBACK_SERVER_PROVIDERS.has(provider) && (
+                    <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3 text-xs text-emerald-200 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="material-symbols-outlined text-sm align-middle mt-0.5">info</span>
+                        <div className="flex-1">
+                          <div className="font-medium mb-1">Remote server capture (xAI / Codex)</div>
+                          <p className="mb-1">
+                            To let the callback <strong>reach the server</strong> automatically (recommended):
+                          </p>
+                          <ol className="list-decimal list-inside space-y-0.5 text-[11px] mb-2">
+                            <li>On <strong>your laptop</strong> (browser machine), run and keep open:<br />
+                              <code className="font-mono bg-black/30 px-1 rounded">ssh -L 56121:127.0.0.1:56121 user@ampereserver02 -N</code><br />
+                              (use 1455 instead of 56121 for Codex)
+                            </li>
+                            <li>Container on the server <strong>must</strong> be started with <code className="font-mono">--network host</code> (or podman equivalent) so the dynamic listener on 56121 is reachable on the host loopback.</li>
+                            <li>Click the button below, then finish the xAI login in the tab it opens. The tunnel will forward the redirect to the listener running on this server.</li>
+                          </ol>
+                          <Button
+                            onClick={startRemoteCallbackListenerAndPoll}
+                            variant="secondary"
+                            size="sm"
+                            disabled={polling}
+                            className="text-emerald-200 border-emerald-400/50"
+                          >
+                            {polling ? "Listener active — complete login in the other tab" : "Start listener on server + wait for capture (via tunnel)"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <p className="text-sm font-medium mb-2">{t("step1OpenUrl")}</p>
                     <div className="flex gap-2">

@@ -75,6 +75,16 @@ const OAUTH_TEST_CONFIG = {
     checkExpiry: true,
     refreshable: true,
   },
+  "xai-oauth": {
+    // xAI Grok OAuth (SuperGrok/X Premium+) tokens are Bearer tokens for api.x.ai.
+    // Probe /v1/models (lightweight, confirms "api:access" scope works). Falls back to
+    // real usage for chat if models probe has restrictions.
+    url: "https://api.x.ai/v1/models",
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    refreshable: true,
+  },
   cursor: {
     checkExpiry: true,
   },

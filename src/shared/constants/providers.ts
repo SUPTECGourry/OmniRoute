@@ -261,7 +261,7 @@ export const OAUTH_PROVIDERS = {
     riskNoticeVariant: "oauth",
     hasFree: true,
     authHint:
-      "Sign in with your X Premium+ or SuperGrok subscription (accounts.x.ai). No separate XAI_API_KEY needed — uses your existing entitlement. Local callback uses 127.0.0.1:56121 (ssh -L 56121:127.0.0.1:56121 for remote).",
+      "Sign in with your X Premium+ or SuperGrok subscription (accounts.x.ai). No separate XAI_API_KEY needed — uses your existing entitlement. After OAuth, use a regular OmniRoute API key (create in dashboard → API Keys) for your /v1 calls; the oauth account supplies the upstream token automatically. Local callback uses 127.0.0.1:56121 (ssh -L 56121:127.0.0.1:56121 for remote).",
   },
 };
 
