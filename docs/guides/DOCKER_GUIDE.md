@@ -284,6 +284,14 @@ The xAI OAuth only authenticates *upstream* to api.x.ai. To call OmniRoute's `/v
 - Use that key as the `api_key` / `Authorization: Bearer <omni-key>` when calling your server's `http://...:20128/v1/...` (or the public URL).
 - Set `REQUIRE_API_KEY=false` only if you fully trust the network / reverse proxy and want unauthenticated access to the LLM proxy.
 
+For the xAI OAuth account, requests must target the prefixed model (or a combo you create that points to the xai-oauth connection):
+
+```json
+{ "model": "xai-oauth/grok-4.3", ... }
+```
+
+(Other grok-4.3 entries from custom providers may exist, hence the prefix or combo short name is required.)
+
 Example curl (after creating an OmniRoute key and having an xai-oauth account active via combo or default routing):
 
 ```bash
