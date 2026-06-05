@@ -21,7 +21,7 @@ export const getMitmStatus = async () => {
 // Must be exported or the Turbopack build fails ("Export getAllAgentsStatus doesn't
 // exist") — /api/tools/agent-bridge/state imports it statically. Returns the truthful
 // empty agent list in the bundled build rather than throwing (see file header). See #3066.
-export const getAllAgentsStatus = (): never[] => [];
+export const getAllAgentsStatus = (): any[] => [];
 export const startMitm = async (
   _apiKey: string,
   _sudoPassword: string,
@@ -32,11 +32,3 @@ export const startMitm = async (
 export const stopMitm = async (_sudoPassword: string): Promise<never> => {
   throw new Error(STUB_ERROR);
 };
-
-/**
- * Stub for getAllAgentsStatus (used by agent-bridge dashboard route).
- * Matches the real signature in manager.ts but throws at runtime if stub leaks.
- */
-export function getAllAgentsStatus(): never[] {
-  throw new Error(STUB_ERROR);
-}
