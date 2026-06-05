@@ -112,6 +112,12 @@ export interface RegistryEntry {
   modelsUrl?: string;
   /** Prefix to prepend to model IDs before upstream API calls (e.g. "accounts/fireworks/models/") */
   modelIdPrefix?: string;
+  /**
+   * Additional already-qualified model ID prefixes that must NOT receive `modelIdPrefix`
+   * (e.g. Fireworks router IDs "accounts/fireworks/routers/"). Prevents double-prefixing
+   * fully-qualified IDs that legitimately differ from `modelIdPrefix`. See issue #3133.
+   */
+  acceptedModelIdPrefixes?: string[];
   chatPath?: string;
   clientVersion?: string;
   timeoutMs?: number;
@@ -1067,6 +1073,12 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
     models: [
       { id: "auto-kiro", name: "Auto (Kiro picks best model)" },
       {
+        id: "claude-opus-4.8",
+        name: "Claude Opus 4.8",
+        contextLength: 1000000,
+        maxOutputTokens: 128000,
+      },
+      {
         id: "claude-opus-4.7",
         name: "Claude Opus 4.7",
         contextLength: 1000000,
@@ -1855,8 +1867,8 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
   kilocode: {
     id: "kilocode",
     alias: "kc",
-    format: "openrouter",
-    executor: "openrouter",
+    format: "openai",
+    executor: "default",
     baseUrl: "https://api.kilo.ai/api/openrouter/chat/completions",
     modelsUrl: "https://api.kilo.ai/api/openrouter/models",
     authType: "oauth",
@@ -2334,16 +2346,6 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
     models: [{ id: "auto", name: "Auto" }],
   },
 
-  lepton: {
-    id: "lepton",
-    alias: "lepton",
-    format: "openai",
-    executor: "default",
-    baseUrl: "https://api.lepton.ai/v1/chat/completions",
-    authType: "apikey",
-    authHeader: "bearer",
-    models: [{ id: "llama-3.1-8b", name: "Llama 3.1 8B" }],
-  },
 
   kluster: {
     id: "kluster",
@@ -2378,16 +2380,6 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
     models: [{ id: "liquid-lfm-40b", name: "Liquid LFM 40B" }],
   },
 
-  nomic: {
-    id: "nomic",
-    alias: "nomic",
-    format: "openai",
-    executor: "default",
-    baseUrl: "https://api.nomic.ai/v1/chat/completions",
-    authType: "apikey",
-    authHeader: "bearer",
-    models: [{ id: "nomic-embed-text-v1.5", name: "Nomic Embed Text" }],
-  },
 
   monsterapi: {
     id: "monsterapi",
@@ -2426,16 +2418,6 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
     ],
   },
 
-  poolside: {
-    id: "poolside",
-    alias: "poolside",
-    format: "openai",
-    executor: "default",
-    baseUrl: "https://api.poolside.ai/v1/chat/completions",
-    authType: "apikey",
-    authHeader: "bearer",
-    models: [{ id: "poolside-model", name: "Poolside Model" }],
-  },
 
   chutes: {
     id: "chutes",
@@ -2461,7 +2443,9 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
 
   huggingchat: {
     id: "huggingchat",
-    alias: "hc",
+    // Distinct alias: "hc" belongs to the hackclub provider; huggingchat is
+    // addressed by its own id to avoid the alias collision.
+    alias: "huggingchat",
     format: "openai",
     executor: "huggingchat",
     baseUrl: "https://huggingface.co/chat/conversation",
@@ -2653,35 +2637,6 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
       { id: "gpt-4.1", name: "GPT-4.1" },
       { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro" },
       { id: "gemini-3-flash-preview", name: "Gemini 3 Flash" },
-    ],
-  },
-  enally: {
-    id: "enally",
-    alias: "enly",
-    format: "openai",
-    executor: "default",
-    baseUrl: "https://ai.enally.in",
-    authType: "apikey",
-    authHeader: "X-API-Key",
-    models: [
-      { id: "default", name: "Default Model" },
-      { id: "chat", name: "Chat Model" },
-      { id: "reasoning", name: "Reasoning Model" },
-      { id: "multimodal", name: "Multimodal Model" },
-    ],
-  },
-  freetheai: {
-    id: "freetheai",
-    alias: "fta",
-    format: "openai",
-    executor: "default",
-    baseUrl: "https://api.freetheai.xyz/v1/chat/completions",
-    authType: "apikey",
-    authHeader: "bearer",
-    models: [
-      { id: "free-fast", name: "Free Fast (Low Latency)" },
-      { id: "free-smart", name: "Free Smart (Reasoning)" },
-      { id: "free", name: "Free (Max Uptime)" },
     ],
   },
   xai: {
@@ -3111,6 +3066,7 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
     modelsUrl:
       "https://api.fireworks.ai/v1/accounts/fireworks/models?filter=supports_serverless=true",
     modelIdPrefix: "accounts/fireworks/models/",
+    acceptedModelIdPrefixes: ["accounts/fireworks/models/", "accounts/fireworks/routers/"],
     authType: "apikey",
     authHeader: "bearer",
     models: [
@@ -3654,42 +3610,6 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
     ],
   },
 
-  replicate: {
-    id: "replicate",
-    alias: "rep",
-    format: "openai",
-    executor: "default",
-    baseUrl: "https://openai-proxy.replicate.com/v1/chat/completions",
-    modelsUrl: "https://openai-proxy.replicate.com/v1/models",
-    authType: "apikey",
-    authHeader: "Authorization",
-    authPrefix: "Bearer",
-    passthroughModels: true,
-    defaultContextLength: 128000,
-    models: [
-      {
-        id: "meta/meta-llama-3.1-405b-instruct",
-        name: "Llama 3.1 405B Instruct (Free)",
-        contextLength: 128000,
-      },
-      {
-        id: "meta/meta-llama-3.1-70b-instruct",
-        name: "Llama 3.1 70B Instruct (Free)",
-        contextLength: 128000,
-      },
-      {
-        id: "mistralai/mixtral-8x7b-instruct-v0.1",
-        name: "Mixtral 8x7B Instruct (Free)",
-        contextLength: 32768,
-      },
-      {
-        id: "deepseek-ai/deepseek-r1",
-        name: "DeepSeek R1 (Free)",
-        contextLength: 65536,
-        supportsReasoning: true,
-      },
-    ],
-  },
 
   hackclub: {
     id: "hackclub",
@@ -3975,7 +3895,9 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
 
   "kimi-web": {
     id: "kimi-web",
-    alias: "kimi",
+    // Distinct alias: the primary "kimi" provider (dedicated KimiExecutor) keeps
+    // the short "kimi" alias; this web/cookie variant is addressed by its own id.
+    alias: "kimi-web",
     format: "openai",
     executor: "kimi-web",
     baseUrl: "https://kimi.moonshot.cn/api/chat",
@@ -4003,7 +3925,9 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
 
   "qwen-web": {
     id: "qwen-web",
-    alias: "qw",
+    // Distinct alias: the primary "qwen" provider keeps the short "qw" alias;
+    // this web/cookie variant is addressed by its own id.
+    alias: "qwen-web",
     format: "openai",
     executor: "qwen-web",
     baseUrl: "https://chat.qwen.ai/api/chat/completions",

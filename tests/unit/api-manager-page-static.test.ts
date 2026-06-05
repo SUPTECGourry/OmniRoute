@@ -35,6 +35,21 @@ test("permissions modal uses i18n for management access description", () => {
   assert.doesNotMatch(managementBlock, /Allow this API key to manage OmniRoute configuration\./);
 });
 
+test("permissions modal converts API key expiration ISO timestamps to local datetime input values", () => {
+  const source = readApiManagerPage();
+  const expirationBlock = source.slice(
+    source.indexOf("{/* Expiration Date */}", source.indexOf("const PermissionsModal")),
+    source.indexOf("{/* Management Access */}", source.indexOf("const PermissionsModal"))
+  );
+
+  assert.match(expirationBlock, /value=\{toLocalDateTimeInputValue\(expiresAt\)\}/);
+  assert.match(expirationBlock, /const date = new Date\(val\)/);
+  assert.match(expirationBlock, /setExpiresAt\(date\.toISOString\(\)\)/);
+  assert.match(expirationBlock, /onClick=\{\(\) => setExpiresAt\(""\)\}/);
+  assert.match(expirationBlock, /\{tc\("clear"\)\}/);
+  assert.doesNotMatch(expirationBlock, /expiresAt\.slice\(0, 16\)/);
+});
+
 test("permissions modal switch buttons declare button type", () => {
   const source = readApiManagerPage();
   const modalStart = source.indexOf("const PermissionsModal");
@@ -46,8 +61,12 @@ test("permissions modal switch buttons declare button type", () => {
     selfServiceBlock.match(/<button\s+type="button"\s+role="switch"/g) ?? []
   ).length;
 
-  assert.equal(switchButtonCount, 2);
-  assert.equal(typedSwitchButtonCount, 2);
+  // Self-service Visibility block has 3 switches: own-usage visibility,
+  // shared-account quota visibility, and disable-non-public-models (#3041).
+  // The invariant is that every switch declares type="button"
+  // (typedSwitchButtonCount === switchButtonCount) to avoid implicit submit.
+  assert.equal(switchButtonCount, 3);
+  assert.equal(typedSwitchButtonCount, 3);
 });
 
 test("self-service API key scope labels do not expose missing placeholders", () => {

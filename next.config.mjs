@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
-const distDir = process.env.NEXT_DIST_DIR || ".next";
+const distDir = process.env.NEXT_DIST_DIR || ".build/next";
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 const scriptSrc =
   process.env.NODE_ENV === "development"
@@ -104,6 +104,10 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
     },
+    // Next.js proxy (middleware) has a default 10MB body clone limit. File
+    // uploads (OpenAI-compatible /v1/files) routinely exceed this. Match the
+    // 512 MB server-side cap; tune via env if needed.
+    proxyClientMaxBodySize: process.env.NEXT_PROXY_BODY_LIMIT || "512mb",
   },
   outputFileTracingRoot: projectRoot,
   outputFileTracingIncludes: {
@@ -141,6 +145,11 @@ const nextConfig = {
     "thread-stream",
     "pino-abstract-transport",
     "better-sqlite3",
+    // sqlite-vec ships a native vec0.so loaded at runtime via createRequire().
+    // Turbopack otherwise tries to bundle the .so and fails with "Unknown module
+    // type"; externalizing it keeps the require at runtime (like better-sqlite3).
+    // See issue #3066.
+    // We also list the platform packages for multi-arch (amd64+arm64) Docker builds.
     "sqlite-vec",
     "sqlite-vec-linux-x64",
     "sqlite-vec-linux-arm64",

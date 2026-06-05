@@ -1,4 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
+import { HEAP_PRESSURE_THRESHOLD_MB } from "../utils/heapPressure.ts";
 import { normalizeHeaders } from "../utils/headers.ts";
 import { detectFormatFromEndpoint, getTargetFormat } from "../services/provider.ts";
 import { injectSystemPrompt } from "../services/systemPrompt.ts";
@@ -12,6 +13,7 @@ import {
   withBodyTimeout,
 } from "../utils/stream.ts";
 import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
+import { synthesizeOpenAiSseFromJson } from "../utils/jsonToSse.ts";
 import { resolveStreamReadinessTimeout } from "../utils/streamReadinessPolicy.ts";
 import { createStreamController, pipeWithDisconnect } from "../utils/streamHandler.ts";
 import { createSseHeartbeatTransform, shapeForClientFormat } from "../utils/sseHeartbeat.ts";
@@ -22,6 +24,7 @@ import {
   runWithOnPersist,
 } from "../services/tokenRefresh.ts";
 import { createRequestLogger } from "../utils/requestLogger.ts";
+import { applyResponsesPreviousResponseIdPolicy } from "../utils/responsesStatePolicy.ts";
 import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../config/defaultThinkingSignature.ts";
 import {
@@ -233,16 +236,12 @@ const MEMORY_EXTRACTION_TEXT_LIMIT = 64 * 1024;
 
 // ── Global memory pressure guard ────────────────────────────────────────
 // Prevents OOM by rejecting new requests when V8 heap exceeds threshold.
-// Self-healing: no counters to leak, no cleanup needed.
-// The threshold adapts to OMNIROUTE_MEMORY_MB (used for --max-old-space-size)
-// so Docker (1024MB) and larger deploys don't trip the guard at 200MB baseline.
-const rawThreshold = process.env.HEAP_PRESSURE_THRESHOLD_MB;
-const configuredMem = parseInt(process.env.OMNIROUTE_MEMORY_MB || "512", 10);
-let defaultThreshold = 200;
-if (configuredMem > 300) {
-  defaultThreshold = Math.max(200, Math.floor(configuredMem * 0.7));
-}
-const HEAP_PRESSURE_THRESHOLD_MB = parseInt(rawThreshold || defaultThreshold.toString(), 10);
+// Self-healing: no counters to leak, no cleanup needed. The threshold
+// auto-calibrates to 85% of the actual V8 heap ceiling (see ../utils/heapPressure.ts)
+// so it tracks --max-old-space-size across 1GB/2GB/large VPS instead of a fixed
+// 200MB that sat below the app's own ~260MB baseline and rejected every request.
+// (Our prior adaptive OMNIROUTE_MEMORY_MB logic is now unified in heapPressure.ts;
+// explicit HEAP_PRESSURE_THRESHOLD_MB env still wins.)
 
 function capMemoryExtractionText(value: string): string {
   if (value.length <= MEMORY_EXTRACTION_TEXT_LIMIT) return value;
@@ -1377,24 +1376,33 @@ const PROXY_CONFIG_CACHE_TTL = 10_000;
  */
 let _combosPromise: Promise<unknown[]> | null = null;
 let _combosCacheTs = 0;
+let _combosCacheVersionSnapshot = -1;
 const COMBOS_CACHE_TTL = 10_000;
 
 async function getCombosCached(): Promise<unknown[]> {
   const now = Date.now();
+  const { getCombos, getCombosCacheVersion } = await import("@/lib/localDb");
+  const version = getCombosCacheVersion();
+  // A combo write (create/update/delete/reorder) bumps the shared version via
+  // invalidateDbCache("combos"); when it no longer matches our snapshot we drop
+  // the cached promise so the nested-combo expansion stops serving removed
+  // targets/models within the 10s TTL window (#3147).
+  if (version !== _combosCacheVersionSnapshot) {
+    clearCombosCache();
+  }
   if (_combosPromise && now - _combosCacheTs < COMBOS_CACHE_TTL) {
     return _combosPromise;
   }
   _combosCacheTs = now;
-  _combosPromise = (async () => {
-    const { getCombos } = await import("@/lib/localDb");
-    return getCombos();
-  })();
+  _combosCacheVersionSnapshot = version;
+  _combosPromise = getCombos();
   return _combosPromise;
 }
 
 export function clearCombosCache() {
   _combosPromise = null;
   _combosCacheTs = 0;
+  _combosCacheVersionSnapshot = -1;
 }
 
 export function clearUpstreamProxyConfigCache(providerId?: string) {
@@ -1612,7 +1620,7 @@ export async function handleChatCore({
   // ── Plugin onRequest hook ──
   // Dynamic import cached by Node.js after first call — minimal overhead
   try {
-    const { runOnRequest } = await import("@/lib/plugins/index");
+    const { runOnRequest } = await import("@/lib/plugins/hooks");
     const pluginCtx = {
       requestId: traceId,
       body,
@@ -1644,8 +1652,11 @@ export async function handleChatCore({
             ),
       };
     }
-    if (pluginResult?.ctx && "body" in pluginResult.ctx) {
-      body = (pluginResult.ctx as unknown as Record<string, unknown>).body;
+    if (pluginResult?.body) {
+      body = pluginResult.body;
+    }
+    if (pluginResult?.metadata) {
+      Object.assign(pluginCtx.metadata, pluginResult.metadata);
     }
   } catch (pluginErr) {
     log?.debug?.(
@@ -2106,7 +2117,7 @@ export async function handleChatCore({
       model,
       requestedModel,
       provider,
-      connectionId,
+      connectionId: connectionId || credentials?.connectionId || undefined,
       duration: Date.now() - startTime,
       tokens: tokens || {},
       requestBody: cloneBoundedChatLogPayload(
@@ -2292,20 +2303,28 @@ export async function handleChatCore({
         cacheSource: "semantic",
       });
       trackPendingRequest(model, provider, connectionId, false);
+      // #2952 — when the client requested a stream, serve the cached completion
+      // as an SSE stream (not a raw JSON body) so content + reasoning_content
+      // arrive in the streaming shape the client expects. Cache hits previously
+      // returned application/json regardless of the stream flag, which made
+      // OpenAI-compatible streaming clients lose reasoning_content. Non-OpenAI
+      // shapes (no `choices`) yield "" and fall back to the JSON body unchanged.
+      const cachedSse = stream ? synthesizeOpenAiSseFromJson(JSON.stringify(cached)) : "";
+      const cacheHitMetaHeaders = buildOmniRouteResponseMetaHeaders({
+        provider,
+        model,
+        cacheHit: true,
+        latencyMs: Date.now() - startTime,
+        usage: cachedUsage,
+        costUsd: cachedCost,
+      });
       return {
         success: true,
-        response: new Response(JSON.stringify(cached), {
+        response: new Response(cachedSse || JSON.stringify(cached), {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": cachedSse ? "text/event-stream" : "application/json",
             [OMNIROUTE_RESPONSE_HEADERS.cache]: "HIT",
-            ...buildOmniRouteResponseMetaHeaders({
-              provider,
-              model,
-              cacheHit: true,
-              latencyMs: Date.now() - startTime,
-              usage: cachedUsage,
-              costUsd: cachedCost,
-            }),
+            ...cacheHitMetaHeaders,
           },
         }),
       };
@@ -3425,7 +3444,7 @@ export async function handleChatCore({
   } catch (error) {
     // ── Plugin onError hook ──
     try {
-      const { runOnError } = await import("@/lib/plugins/index");
+      const { runOnError } = await import("@/lib/plugins/hooks");
       await runOnError(
         { requestId: traceId, body, model, provider, apiKeyInfo, metadata: {} },
         error instanceof Error ? error : new Error(String(error))
@@ -3504,6 +3523,14 @@ export async function handleChatCore({
     }
   }
   translatedBody.model = finalModelToUpstream;
+
+  const previousResponseIdPolicy = applyResponsesPreviousResponseIdPolicy(translatedBody, {
+    mode: settings.responsesPreviousResponseIdMode,
+    sourceFormat,
+    targetFormat,
+    credentials,
+  });
+  translatedBody = previousResponseIdPolicy.body as typeof translatedBody;
 
   // #1789: Prevent output_config.effort from overriding effort encoded in model name (Codex)
   if (provider === "codex" || provider?.startsWith("codex")) {
@@ -5483,6 +5510,47 @@ export async function handleChatCore({
   }
 
   // Streaming response
+  // #3089 — some "reasoning" openai-compatible upstreams ignore a stream:true
+  // request and return a complete application/json chat-completion body instead
+  // of an SSE stream. The readiness check below only recognizes SSE `data:`
+  // frames, so that body produced a spurious STREAM_EARLY_EOF / HTTP 502 even
+  // though it carried valid content/reasoning_content. Detect a JSON (non-SSE)
+  // upstream body and synthesize an equivalent OpenAI SSE stream so the
+  // streaming pipeline (and the client) get a valid stream.
+  {
+    const upstreamContentType = (providerResponse.headers.get("content-type") || "").toLowerCase();
+    const isNonSseJsonBody =
+      !!providerResponse.body &&
+      upstreamContentType.includes("application/json") &&
+      !upstreamContentType.includes("text/event-stream") &&
+      !upstreamContentType.includes("application/x-ndjson");
+    if (isNonSseJsonBody) {
+      const jsonText = await withBodyTimeout<string>(providerResponse.text());
+      const synthesizedSse = synthesizeOpenAiSseFromJson(jsonText);
+      const rebuiltHeaders = new Headers(providerResponse.headers);
+      rebuiltHeaders.delete("content-length");
+      if (synthesizedSse) {
+        log?.debug?.(
+          "STREAM",
+          `Upstream returned application/json on a streaming request — converting to SSE (${provider}/${model})`
+        );
+        rebuiltHeaders.set("content-type", "text/event-stream");
+        providerResponse = new Response(synthesizedSse, {
+          status: providerResponse.status,
+          statusText: providerResponse.statusText,
+          headers: rebuiltHeaders,
+        });
+      } else {
+        // Not a convertible chat-completion JSON — rebuild the consumed body so
+        // the existing readiness/error path still runs unchanged.
+        providerResponse = new Response(jsonText, {
+          status: providerResponse.status,
+          statusText: providerResponse.statusText,
+          headers: rebuiltHeaders,
+        });
+      }
+    }
+  }
   const streamReadinessPolicy = resolveStreamReadinessTimeout({
     baseTimeoutMs: STREAM_READINESS_TIMEOUT_MS,
     provider,
@@ -5844,6 +5912,17 @@ export async function handleChatCore({
     } catch (_) {
       /* gamification optional */
     }
+  }
+
+  // ── Plugin onResponse hook (fire-and-forget) ──
+  try {
+    const { runOnResponse } = await import("@/lib/plugins/hooks");
+    runOnResponse(
+      { requestId: traceId, body, model, provider, apiKeyInfo, metadata: {} },
+      { status: 200 }
+    ).catch(() => {});
+  } catch (_) {
+    /* plugin onResponse optional */
   }
 
   return {
