@@ -85,20 +85,28 @@ ENV HEAP_PRESSURE_THRESHOLD_MB=850
 ENV DATA_DIR=/app/data
 RUN mkdir -p /app/data
 
-# The standalone build + syncStandaloneExtraModules bundles all runtime files
-# (.next, node_modules, migrations, scripts, docs, etc.) into .build/next/standalone/.
-# Explicit overrides below cover modules that NFT tracing may miss.
+# `npm run build` (build-next-isolated → assembleStandalone) bundles ALL runtime
+# files into .build/next/standalone/ — .next, node_modules, migrations, scripts,
+# docs, and the previously hand-COPY'd modules below (@swc/helpers, pino-*, split2,
+# migrations). assembleStandalone copies them straight from the builder's
+# node_modules, so they are present regardless of NFT/Turbopack trace behaviour.
+# The old per-module overrides were therefore pure duplication and were removed
+# (build-output-isolation cleanup). See scripts/build/assembleStandalone.mjs
+# (EXTRA_MODULE_ENTRIES) for the single source of truth.
 COPY --from=builder /app/.build/next/standalone ./
-# Explicitly copy @swc/helpers — not always traced by standalone output but needed at runtime
-COPY --from=builder /app/node_modules/@swc/helpers ./node_modules/@swc/helpers
-# Explicitly copy better-sqlite3 — native bindings are not reliably traced by
-# Next.js standalone output, but bootstrap-env requires SQLite before startup.
+# better-sqlite3 is the one exception still copied explicitly: assembleStandalone
+# only syncs its native build/ dir; the JS wrapper (lib/, package.json) is left to
+# Next.js tracing. bootstrap-env requires SQLite BEFORE the standalone server
+# starts, so guarantee the complete package independent of trace behaviour.
 COPY --from=builder /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+
+# --- Fork reliability additions (multi-arch GHCR + Turbopack tracing gaps) ---
 # Explicitly copy sqlite-vec (+ linux-*-x64/arm64 optional native .so) for vector
 # memory search. The package uses dynamic platform require + loadExtension;
 # standalone + Turbopack tracing frequently misses the optional deps.
 # We copy *both* linux variants so multi-arch builds (which only install the
-# matching optional for the target platform) still succeed at COPY time.
+# matching optional for the target platform during buildx) still succeed at COPY time.
+# The force-install of the platform packages happens earlier in the builder stage.
 COPY --from=builder /app/node_modules/sqlite-vec ./node_modules/sqlite-vec
 COPY --from=builder /app/node_modules/sqlite-vec-linux-x64 ./node_modules/sqlite-vec-linux-x64
 COPY --from=builder /app/node_modules/sqlite-vec-linux-arm64 ./node_modules/sqlite-vec-linux-arm64
@@ -109,15 +117,23 @@ COPY --from=builder /app/node_modules/sql.js ./node_modules/sql.js
 RUN mkdir -p /ROOT/node_modules/sql.js/dist && \
     cp /app/node_modules/sql.js/dist/sql-wasm.wasm /ROOT/node_modules/sql.js/dist/sql-wasm.wasm 2>/dev/null || true && \
     chown -R node:node /ROOT 2>/dev/null || true
-# Explicitly copy pino transport dependencies — pino spawns a worker that requires
-# pino-abstract-transport at runtime; Next.js standalone trace does not capture it (#449)
+
+# Pino transport deps — pino spawns a worker that requires pino-abstract-transport
+# at runtime; Next.js standalone trace has not always captured it reliably (#449).
+# Kept here for fork GHCR image stability even though upstream now relies on
+# assembleStandalone for most modules.
 COPY --from=builder /app/node_modules/pino-abstract-transport ./node_modules/pino-abstract-transport
 COPY --from=builder /app/node_modules/pino-pretty ./node_modules/pino-pretty
 COPY --from=builder /app/node_modules/split2 ./node_modules/split2
-# Migration SQL files are read via fs.readFileSync at runtime and are NOT
-# traced by Next.js standalone output — copy them explicitly.
-COPY --from=builder /app/src/lib/db/migrations ./migrations
+
+# Migrations are now landed by assembleStandalone (single source of truth in
+# scripts/build/assembleStandalone.mjs). We keep the ENV for the runtime lookup.
+# (Explicit COPY kept only if assembleStandalone ever regresses on this.)
 ENV OMNIROUTE_MIGRATIONS_DIR=/app/migrations
+
+# Docker healthcheck script — not traced by Next.js standalone output, so copy
+# it explicitly. The HEALTHCHECK CMD references it as `node healthcheck.mjs`.
+COPY --from=builder /app/scripts/dev/healthcheck.mjs ./healthcheck.mjs
 
 # Hand /app over to the baked-in `node` non-root user (UID/GID 1000) so the
 # runtime process never holds root privileges. The chown happens after all
