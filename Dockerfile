@@ -55,12 +55,37 @@ RUN --mount=type=cache,target=/root/.npm \
 # succeed and at runtime the package will use what's available or fall back.
 RUN mkdir -p /app/node_modules/sqlite-vec-linux-x64 /app/node_modules/sqlite-vec-linux-arm64
 
+# Ensure the other "reliability" modules we explicitly COPY in runner-base always
+# have a source path in the builder (prevents hard build failure in GHCR validate
+# on arm/amd64 runners if npm ci in this env doesn't populate an optional/peer for
+# some reason). The real contents come from the force install (sqlite) or npm ci.
+RUN mkdir -p \
+  /app/node_modules/sql.js \
+  /app/node_modules/pino-abstract-transport \
+  /app/node_modules/pino-pretty \
+  /app/node_modules/split2
+
 # Use Turbopack for significant build speedup
 ENV OMNIROUTE_USE_TURBOPACK=1
 
 COPY . ./
 RUN --mount=type=cache,target=/app/.build/next/cache \
   mkdir -p /app/data && npm run build
+
+# Diagnostics for GHCR "Publish Fork Image" validate-build job (and arm64/amd64 matrix).
+# These lines appear in the Actions log and help debug why a build that works locally
+# fails in the fork's buildx runners after upstream changes (assemble, Turbopack tracing, platform packages).
+RUN echo "=== Post-build reliability modules (for GHCR fork CI debug) ===" && \
+    ls -ld .build/next/standalone/node_modules/sqlite-vec* \
+           .build/next/standalone/node_modules/pino* \
+           .build/next/standalone/node_modules/sql.js \
+           .build/next/standalone/node_modules/better-sqlite3 2>/dev/null || true && \
+    echo "=== Healthcheck + run-standalone sidecars ===" && \
+    ls -l .build/next/standalone/healthcheck.mjs \
+          .build/next/standalone/dev/run-standalone.mjs \
+          scripts/dev/healthcheck.mjs 2>/dev/null || true && \
+    echo "=== Migrations present via assemble ===" && \
+    ls -1 .build/next/standalone/migrations/ 2>/dev/null | head -5 || true
 
 # ── Runner base ────────────────────────────────────────────────────────────
 FROM base AS runner-base
