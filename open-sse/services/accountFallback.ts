@@ -89,7 +89,16 @@ const PROVIDER_FAILURE_ERROR_CODES = new Set([408, 429, 500, 502, 503, 504]);
 // Per-connection failure deduplication: prevents rapid-fire failures from the
 // same connection from counting multiple times toward the provider breaker.
 const CONNECTION_FAILURE_DEDUP_MS = 5000;
+const MAX_CONNECTION_FAILURE_DEDUP_ENTRIES = 10_000;
 const lastConnectionFailure = new Map<string, number>();
+
+function pruneConnectionFailureDedupeEntries(): void {
+  while (lastConnectionFailure.size > MAX_CONNECTION_FAILURE_DEDUP_ENTRIES) {
+    const oldestKey = lastConnectionFailure.keys().next().value;
+    if (typeof oldestKey !== "string") return;
+    lastConnectionFailure.delete(oldestKey);
+  }
+}
 
 const _connectionFailureSweep = setInterval(() => {
   const now = Date.now();
@@ -115,6 +124,19 @@ export const ACCOUNT_DEACTIVATED_SIGNALS = [
   "this service has been disabled in this account for violation",
   "this service has been disabled in this account",
 ];
+
+// Custom banned signals — loaded from DB settings at runtime.
+// Combined with ACCOUNT_DEACTIVATED_SIGNALS in isAccountDeactivated().
+let _customBannedSignals: string[] = [];
+
+export function setCustomBannedSignals(signals: string[]): void {
+  _customBannedSignals = signals;
+}
+
+export function getMergedBannedSignals(): string[] {
+  if (_customBannedSignals.length === 0) return ACCOUNT_DEACTIVATED_SIGNALS;
+  return [...ACCOUNT_DEACTIVATED_SIGNALS, ..._customBannedSignals];
+}
 
 // T10 (sub2api PR #1169): Signals that indicate billing credits are exhausted.
 // Distinct from rate-limit 429 — the account won't recover until credits are added.
@@ -231,7 +253,7 @@ const MALFORMED_REQUEST_PATTERNS = [
  */
 export function isAccountDeactivated(errorText: string): boolean {
   const lower = String(errorText || "").toLowerCase();
-  return ACCOUNT_DEACTIVATED_SIGNALS.some((sig) => lower.includes(sig));
+  return getMergedBannedSignals().some((sig) => lower.includes(sig));
 }
 
 /**
@@ -712,6 +734,11 @@ export function getProviderCooldownRemainingMs(provider: string | null | undefin
   return remaining > 0 ? remaining : null;
 }
 
+export function getProviderBreakerState(provider: string | null | undefined) {
+  const breaker = getProviderBreaker(provider);
+  return breaker?.getStatus?.() ?? null;
+}
+
 /**
  * Record a provider failure against the shared circuit breaker.
  * Delegates to the existing CircuitBreaker utility which handles
@@ -738,11 +765,9 @@ export function recordProviderFailure(
     if (lastFailure && now - lastFailure < CONNECTION_FAILURE_DEDUP_MS) {
       return;
     }
-    // Prevent memory leak by clearing map if it grows too large
-    if (lastConnectionFailure.size > 10000) {
-      lastConnectionFailure.clear();
-    }
+    lastConnectionFailure.delete(dedupKey);
     lastConnectionFailure.set(dedupKey, now);
+    pruneConnectionFailureDedupeEntries();
   }
 
   const breaker = configureProviderBreaker(provider, profile);
