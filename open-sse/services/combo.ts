@@ -71,8 +71,13 @@ import {
   type ProviderCandidate,
   type ScoringWeights,
 } from "./autoCombo/scoring.ts";
-import { getResolvedModelCapabilities, supportsToolCalling } from "./modelCapabilities.ts";
+import {
+  getResolvedModelCapabilities,
+  supportsReasoning,
+  supportsToolCalling,
+} from "./modelCapabilities.ts";
 import { estimateTokens } from "./contextManager.ts";
+import { getReasoningTokens } from "../../src/lib/usage/tokenAccounting.ts";
 import { getSessionConnection } from "./sessionManager.ts";
 import { orderTargetsByEvalScores } from "./evalRouting.ts";
 import { generateRoutingHints } from "./manifestAdapter";
@@ -94,6 +99,15 @@ import {
   type RoutingTagMatchMode,
 } from "../../src/domain/tagRouter.ts";
 import { normalizeRoutingStrategy } from "../../src/shared/constants/routingStrategies.ts";
+import {
+  isProviderInCooldown,
+  recordProviderCooldown,
+  recordProviderSuccess,
+} from "./providerCooldownTracker.ts";
+import {
+  resolveResilienceSettings,
+  type ResilienceSettings,
+} from "../../src/lib/resilience/settings";
 
 // Status codes that should mark round-robin target semaphores as cooling down.
 const TRANSIENT_FOR_SEMAPHORE = [429, 502, 503, 504];
@@ -484,6 +498,28 @@ export async function validateResponseQuality(
 
   if (!hasContent && !hasToolCalls) {
     return { valid: false, reason: "empty content and no tool_calls in response" };
+  }
+
+  // Issue #3587: Reasoning models (deepseek-v4-flash, nemotron, etc.) may consume
+  // ALL max_tokens for reasoning_tokens, leaving content empty. When content is
+  // empty but reasoning_content exists, and usage shows reasoning consumed nearly
+  // all completion tokens, treat as invalid so the combo loop retries with more
+  // tokens or falls back to a non-reasoning model.
+  const contentIsEmpty = content === null || content === undefined || content === "";
+  if (contentIsEmpty && hasReasoningContent && !hasToolCalls) {
+    const usage = json?.usage as Record<string, unknown> | undefined;
+    if (usage) {
+      const completionTokens = Number(usage.completion_tokens) || 0;
+      const reasoningTokens = getReasoningTokens(usage);
+      // If reasoning consumed 90%+ of completion tokens, the model ran out of
+      // budget before producing any content output.
+      if (completionTokens > 0 && reasoningTokens >= completionTokens * 0.9) {
+        return {
+          valid: false,
+          reason: `reasoning consumed ${reasoningTokens}/${completionTokens} tokens — no content output`,
+        };
+      }
+    }
   }
 
   return {
@@ -2717,6 +2753,10 @@ export async function handleComboChat({
   const relayConfig =
     strategy === "context-relay" ? resolveContextRelayConfig(relayOptions?.config || null) : null;
 
+  const resilienceSettings: ResilienceSettings = settings
+    ? resolveResilienceSettings(settings)
+    : resolveResilienceSettings(null);
+
   const universalHandoffConfig = resolveUniversalHandoffConfig(
     (combo.universal_handoff || combo.universalHandoff) as
       | Record<string, unknown>
@@ -3344,6 +3384,16 @@ export async function handleComboChat({
           return null;
         }
 
+        if (
+          resilienceSettings.providerCooldown.enabled &&
+          Boolean(provider && provider !== "unknown") &&
+          isProviderInCooldown(provider, target.connectionId ?? undefined, resilienceSettings)
+        ) {
+          log.info("COMBO", `Skipping ${modelStr} — provider ${provider} in global cooldown`);
+          if (i > 0) fallbackCount++;
+          return null;
+        }
+
         // Use pre-screened profile if available, otherwise fetch on demand
         const preScreenEntry = preScreenMap.get(target.executionKey);
         const profile = preScreenEntry?.profile ?? (await getRuntimeProviderProfile(provider));
@@ -3524,6 +3574,26 @@ export async function handleComboChat({
               );
             }
           }
+
+          // Issue #3587: Reasoning models (deepseek-v4-flash, nemotron, etc.) consume
+          // ALL max_tokens for reasoning_tokens, leaving content empty. Add a buffer
+          // to max_tokens so the model has enough tokens for both reasoning and content.
+          if (supportsReasoning(modelStr)) {
+            const bodyRecord = attemptBody as Record<string, unknown>;
+            const currentMaxTokens = Number(bodyRecord.max_tokens) || 0;
+            if (currentMaxTokens > 0) {
+              // Add 50% buffer + 1000 floor to ensure reasoning + content both fit
+              const bufferedMaxTokens = Math.max(
+                currentMaxTokens + 1000,
+                Math.ceil(currentMaxTokens * 1.5)
+              );
+              bodyRecord.max_tokens = bufferedMaxTokens;
+              log.info(
+                "COMBO",
+                `Reasoning model ${modelStr}: buffered max_tokens ${currentMaxTokens} -> ${bufferedMaxTokens}`
+              );
+            }
+          }
           const result = await handleSingleModelWithTimeout(attemptBody, modelStr, {
             ...targetForAttempt,
             failoverBeforeRetry: config.failoverBeforeRetry,
@@ -3580,6 +3650,11 @@ export async function handleComboChat({
               target: toRecordedTarget(target),
             });
             recordedAttempts++;
+
+            // Reset cooldown on success
+            if (provider && provider !== "unknown") {
+              recordProviderSuccess(provider, target.connectionId ?? undefined);
+            }
             // Webhook fan-out: best-effort, never blocks the response stream.
             notifyWebhookEvent("request.completed", {
               combo: combo.name,
@@ -3920,6 +3995,10 @@ export async function handleComboChat({
           if (i > 0) fallbackCount++;
           log.warn("COMBO", `Model ${modelStr} failed, trying next`, { status: result.status });
 
+          if (resilienceSettings.providerCooldown.enabled && provider && provider !== "unknown") {
+            recordProviderCooldown(provider, target.connectionId ?? undefined, resilienceSettings);
+          }
+
           const fallbackWaitMs =
             fallbackDelayMs > 0 && cooldownMs > 0 && cooldownMs <= MAX_FALLBACK_WAIT_MS
               ? Math.min(cooldownMs, fallbackDelayMs)
@@ -4091,6 +4170,10 @@ async function handleRoundRobinCombo({
   const retryDelayMs = resolveDelayMs(config.retryDelayMs, 2000);
   const fallbackDelayMs = resolveDelayMs(config.fallbackDelayMs, 0);
 
+  const resilienceSettings: ResilienceSettings = settings
+    ? resolveResilienceSettings(settings)
+    : resolveResilienceSettings(null);
+
   const orderedTargets = resolveComboTargets(combo, allCombos);
   const tagFilteredTargets = await applyRequestTagRouting(orderedTargets, body, log);
   const evalRankedTargets = orderTargetsByEvalScores(tagFilteredTargets, config.evalRouting, log);
@@ -4167,6 +4250,16 @@ async function handleRoundRobinCombo({
       }
     }
 
+    if (
+      resilienceSettings.providerCooldown.enabled &&
+      Boolean(provider && provider !== "unknown") &&
+      isProviderInCooldown(provider, target.connectionId as string | undefined, resilienceSettings)
+    ) {
+      log.info("COMBO-RR", `Skipping ${modelStr} — provider ${provider} in global cooldown`);
+      if (offset > 0) fallbackCount++;
+      continue;
+    }
+
     // #1731: Skip targets from a provider that already signaled full quota exhaustion
     // this request.
     if (provider && exhaustedProviders.has(provider)) {
@@ -4222,7 +4315,32 @@ async function handleRoundRobinCombo({
           `[RR #${counter}] → ${modelStr}${offset > 0 ? ` (fallback +${offset})` : ""}${retry > 0 ? ` (retry ${retry})` : ""}`
         );
 
-        const result = await handleSingleModel(body, modelStr, {
+        // Issue #3587: Reasoning models consume ALL max_tokens for reasoning_tokens.
+        // Add buffer to ensure reasoning + content both fit. Apply the buffer to a
+        // per-attempt COPY — never mutate the shared `body` — so it does not compound
+        // across round-robin iterations/retries (otherwise 4096 -> 6144 -> 9216 -> ...
+        // as each reasoning model re-reads an already-buffered value and overshoots the
+        // model's real limit, triggering 400s).
+        let attemptBody = body;
+        if (supportsReasoning(modelStr)) {
+          const currentMaxTokens = Number((body as Record<string, unknown>).max_tokens) || 0;
+          if (currentMaxTokens > 0) {
+            const bufferedMaxTokens = Math.max(
+              currentMaxTokens + 1000,
+              Math.ceil(currentMaxTokens * 1.5)
+            );
+            attemptBody = {
+              ...(body as Record<string, unknown>),
+              max_tokens: bufferedMaxTokens,
+            } as typeof body;
+            log.info(
+              "COMBO-RR",
+              `Reasoning model ${modelStr}: buffered max_tokens ${currentMaxTokens} -> ${bufferedMaxTokens}`
+            );
+          }
+        }
+
+        const result = await handleSingleModel(attemptBody, modelStr, {
           ...targetForAttempt,
           failoverBeforeRetry: config.failoverBeforeRetry,
         });
@@ -4263,6 +4381,11 @@ async function handleRoundRobinCombo({
             target: toRecordedTarget(target),
           });
           recordedAttempts++;
+
+          if (provider && provider !== "unknown") {
+            recordProviderSuccess(provider, target.connectionId ?? undefined);
+          }
+
           if (provider) {
             const connId = target.connectionId || undefined;
             void (async () => {
@@ -4456,6 +4579,10 @@ async function handleRoundRobinCombo({
         if (!lastStatus) lastStatus = result.status;
         if (offset > 0) fallbackCount++;
         log.warn("COMBO-RR", `${modelStr} failed, trying next model`, { status: result.status });
+
+        if (resilienceSettings.providerCooldown.enabled && provider && provider !== "unknown") {
+          recordProviderCooldown(provider, target.connectionId ?? undefined, resilienceSettings);
+        }
 
         const fallbackWaitMs =
           fallbackDelayMs > 0 && cooldownMs > 0 && cooldownMs <= MAX_FALLBACK_WAIT_MS

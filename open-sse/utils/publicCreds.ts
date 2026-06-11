@@ -157,9 +157,31 @@ const EMBEDDED_DEFAULTS = {
   ],
   // xAI Grok OAuth (SuperGrok / X Premium+) — public PKCE client_id from xAI CLIs (OpenCode, Hermes, etc.)
   xai_oauth_id: [
-    13, 92, 15, 89, 66, 91, 76, 70, 72, 29, 71, 70, 3, 65, 93, 84, 72, 23, 28, 87, 92, 88, 15, 95, 91,
-    22, 71, 87, 20, 66, 67, 86, 13, 81, 81, 21,
+    13, 92, 15, 89, 66, 91, 76, 70, 72, 29, 71, 70, 3, 65, 93, 84, 72, 23, 28, 87, 92, 88, 15, 95,
+    91, 22, 71, 87, 20, 66, 67, 86, 13, 81, 81, 21,
   ],
+  // Claude Code CLI — anthropic oauth client (public, PKCE)
+  claude_id: [
+    86, 9, 95, 10, 64, 90, 69, 21, 72, 72, 70, 68, 0, 65, 93, 87, 73, 79, 28, 87, 85, 11, 13, 95,
+    90, 76, 64, 81, 73, 65, 76, 84, 94, 15, 86, 72,
+  ],
+  // Codex CLI — openai oauth client (public, PKCE)
+  codex_id: [
+    14, 29, 30, 54, 55, 34, 26, 21, 8, 104, 53, 47, 85, 95, 15, 83, 110, 29, 105, 14, 53, 30, 94,
+    26, 29, 20, 26, 11,
+  ],
+  // Qwen Code CLI — qwen oauth client (public, device flow)
+  qwen_id: [
+    9, 93, 93, 89, 70, 92, 66, 71, 7, 26, 68, 20, 86, 88, 13, 81, 79, 67, 9, 91, 12, 93, 15, 16, 88,
+    69, 23, 4, 20, 21, 64, 84,
+  ],
+  // Kimi coding CLI — moonshot oauth client (public)
+  kimi_id: [
+    94, 90, 11, 92, 20, 89, 66, 69, 72, 73, 65, 76, 86, 65, 93, 7, 75, 20, 28, 86, 90, 94, 95, 95,
+    90, 64, 69, 83, 78, 18, 65, 90, 15, 89, 90, 21,
+  ],
+  // GitHub Copilot CLI — github oauth app id (public, device flow)
+  github_copilot_id: [38, 27, 95, 71, 16, 90, 69, 67, 4, 29, 72, 22, 90, 91, 12, 0, 75, 19, 8, 87],
 } as const;
 
 export type EmbeddedDefaultKey = keyof typeof EMBEDDED_DEFAULTS;

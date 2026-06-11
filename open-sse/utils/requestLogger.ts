@@ -219,10 +219,7 @@ function compactPipelinePayloads(
 
   return hasOwnValues(result) ? result : null;
 }
-function makeStreamChunkMethods(
-  options: RequestLoggerOptions,
-  captureChunks: boolean
-) {
+function makeStreamChunkMethods(options: RequestLoggerOptions, captureChunks: boolean) {
   const streamChunks = createEmptyStreamChunks();
   const streamChunkBytes = {
     provider: { value: 0, truncated: false },
@@ -243,30 +240,26 @@ function makeStreamChunkMethods(
     if (pendingPushed) return;
     if (!options.connectionId || !options.model) return;
     pendingPushed = true;
-      try {
-        const pending = getPendingById();
-        for (const entry of pending.values()) {
-          if (entry?.model === options.model && entry.provider === (options.provider || "")) {
-            entry.streamChunks = { ...streamChunks };
-            return;
-          }
+    try {
+      const pending = getPendingById();
+      for (const entry of pending.values()) {
+        if (entry?.model === options.model && entry.provider === (options.provider || "")) {
+          entry.streamChunks = { ...streamChunks };
+          return;
         }
-      } catch (e) {
-        // Do not allow logging failures to disrupt request handling
-        try {
-          console.warn("[requestLogger] updatePendingRequestStreamChunks failed:", e);
-        } catch {}
+      }
+    } catch (e) {
+      // Do not allow logging failures to disrupt request handling
+      try {
+        console.warn("[requestLogger] updatePendingRequestStreamChunks failed:", e);
+      } catch {}
     }
   };
 
-  const append = (
-    arr: string[],
-    bytes: { value: number; truncated: boolean },
-    chunk: string
-  ) => {
+  const append = (arr: string[], bytes: { value: number; truncated: boolean }, chunk: string) => {
     if (!captureChunks) return;
     push();
-      appendBoundedChunk(arr, bytes, chunk, maxBytes, maxItems);
+    appendBoundedChunk(arr, bytes, chunk, maxBytes, maxItems);
   };
 
   return {
@@ -308,7 +301,9 @@ export async function createRequestLogger(
       logConvertedResponse() {},
       appendConvertedChunk: chunkMethods.appendConvertedChunk,
       logError() {},
-      getPipelinePayloads() { return null; },
+      getPipelinePayloads() {
+        return null;
+      },
     };
   }
 

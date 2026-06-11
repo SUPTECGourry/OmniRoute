@@ -223,7 +223,7 @@ export default function OAuthModal({
           "Ensure your ssh -L tunnel is running and that the container was started with --network host. " +
           "You can still paste the full callback URL (from the browser address bar after x.ai redirect) below."
       );
-    } catch (err: any) {
+    } catch (err) {
       console.warn("startRemoteCallbackListenerAndPoll failed", err);
       setPolling(false);
       setStep("input");

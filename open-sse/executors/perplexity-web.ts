@@ -14,6 +14,7 @@ import {
   type TlsFetchResult,
 } from "../services/perplexityTlsClient.ts";
 import { prepareToolMessages, buildToolAwareResult } from "../translator/webTools.ts";
+import { sanitizeErrorMessage } from "../utils/error.ts";
 
 const PPLX_SSE_ENDPOINT = "https://www.perplexity.ai/rest/sse/perplexity_ask";
 const PPLX_API_VERSION = "client-1.11.0";
@@ -580,7 +581,9 @@ function buildStreamingResponse(
           );
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         } finally {
-          try { controller.close(); } catch {}
+          try {
+            controller.close();
+          } catch {}
         }
       },
     },
@@ -659,9 +662,7 @@ export class PerplexityWebExecutor extends BaseExecutor {
 
   async execute({ model, body, stream, credentials, signal, log }: ExecuteInput) {
     const bodyObj = (body || {}) as Record<string, unknown>;
-    const rawMessages = bodyObj.messages as
-      | Array<Record<string, unknown>>
-      | undefined;
+    const rawMessages = bodyObj.messages as Array<Record<string, unknown>> | undefined;
     if (!rawMessages || !Array.isArray(rawMessages) || rawMessages.length === 0) {
       const errResp = new Response(
         JSON.stringify({
@@ -672,7 +673,10 @@ export class PerplexityWebExecutor extends BaseExecutor {
       return { response: errResp, url: PPLX_SSE_ENDPOINT, headers: {}, transformedBody: body };
     }
 
-    const { hasTools, requestedTools, effectiveMessages } = prepareToolMessages(bodyObj, rawMessages as Array<{ role: string; content: unknown }>);
+    const { hasTools, requestedTools, effectiveMessages } = prepareToolMessages(
+      bodyObj,
+      rawMessages as Array<{ role: string; content: unknown }>
+    );
 
     // Resolve thinking mode
     const thinking =
@@ -756,8 +760,8 @@ export class PerplexityWebExecutor extends BaseExecutor {
         JSON.stringify({
           error: {
             message: isTlsUnavail
-              ? `Perplexity TLS client unavailable: ${(err as Error).message}`
-              : `Perplexity connection failed: ${err instanceof Error ? err.message : String(err)}`,
+              ? `Perplexity TLS client unavailable: ${sanitizeErrorMessage((err as Error).message)}`
+              : `Perplexity connection failed: ${sanitizeErrorMessage(err instanceof Error ? err.message : String(err))}`,
             type: "upstream_error",
           },
         }),
@@ -843,7 +847,11 @@ export class PerplexityWebExecutor extends BaseExecutor {
       try {
         const json = JSON.parse(bodyText);
         const rawContent = json?.choices?.[0]?.message?.content || "";
-        const { content, toolCalls, finishReason } = buildToolAwareResult(rawContent, requestedTools, "pplx");
+        const { content, toolCalls, finishReason } = buildToolAwareResult(
+          rawContent,
+          requestedTools,
+          "pplx"
+        );
         if (toolCalls) {
           json.choices[0].message = { role: "assistant", content: null, tool_calls: toolCalls };
           json.choices[0].finish_reason = finishReason;
@@ -851,9 +859,12 @@ export class PerplexityWebExecutor extends BaseExecutor {
           json.choices[0].message.content = content;
         }
         finalResponse = new Response(JSON.stringify(json), {
-          status: 200, headers: { "Content-Type": "application/json" },
+          status: 200,
+          headers: { "Content-Type": "application/json" },
         });
-      } catch { /* keep original response */ }
+      } catch {
+        /* keep original response */
+      }
     }
 
     return {

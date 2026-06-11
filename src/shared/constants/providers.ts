@@ -493,7 +493,8 @@ export const WEB_COOKIE_PROVIDERS = {
     textIcon: "LMA",
     website: "https://lmarena.ai",
     hasFree: true,
-    freeNote: "Free model comparison platform — 40+ models (GPT, Claude, Gemini, Llama). No subscription required.",
+    freeNote:
+      "Free model comparison platform — 40+ models (GPT, Claude, Gemini, Llama). No subscription required.",
     authHint:
       "Paste your session cookie from lmarena.ai (DevTools → Application → Cookies). Optional — works with free tier for basic comparisons.",
     riskNoticeVariant: "webCookie",
@@ -1448,8 +1449,10 @@ export const APIKEY_PROVIDERS = {
     color: "#059669",
     textIcon: "PA",
     website: "https://publicai.co",
-    hasFree: true,
-    freeNote: "Free community inference tier for testing",
+    // #3558: PublicAI requires an API key (registry authType:"apikey"); signup grants a
+    // one-time credit, then it bills per-model. It is NOT a keyless/free tier.
+    hasFree: false,
+    freeNote: "Requires an API key — one-time signup credit, then paid",
   },
   moonshot: {
     id: "moonshot",
