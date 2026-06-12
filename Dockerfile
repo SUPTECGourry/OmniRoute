@@ -160,6 +160,12 @@ ENV OMNIROUTE_MIGRATIONS_DIR=/app/migrations
 # it explicitly. The HEALTHCHECK CMD references it as `node healthcheck.mjs`.
 COPY --from=builder /app/scripts/dev/healthcheck.mjs ./healthcheck.mjs
 
+# webdav-handler.mjs — new upstream sidecar (v3.8.22) for Obsidian/WebDAV vault
+# sync (used by maybeHandleWebdav imported from server-ws.mjs / standalone-server-ws).
+# assembleStandalone now lists it, but we COPY explicitly for fork GHCR multi-arch
+# / Turbopack tracing reliability (same pattern as healthcheck, pino, sqlite-vec).
+COPY --from=builder /app/scripts/dev/webdav-handler.mjs ./webdav-handler.mjs
+
 # Hand /app over to the baked-in `node` non-root user (UID/GID 1000) so the
 # runtime process never holds root privileges. The chown happens after all
 # COPYs so it covers files originally owned by root in the builder stage.
