@@ -38,7 +38,6 @@ RUN --mount=type=cache,target=/root/.npm \
   && npm rebuild better-sqlite3 \
   && node -e "require('better-sqlite3')(':memory:').close()"
 
-<<<<<<< HEAD
 # Force-install all Linux platform packages for sqlite-vec (declared as
 # optionalDependencies of "sqlite-vec"). `npm ci --ignore-scripts` can cause
 # the platform-specific package (e.g. sqlite-vec-linux-x64) to be omitted in
@@ -73,7 +72,6 @@ RUN mkdir -p \
 # all green). Re-enable Turbopack (=1) once the upstream tracer bug is fixed.
 # See docs/ops/QUALITY_GATE_PLAYBOOK.md Parte 6.
 ENV OMNIROUTE_USE_TURBOPACK=0
->>>>>>> upstream/main
 
 COPY . ./
 RUN --mount=type=cache,target=/app/.build/next/cache \
