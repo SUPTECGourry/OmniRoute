@@ -1,11 +1,11 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 import {
   buildAntigravityUrl,
   ANTIGRAVITY_BASE_URLS,
   AGY_PUBLIC_MODELS,
   getAntigravityProviderHeaders,
   resolvePublicCred,
-} from "../../shared";
+} from "../../shared.ts";
 
 export const agyProvider: RegistryEntry = {
   id: "agy",

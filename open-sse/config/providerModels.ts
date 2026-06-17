@@ -1,4 +1,4 @@
-import { generateModels, generateAliasMap, type RegistryModel } from "./providerRegistry";
+import { generateModels, generateAliasMap, type RegistryModel } from "./providerRegistry.ts";
 
 // Provider models - Generated from providerRegistry.js (single source of truth)
 export const PROVIDER_MODELS = generateModels();

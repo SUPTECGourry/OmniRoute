@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 
 export const t3_webProvider: RegistryEntry = {
   id: "t3-web",

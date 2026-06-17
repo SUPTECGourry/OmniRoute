@@ -1,4 +1,4 @@
-import { stripTrailingSlashes } from "../utils/urlSanitize";
+import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 
 export const WATSONX_DEFAULT_BASE_URL = "https://ca-tor.ml.cloud.ibm.com/ml/gateway/v1";
 

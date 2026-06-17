@@ -1,5 +1,5 @@
-import type { RegistryEntry } from "../../shared";
-import { CHAT_OPENAI_COMPAT_MODELS, MARITALK_DEFAULT_BASE_URL } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
+import { CHAT_OPENAI_COMPAT_MODELS, MARITALK_DEFAULT_BASE_URL } from "../../shared.ts";
 
 export const maritalkProvider: RegistryEntry = {
   id: "maritalk",

@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 
 export const adapta_webProvider: RegistryEntry = {
   id: "adapta-web",

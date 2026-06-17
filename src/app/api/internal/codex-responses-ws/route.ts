@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { CodexExecutor } from "@omniroute/open-sse/executors/codex.ts";
+import { CodexExecutor } from "@omniroute/open-sse/executors/codex";
 import { getApiKeyMetadata } from "@/lib/db/apiKeys";
 import { authorizeWebSocketHandshake, extractWsTokenFromRequest } from "@/lib/ws/handshake";
 import { getModelInfo } from "@/sse/services/model";
@@ -9,11 +9,20 @@ import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
 import { checkAndRefreshToken } from "@/sse/services/tokenRefresh";
 import { resolveCodexWsModelInfo } from "./modelResolution";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
-import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { logger } from "@/shared/utils/logger";
+
+export const dynamic = "force-dynamic";
 
 const CODEX_RESPONSES_WS_URL = "wss://chatgpt.com/backend-api/codex/responses";
-const executor = new CodexExecutor();
-const log = logger("RESPONSES_WS");
+// Lazy to avoid top level side effects / collection failures in build (new Executor, logger setup)
+let executor: CodexExecutor | null = null;
+let log: any = null;
+function getExecutorAndLog() {
+  if (!executor) executor = new CodexExecutor();
+  if (!log) log = logger("RESPONSES_WS");
+  return { executor: executor!, log };
+}
 
 type JsonRecord = Record<string, unknown>;
 type ApiKeyMetadata = Awaited<ReturnType<typeof getApiKeyMetadata>>;

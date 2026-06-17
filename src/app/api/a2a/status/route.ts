@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getTaskManager } from "@/lib/a2a/taskManager";
 import { getSettings } from "@/lib/db/settings";
 
+// Prevent Next.js build-time page data collection (which can pull registry/config
+// chunks that reference constants only available after full module graph).
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const [settings, stats] = await Promise.all([

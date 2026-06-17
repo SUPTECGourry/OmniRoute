@@ -5,7 +5,7 @@
  * Currently supports local providers (ComfyUI with audio models).
  */
 
-import { parseModelFromRegistry, getAllModelsFromRegistry } from "./registryUtils";
+import { parseModelFromRegistry, getAllModelsFromRegistry } from "./registryUtils.ts";
 
 interface MusicModel {
   id: string;

@@ -6,9 +6,9 @@
  * is auto-generated from this registry.
  */
 
-import { ANTIGRAVITY_BASE_URLS } from "../antigravityUpstream";
-import { ANTIGRAVITY_PUBLIC_MODELS } from "../antigravityModelAliases";
-import { AGY_PUBLIC_MODELS } from "../agyModels";
+import { ANTIGRAVITY_BASE_URLS } from "../antigravityUpstream.ts";
+import { ANTIGRAVITY_PUBLIC_MODELS } from "../antigravityModelAliases.ts";
+import { AGY_PUBLIC_MODELS } from "../agyModels.ts";
 import {
   ANTHROPIC_BETA_API_KEY,
   ANTHROPIC_BETA_CLAUDE_OAUTH,
@@ -16,16 +16,16 @@ import {
   CLAUDE_CLI_STAINLESS_PACKAGE_VERSION,
   CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
   CLAUDE_CLI_USER_AGENT,
-} from "../anthropicHeaders";
-import { getCodexDefaultHeaders } from "../codexClient";
+} from "../anthropicHeaders.ts";
+import { getCodexDefaultHeaders } from "../codexClient.ts";
 import {
   GLM_REQUEST_DEFAULTS,
   GLMT_REQUEST_DEFAULTS,
   GLM_TIMEOUT_MS,
   GLMT_TIMEOUT_MS,
   GLM_SHARED_MODELS,
-} from "../glmProvider";
-import { MARITALK_DEFAULT_BASE_URL } from "../maritalk";
+} from "../glmProvider.ts";
+import { MARITALK_DEFAULT_BASE_URL } from "../maritalk.ts";
 import {
   CURSOR_REGISTRY_VERSION,
   getAntigravityProviderHeaders,
@@ -36,9 +36,9 @@ import {
   getQwenOauthHeaders,
   getRuntimePlatform,
   getRuntimeArch,
-} from "../providerHeaderProfiles";
-import type { ProviderRequestDefaults } from "../../services/providerRequestDefaults";
-import { resolvePublicCred } from "../../utils/publicCreds";
+} from "../providerHeaderProfiles.ts";
+import type { ProviderRequestDefaults } from "../../services/providerRequestDefaults.ts";
+import { resolvePublicCred } from "../../utils/publicCreds.ts";
 import { buildGitLabOAuthEndpoints, GITLAB_DUO_DEFAULT_BASE_URL } from "@/lib/oauth/gitlab";
 
 // ── Types ─────────────────────────────────────────────────────────────────

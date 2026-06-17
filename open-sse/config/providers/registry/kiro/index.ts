@@ -1,5 +1,5 @@
-import type { RegistryEntry } from "../../shared";
-import { getKiroServiceHeaders } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
+import { getKiroServiceHeaders } from "../../shared.ts";
 
 export const kiroProvider: RegistryEntry = {
   id: "kiro",

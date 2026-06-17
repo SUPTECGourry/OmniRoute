@@ -1,5 +1,5 @@
-import type { RegistryEntry } from "../../shared";
-import { CHAT_OPENAI_COMPAT_MODELS } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
+import { CHAT_OPENAI_COMPAT_MODELS } from "../../shared.ts";
 
 export const vercel_ai_gatewayProvider: RegistryEntry = {
   id: "vercel-ai-gateway",

@@ -12,6 +12,10 @@ import { loginSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { checkLoginGuard, clearLoginAttempts, recordLoginFailure } from "@/server/auth/loginGuard";
 
+// Prevent build-time page data collection (pulls heavy config/registry chunks with
+// top-level provider defs that reference conditionally-loaded constants).
+export const dynamic = "force-dynamic";
+
 // SECURITY: No hardcoded fallback — JWT_SECRET must be configured.
 if (!process.env.JWT_SECRET) {
   console.error("[SECURITY] FATAL: JWT_SECRET is not set. Login authentication is disabled.");

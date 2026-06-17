@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 
 export const chatgpt_webProvider: RegistryEntry = {
   id: "chatgpt-web",

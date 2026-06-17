@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 
 export const copilot_webProvider: RegistryEntry = {
   id: "copilot-web",

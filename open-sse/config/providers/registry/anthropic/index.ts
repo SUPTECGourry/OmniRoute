@@ -1,5 +1,5 @@
-import type { RegistryEntry } from "../../shared";
-import { ANTHROPIC_BETA_API_KEY, ANTHROPIC_VERSION_HEADER } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
+import { ANTHROPIC_BETA_API_KEY, ANTHROPIC_VERSION_HEADER } from "../../shared.ts";
 
 export const anthropicProvider: RegistryEntry = {
   id: "anthropic",

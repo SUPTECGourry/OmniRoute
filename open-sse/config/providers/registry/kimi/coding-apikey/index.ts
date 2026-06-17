@@ -1,5 +1,5 @@
-import type { RegistryEntry } from "../../../shared";
-import { KIMI_CODING_SHARED } from "../../../shared";
+import type { RegistryEntry } from "../../../shared.ts";
+import { KIMI_CODING_SHARED } from "../../../shared.ts";
 
 export const kimi_coding_apikeyProvider: RegistryEntry = {
   id: "kimi-coding-apikey",

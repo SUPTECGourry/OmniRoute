@@ -16,7 +16,7 @@
  * No changes to classifyError, lockModel, or updateProviderConnection needed.
  */
 
-import type { ConfiguredErrorReason } from "./errorConfig";
+import type { ConfiguredErrorReason } from "./errorConfig.ts";
 
 export type ProviderErrorRule = {
   id: string;

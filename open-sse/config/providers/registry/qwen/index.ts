@@ -1,5 +1,5 @@
-import type { RegistryEntry } from "../../shared";
-import { getQwenOauthHeaders, resolvePublicCred } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
+import { getQwenOauthHeaders, resolvePublicCred } from "../../shared.ts";
 
 export const qwenProvider: RegistryEntry = {
   id: "qwen",

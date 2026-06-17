@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 
 // BytePlus ModelArk (Ark) — OpenAI-compatible, ap-southeast-1 region, Bearer auth.
 // Re-added after the registry modularization (#3993) dropped it; restores #3877.

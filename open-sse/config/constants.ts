@@ -1,6 +1,6 @@
 import { getUpstreamTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
-import { loadProviderCredentials } from "./credentialLoader";
-import { generateLegacyProviders } from "./providerRegistry";
+import { loadProviderCredentials } from "./credentialLoader.ts";
+import { generateLegacyProviders } from "./providerRegistry.ts";
 
 const upstreamTimeouts = getUpstreamTimeoutConfig(process.env, (message) => {
   console.warn(`[open-sse] ${message}`);
@@ -134,7 +134,7 @@ export {
   getErrorInfo,
   matchErrorRuleByStatus,
   matchErrorRuleByText,
-} from "./errorConfig";
+} from "./errorConfig.ts";
 
 // Configurable backoff steps for rate limits (Phase 1 — enhanced rate limiting)
 // Used for per-model lockouts with increasing severity

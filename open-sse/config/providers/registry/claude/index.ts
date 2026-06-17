@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 import {
   getClaudeCliHeaders,
   mapStainlessOs,
@@ -9,7 +9,7 @@ import {
   CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
   CLAUDE_CLI_USER_AGENT,
   resolvePublicCred,
-} from "../../shared";
+} from "../../shared.ts";
 
 export const claudeProvider: RegistryEntry = {
   id: "claude",

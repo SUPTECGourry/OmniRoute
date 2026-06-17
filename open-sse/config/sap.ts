@@ -1,4 +1,4 @@
-import { stripTrailingSlashes } from "../utils/urlSanitize";
+import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 
 export const SAP_DEFAULT_BASE_URL =
   "https://example-aicore.cfapps.eu10.hana.ondemand.com/v2/lm/deployments/example-deployment";

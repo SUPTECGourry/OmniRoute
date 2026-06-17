@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 
 export const blackboxProvider: RegistryEntry = {
   id: "blackbox",

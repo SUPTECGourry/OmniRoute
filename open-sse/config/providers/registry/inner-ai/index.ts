@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared";
+import type { RegistryEntry } from "../../shared.ts";
 
 export const inner_aiProvider: RegistryEntry = {
   id: "inner-ai",
