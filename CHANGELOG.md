@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.8.28-grok-oauth] — 2026-06-17
+
+### 🐛 Fixed
+
+- **GHCR build for fork** (Publish Fork Image to GHCR): fixed persistent Docker/Next.js build failures after upstream merges. Root causes included:
+  - Duplicate/merged provider schemas in `src/shared/validation/schemas.ts` missing imports (causing `ReferenceError: z is not defined`, `ROUTING_STRATEGY_VALUES`, `AGY_PUBLIC_MODELS` etc. during page data collection for `/api/auth/login`, `/a2a`, etc.).
+  - Bare `logger` and top-level side-effects in `src/app/api/internal/codex-responses-ws/route.ts`.
+  - Missing named imports for `ANTIGRAVITY_*` / `AGY_*` consts in `open-sse/config/providerRegistry.ts`.
+  - `material-symbols/outlined.css` not materializing under `--ignore-scripts` (fixed force-install without `--ignore-scripts`).
+  - Residual `.ts` extensions in open-sse imports breaking resolution in build chunks.
+  - Collection errors for routes pulling heavy registry/config/DB at top level.
+- Restored clean upstream `open-sse/config/` + schemas (matching upstream tree that builds). Added `export const dynamic = "force-dynamic"` + lazy init where needed. `npm run build` now succeeds through to `assembleStandalone`.
+- Previous partial fixes (a2a force-dynamic, .ts strip, material-symbols) landed; this release captures the complete alignment so fork GHCR action matches upstream success.
+
+### ♻️ Maintenance
+- Version bump + metadata sync across root/electron/open-sse package files, lockfiles, and openapi.yaml.
+- Fork continues carrying `-grok-oauth` suffix for custom xAI OAuth + GHCR matrix (amd64/arm64 validate + push-by-digest + manifest).
+
+---
+
 ## [Unreleased]
 
 ---
