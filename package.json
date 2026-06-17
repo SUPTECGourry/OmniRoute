@@ -262,6 +262,8 @@
     "better-sqlite3": "^12.10.0",
     "js-tiktoken": "^1.0.20",
     "keytar": "^7.9.0",
+    "sqlite-vec-linux-arm64": "0.1.9",
+    "sqlite-vec-linux-x64": "0.1.9",
     "tls-client-node": "^0.2.0",
     "wreq-js": "^2.3.1"
   },
