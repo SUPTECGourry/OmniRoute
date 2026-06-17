@@ -262,3 +262,7 @@ export async function OPTIONS() {
     },
   });
 }
+
+// Force dynamic to avoid build-time page data collection errors when DB/settings
+// are not available in the builder container (getSettings / taskManager side effects).
+export const dynamic = "force-dynamic";
