@@ -1,5 +1,5 @@
-import type { TosVerdict } from "./freeTierCatalog.ts";
-export { FREE_MODEL_BUDGETS } from "./freeModelCatalog.data.ts";
+import type { TosVerdict } from "./freeTierCatalog";
+export { FREE_MODEL_BUDGETS } from "./freeModelCatalog.data";
 import { FREE_MODEL_BUDGETS } from "./freeModelCatalog.data";
 
 export type FreeModelFreeType =

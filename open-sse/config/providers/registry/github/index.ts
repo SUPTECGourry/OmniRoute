@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 import { GPT_5_5_CODEX_CAPABILITIES, getGitHubCopilotChatHeaders } from "../../shared";
 
 export const githubProvider: RegistryEntry = {

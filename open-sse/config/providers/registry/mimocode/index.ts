@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 import { CHAT_OPENAI_COMPAT_MODELS } from "../../shared";
 
 // Mimocode (Xiaomi MiMo free OpenAI-compatible gateway) — no-auth, custom executor.

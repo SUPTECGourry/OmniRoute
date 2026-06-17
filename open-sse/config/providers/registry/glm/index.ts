@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 import { GLM_REQUEST_DEFAULTS, GLM_TIMEOUT_MS, GLM_SHARED_MODELS } from "../../shared";
 
 export const glmProvider: RegistryEntry = {

@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 import { REASONING_UNSUPPORTED } from "../../shared";
 
 export const openaiProvider: RegistryEntry = {

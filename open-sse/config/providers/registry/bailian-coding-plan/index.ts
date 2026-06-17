@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 import { getAnthropicCompatHeaders, ANTHROPIC_VERSION_HEADER } from "../../shared";
 
 export const bailian_coding_planProvider: RegistryEntry = {

@@ -12,16 +12,16 @@ import {
   CLAUDE_CLI_STAINLESS_PACKAGE_VERSION,
   CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
   CLAUDE_CLI_USER_AGENT,
-} from "./anthropicHeaders.ts";
-import { getCodexDefaultHeaders } from "./codexClient.ts";
+} from "./anthropicHeaders";
+import { getCodexDefaultHeaders } from "./codexClient";
 import {
   GLM_REQUEST_DEFAULTS,
   GLMT_REQUEST_DEFAULTS,
   GLM_TIMEOUT_MS,
   GLMT_TIMEOUT_MS,
   GLM_SHARED_MODELS,
-} from "./glmProvider.ts";
-import { MARITALK_DEFAULT_BASE_URL } from "./maritalk.ts";
+} from "./glmProvider";
+import { MARITALK_DEFAULT_BASE_URL } from "./maritalk";
 import {
   CURSOR_REGISTRY_VERSION,
   getAntigravityProviderHeaders,
@@ -32,8 +32,8 @@ import {
   getQwenOauthHeaders,
   getRuntimePlatform,
   getRuntimeArch,
-} from "./providerHeaderProfiles.ts";
-import type { ProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
+} from "./providerHeaderProfiles";
+import type { ProviderRequestDefaults } from "../services/providerRequestDefaults";
 import { resolvePublicCred } from "../utils/publicCreds";
 import { buildGitLabOAuthEndpoints, GITLAB_DUO_DEFAULT_BASE_URL } from "@/lib/oauth/gitlab";
 
