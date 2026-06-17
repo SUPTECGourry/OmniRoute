@@ -126,25 +126,17 @@ const EXTRA_MODULE_ENTRIES = [
     dest: ["peer-stamp.mjs"],
   },
   {
-<<<<<<< HEAD
-=======
     label: "HTTP method guard (server-ws.mjs dependency)",
     src: ["scripts", "dev", "http-method-guard.cjs"],
     dest: ["http-method-guard.cjs"],
   },
   {
->>>>>>> upstream/main
     label: "responses-ws-proxy (server-ws.mjs dependency)",
     src: ["scripts", "dev", "responses-ws-proxy.mjs"],
     dest: ["responses-ws-proxy.mjs"],
   },
   {
-<<<<<<< HEAD
-    label:
-      "webdav-handler for Obsidian/WebDAV support (server-ws.mjs dependency, new in v3.8.22 for vault sync)",
-=======
-    label: "webdav-handler (server-ws.mjs dependency)",
->>>>>>> upstream/main
+    label: "webdav-handler for Obsidian/WebDAV support (server-ws.mjs dependency, new in v3.8.22 for vault sync)",
     src: ["scripts", "dev", "webdav-handler.mjs"],
     dest: ["webdav-handler.mjs"],
   },
