@@ -3,8 +3,8 @@
  * Modularized into `open-sse/config/providers/`
  */
 
-export * from "./providers/shared.ts";
-import { REGISTRY } from "./providers/index.ts";
+export * from "./providers/shared";
+import { REGISTRY } from "./providers/index";
 import {
   ANTHROPIC_BETA_API_KEY,
   ANTHROPIC_BETA_CLAUDE_OAUTH,
