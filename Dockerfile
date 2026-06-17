@@ -68,6 +68,12 @@ RUN --mount=type=cache,target=/root/.npm \
     sqlite-vec-linux-arm64@0.1.9 \
   || true
 
+# Ensure material-symbols/outlined.css (imported by globals.css for icons) is present.
+# The base npm ci uses --ignore-scripts (supply-chain hardening); some packages rely on
+# postinstall or file layout that buildx may not fully materialize for optional/font assets.
+RUN --mount=type=cache,target=/root/.npm \
+  npm install --no-save material-symbols --legacy-peer-deps --ignore-scripts --no-audit --no-fund || true
+
 # Fallback dirs (in case install fails for a platform in cross-build); COPY will
 # succeed and at runtime the package will use what's available or fall back.
 RUN mkdir -p /app/node_modules/sqlite-vec-linux-x64 /app/node_modules/sqlite-vec-linux-arm64
