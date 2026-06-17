@@ -4,7 +4,6 @@
  */
 
 export * from "./providers/shared.ts";
-export { REGISTRY } from "./providers/index.ts";
 import { REGISTRY } from "./providers/index.ts";
 import {
   ANTHROPIC_BETA_API_KEY,
