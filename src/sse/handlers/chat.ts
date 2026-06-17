@@ -40,6 +40,7 @@ import {
   getCombosCacheVersion,
   getSessionAccountAffinity,
 } from "@/lib/localDb";
+import { resolveModelLockoutSettings } from "@/lib/resilience/modelLockoutSettings";
 import {
   ensureOpenAIStoreSessionFallback,
   isOpenAIResponsesStoreEnabled,
@@ -52,6 +53,7 @@ import {
   handleNoCredentials,
   safeResolveProxy,
   safeLogEvents,
+  shouldRetryStreamEarlyEof,
   withSessionHeader,
 } from "./chatHelpers";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
@@ -66,6 +68,7 @@ import { generateRequestId } from "../../shared/utils/requestId";
 import { logAuditEvent } from "../../lib/compliance/index";
 import { enforceApiKeyPolicy } from "../../shared/utils/apiKeyPolicy";
 import { cloneLogPayload } from "@/lib/logPayloads";
+import { handleInternalUsageCommand } from "@/lib/usage/internalUsageCommand";
 import {
   applyTaskAwareRouting,
   getTaskRoutingConfig,
@@ -97,10 +100,7 @@ import {
   resolveCooldownAwareRetrySettings,
   waitForCooldownAwareRetry,
 } from "../services/cooldownAwareRetry";
-import {
-  constrainConnectionsToQuota,
-  resolveQuotaKeyScope,
-} from "../../lib/quota/quotaKey";
+import { constrainConnectionsToQuota, resolveQuotaKeyScope } from "../../lib/quota/quotaKey";
 
 registerCodexQuotaFetcher();
 
@@ -240,6 +240,12 @@ export async function handleChat(request: any, clientRawRequest: any = null) {
     log.debug("AUTH", `API Key: ${log.maskKey(apiKey)}`);
   } else {
     log.debug("AUTH", "No API key provided (local mode)");
+  }
+
+  const internalUsageCommandResponse = await handleInternalUsageCommand(request, body);
+  if (internalUsageCommandResponse) {
+    recordTelemetry(telemetry);
+    return internalUsageCommandResponse;
   }
 
   const isComboLiveTest = request.headers?.get?.("x-internal-test") === "combo-health-check";
@@ -771,7 +777,14 @@ async function handleSingleModelChat(
     });
   }
 
-  const { provider: resolvedProvider, model, sourceFormat, targetFormat, extendedContext, apiFormat } = resolved;
+  const {
+    provider: resolvedProvider,
+    model,
+    sourceFormat,
+    targetFormat,
+    extendedContext,
+    apiFormat,
+  } = resolved;
   // Prefer the combo target's providerId when available — the model string's
   // provider prefix may differ from the credential provider ID (e.g. model
   // "xiaomi/mimo-v2-flash" resolves to provider "xiaomi" but the combo target
@@ -876,6 +889,10 @@ async function handleSingleModelChat(
   let requestRetryLastError = null;
   let requestRetryLastStatus = null;
   let requestRetryLastCooldownMs = 0;
+  // Bug #3758: per-request counter bounding the early-close (STREAM_EARLY_EOF)
+  // re-attempt to exactly one for the whole request. Declared outside both retry
+  // loops so it can never reset and loop.
+  let streamEarlyEofRetries = 0;
 
   requestAttemptLoop: while (true) {
     const excludedConnectionIds = new Set<string>();
@@ -1057,8 +1074,8 @@ async function handleSingleModelChat(
         getTargetFormat(provider, credentials.providerSpecificData) ||
         targetFormat;
 
-      // 5. Log proxy + translation events
-      safeLogEvents({
+      // 5. Log proxy + translation events (fire-and-forget; never blocks the response)
+      void safeLogEvents({
         result,
         proxyInfo,
         proxyLatency,
@@ -1096,6 +1113,27 @@ async function handleSingleModelChat(
         (result.errorType === "stream_timeout" || result.errorType === "stream_early_eof") &&
         !isAntigravityStreamReadinessFailure
       ) {
+        // Bug #3758: flaky OpenAI-compatible upstreams (e.g. NVIDIA NIM) sometimes
+        // send HTTP 200 then close the SSE early with zero useful frames
+        // (STREAM_EARLY_EOF). That is a transient upstream glitch, not a bad key — so
+        // allow exactly ONE bounded same-connection re-attempt before surfacing the
+        // 502. Do NOT retry STREAM_READINESS_TIMEOUT (a slow-but-alive upstream;
+        // retrying would only double latency) and do NOT mark the account unavailable
+        // for the early close.
+        if (
+          shouldRetryStreamEarlyEof(result.errorCode, streamEarlyEofRetries) &&
+          !hasForcedConnection
+        ) {
+          streamEarlyEofRetries += 1;
+          log.warn(
+            "STREAM",
+            `${provider}/${model} closed the stream early before useful content — retrying once (attempt ${streamEarlyEofRetries})`
+          );
+          // Plain re-attempt of the same request: no markAccountUnavailable, no
+          // excludedConnectionIds mutation (an early close is not a bad connection).
+          continue;
+        }
+
         // Stream readiness timeout is an upstream stall after an HTTP response was received,
         // not an account/quota failure. Do NOT mark the account unavailable here.
         return result.response;
@@ -1108,7 +1146,8 @@ async function handleSingleModelChat(
           result.error || result.errorCode || "Antigravity stream ended before useful content",
           provider,
           model,
-          providerProfile
+          providerProfile,
+          { isCombo }
         );
 
         if (shouldFallback && !hasForcedConnection) {
@@ -1157,7 +1196,8 @@ async function handleSingleModelChat(
           result.error || ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
           provider,
           model,
-          providerProfile
+          providerProfile,
+          { isCombo }
         );
 
         if (shouldFallback && !hasForcedConnection) {
@@ -1214,7 +1254,10 @@ async function handleSingleModelChat(
 
       // Emergency fallback for budget exhaustion (402 / billing / quota keywords):
       // reroute to a free model (default provider/model: nvidia + openai/gpt-oss-120b) exactly once.
-      if (!runtimeOptions.emergencyFallbackTried) {
+      // Combo targets never emergency-hop: the combo is the operator's fallback policy
+      // (target-level orchestration plus the global fallback #689 after it), and a
+      // per-target hop burns extra upstream calls against exhausted providers (#1731).
+      if (!runtimeOptions.emergencyFallbackTried && !comboName) {
         const fallbackDecision = shouldUseFallback(
           Number(result.status || 0),
           String(result.error || ""),
@@ -1290,26 +1333,30 @@ async function handleSingleModelChat(
         const match = errorStr.match(/today's quota for model ([^,]+)/);
         const limitedModel = match ? match[1].trim() : model;
 
-        // Lock this model on this connection until tomorrow 00:00
-        const lockResult = recordModelLockoutFailure(
-          provider,
-          credentials.connectionId,
-          limitedModel,
-          "quota_exhausted",
-          result.status,
-          0,
-          providerProfile
-        );
+        const mlSettings = resolveModelLockoutSettings(runtimeOptions.cachedSettings);
+        if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
+          // Lock this model on this connection until tomorrow 00:00
+          const lockResult = recordModelLockoutFailure(
+            provider,
+            credentials.connectionId,
+            limitedModel,
+            "quota_exhausted",
+            result.status,
+            0,
+            providerProfile,
+            { maxCooldownMs: mlSettings.maxCooldownMs }
+          );
 
-        log.info(
-          "MODEL_DAILY_QUOTA",
-          JSON.stringify({
-            connection: credentials.connectionId.slice(0, 8),
-            model: limitedModel,
-            cooldownMs: lockResult.cooldownMs,
-            failureCount: lockResult.failureCount,
-          })
-        );
+          log.info(
+            "MODEL_DAILY_QUOTA",
+            JSON.stringify({
+              connection: credentials.connectionId.slice(0, 8),
+              model: limitedModel,
+              cooldownMs: lockResult.cooldownMs,
+              failureCount: lockResult.failureCount,
+            })
+          );
+        }
 
         dailyQuotaExhausted = true;
       }
@@ -1347,8 +1394,12 @@ async function handleSingleModelChat(
             model,
             providerProfile,
             {
-              persistUnavailableState:
-                !(isCombo && result.status === 429 && (failureKind === "rate_limit" || failureKind === "transient")),
+              persistUnavailableState: !(
+                isCombo &&
+                result.status === 429 &&
+                (failureKind === "rate_limit" || failureKind === "transient")
+              ),
+              isCombo,
             }
           );
 

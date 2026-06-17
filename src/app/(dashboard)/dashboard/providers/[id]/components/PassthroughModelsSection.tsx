@@ -14,11 +14,23 @@
  */
 import React, { useState, useMemo } from "react";
 import { Button } from "@/shared/components";
+<<<<<<< HEAD
 import { matchesModelCatalogQuery, normalizeModelCatalogSource } from "@/shared/utils/modelCatalogSearch";
+=======
+import {
+  matchesModelCatalogQuery,
+  normalizeModelCatalogSource,
+} from "@/shared/utils/modelCatalogSearch";
+>>>>>>> upstream/main
 import { useNotificationStore } from "@/store/notificationStore";
 import {
   buildCompatMap,
   providerText,
+<<<<<<< HEAD
+=======
+  testAllResultsText,
+  evaluateTestAllEntry,
+>>>>>>> upstream/main
   buildPassthroughTestBody,
   shouldSwitchToVisibleFilter,
   type CompatModelRow,
@@ -53,10 +65,14 @@ export interface PassthroughModelsSectionProps {
   effectiveModelNormalize: (alias: string) => boolean;
   effectiveModelPreserveDeveloper: (alias: string) => boolean;
   getUpstreamHeadersRecord: (modelId: string, protocol: string) => Record<string, string>;
+<<<<<<< HEAD
   saveModelCompatFlags: (
     modelId: string,
     flags: ModelCompatSavePatchPassthrough
   ) => Promise<void>;
+=======
+  saveModelCompatFlags: (modelId: string, flags: ModelCompatSavePatchPassthrough) => Promise<void>;
+>>>>>>> upstream/main
   compatSavingModelId?: string;
   isModelHidden: (modelId: string) => boolean;
   onToggleHidden: (modelId: string, hidden: boolean) => Promise<void>;
@@ -65,6 +81,11 @@ export interface PassthroughModelsSectionProps {
   togglingModelId?: string | null;
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
   modelTestStatus?: Record<string, "ok" | "error" | null>;
+<<<<<<< HEAD
+=======
+  /** Report a model's test-all result so the parent updates the green/red icon. */
+  onModelTestStatusChange?: (modelId: string, status: "ok" | "error") => void;
+>>>>>>> upstream/main
   testingModelId?: string | null;
   providerId: string;
   connectionId: string;
@@ -102,6 +123,10 @@ export default function PassthroughModelsSection({
   togglingModelId,
   onTestModel,
   modelTestStatus,
+<<<<<<< HEAD
+=======
+  onModelTestStatusChange,
+>>>>>>> upstream/main
   testingModelId,
   providerId,
   connectionId,
@@ -115,8 +140,14 @@ export default function PassthroughModelsSection({
   const [modelFilter, setModelFilter] = useState("");
   const [testingAll, setTestingAll] = useState(false);
   const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
+<<<<<<< HEAD
   const [localAutoHideFailed, setLocalAutoHideFailed] = useState(true);
   const autoHideFailed = autoHideFailedProp !== undefined ? autoHideFailedProp : localAutoHideFailed;
+=======
+  const [localAutoHideFailed, setLocalAutoHideFailed] = useState(false);
+  const autoHideFailed =
+    autoHideFailedProp !== undefined ? autoHideFailedProp : localAutoHideFailed;
+>>>>>>> upstream/main
   const setAutoHideFailed = onAutoHideFailedChange ?? setLocalAutoHideFailed;
   const [visibilityFilter, setVisibilityFilter] = useState<"all" | "visible" | "hidden">("all");
   const notify = useNotificationStore();
@@ -162,22 +193,41 @@ export default function PassthroughModelsSection({
         }).then((r) => r.json());
 
         const entry = result.results?.[model.modelId];
+<<<<<<< HEAD
         if (entry?.status === "ok") {
           ok++;
         } else {
           error++;
           if (autoHideFailed && !entry?.rateLimited && !entry?.isTimeout) {
+=======
+        const outcome = evaluateTestAllEntry(entry, autoHideFailed);
+        // Paint the per-model icon green/red, same as the single-model ▶ test.
+        onModelTestStatusChange?.(model.modelId, outcome.status);
+        if (outcome.status === "ok") {
+          ok++;
+        } else {
+          error++;
+          if (outcome.shouldHide) {
+>>>>>>> upstream/main
             await onToggleHidden(model.modelId, true);
             hiddenCount++;
           }
         }
       } catch (e) {
         error++;
+<<<<<<< HEAD
+=======
+        onModelTestStatusChange?.(model.modelId, "error");
+>>>>>>> upstream/main
       }
       setTestProgress((prev) => (prev ? { done: prev.done + 1, total: prev.total } : null));
     }
 
+<<<<<<< HEAD
     notify.info(providerText(t, "testAllResults", "{ok} ok, {error} error", { ok, error }));
+=======
+    notify.info(testAllResultsText(t, ok, ok + error));
+>>>>>>> upstream/main
     if (hiddenCount > 0) {
       notify.info(providerText(t, "testAllFailedHidden", "{count} hidden", { count: hiddenCount }));
       // Bug #3610 fix 3: switch to "visible" filter so hidden models disappear on-screen

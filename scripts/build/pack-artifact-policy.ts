@@ -35,13 +35,18 @@ export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
   ".env.example",
   "BUILD_SHA",
   "docs/reference/openapi.yaml",
+  "http-method-guard.cjs",
   "open-sse/mcp-server/server.js",
+  // LLMLingua ONNX worker — esbuild'd standalone .js spawned via worker_threads
+  // (the Next.js bundler can't trace the computed Worker path). Kept like the MCP server.
+  "open-sse/services/compression/engines/llmlingua/onnxWorker.js",
   "package.json",
   "peer-stamp.mjs",
   "responses-ws-proxy.mjs",
   "scripts/dev/sync-env.mjs",
   "server.js",
   "server-ws.mjs",
+  "webdav-handler.mjs",
 ];
 
 export const APP_STAGING_ALLOWED_PATH_PREFIXES: string[] = [
@@ -120,6 +125,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "dist/server-ws.mjs",
   "dist/responses-ws-proxy.mjs",
   "dist/peer-stamp.mjs",
+  "dist/http-method-guard.cjs",
+  "dist/webdav-handler.mjs",
   "bin/cli/program.mjs",
   "bin/mcp-server.mjs",
   "bin/nodeRuntimeSupport.mjs",

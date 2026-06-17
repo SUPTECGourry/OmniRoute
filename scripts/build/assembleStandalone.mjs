@@ -32,7 +32,7 @@
  * Turbopack hashed-chunk patch (.next/server/ *.js)           -               Y           -    SHARED (opt-in: patchTurbopackChunks)
  * --- npm-UNIQUE ---
  * MITM tsc compile -> app/src/mitm/                           -               Y           -    UNIQUE (prepublish)
- * MCP server esbuild -> app/open-sse/mcp-server/server.js     -               Y           -    UNIQUE (prepublish)
+ * MCP server esbuild -> dist/open-sse/mcp-server/server.js    -               Y           -    UNIQUE (prepublish)
  * CLI esbuild -> bin/omniroute.mjs                            -               Y           -    UNIQUE (prepublish)
  * sidecar/doc copies (.env.example, docs/, sync-env, etc.)    -               Y           -    UNIQUE (prepublish)
  * prune + validate (pack-artifact-policy)                      -               Y           -    UNIQUE (prepublish)
@@ -126,13 +126,25 @@ const EXTRA_MODULE_ENTRIES = [
     dest: ["peer-stamp.mjs"],
   },
   {
+<<<<<<< HEAD
+=======
+    label: "HTTP method guard (server-ws.mjs dependency)",
+    src: ["scripts", "dev", "http-method-guard.cjs"],
+    dest: ["http-method-guard.cjs"],
+  },
+  {
+>>>>>>> upstream/main
     label: "responses-ws-proxy (server-ws.mjs dependency)",
     src: ["scripts", "dev", "responses-ws-proxy.mjs"],
     dest: ["responses-ws-proxy.mjs"],
   },
   {
+<<<<<<< HEAD
     label:
       "webdav-handler for Obsidian/WebDAV support (server-ws.mjs dependency, new in v3.8.22 for vault sync)",
+=======
+    label: "webdav-handler (server-ws.mjs dependency)",
+>>>>>>> upstream/main
     src: ["scripts", "dev", "webdav-handler.mjs"],
     dest: ["webdav-handler.mjs"],
   },

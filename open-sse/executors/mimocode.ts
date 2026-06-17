@@ -18,6 +18,10 @@
 import * as crypto from "node:crypto";
 import * as os from "node:os";
 import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base.ts";
+<<<<<<< HEAD
+=======
+import { runWithProxyContext } from "../utils/proxyFetch.ts";
+>>>>>>> upstream/main
 
 const BOOTSTRAP_PATH = "/api/free-ai/bootstrap";
 const CHAT_PATH = "/api/free-ai/openai/chat";
@@ -28,6 +32,45 @@ const COOLDOWN_MAX_MS = 60_000;
 
 const MIMO_SOURCE = "mimocode-cli-free";
 
+<<<<<<< HEAD
+=======
+/**
+ * Anti-abuse gate marker required by the Xiaomi free endpoint.
+ *
+ * `/api/free-ai/openai/chat` returns `403 "Illegal access"` unless the request body
+ * contains a recognized MiMoCode prompt signature as a substring inside a `system`-role
+ * message (verified empirically — headers, fingerprint, and JWT are not what is checked).
+ * This is the canonical MiMoCode agent opener the official CLI sends, and it is on the
+ * upstream allowlist. We inject it as a leading system message so user requests pass the
+ * gate. The string MUST stay byte-for-byte identical — the check is case-sensitive and
+ * truncations are rejected.
+ */
+export const MIMO_SYSTEM_MARKER =
+  "You are MiMoCode, an interactive CLI tool that helps users with software engineering tasks.";
+
+/**
+ * Ensure the outgoing body carries the MiMoCode anti-abuse marker in a system message.
+ * Idempotent: if any system message already contains the marker, the body is returned
+ * unchanged. Bodies without a `messages` array are left untouched.
+ */
+function injectSystemMarker(body: Record<string, unknown>): Record<string, unknown> {
+  const messages = body.messages;
+  if (!Array.isArray(messages)) return body;
+
+  const hasMarker = messages.some(
+    (m) =>
+      m != null &&
+      typeof m === "object" &&
+      (m as { role?: unknown }).role === "system" &&
+      typeof (m as { content?: unknown }).content === "string" &&
+      (m as { content: string }).content.includes(MIMO_SYSTEM_MARKER)
+  );
+  if (hasMarker) return body;
+
+  return { ...body, messages: [{ role: "system", content: MIMO_SYSTEM_MARKER }, ...messages] };
+}
+
+>>>>>>> upstream/main
 const USER_AGENTS = [
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
@@ -36,12 +79,32 @@ const USER_AGENTS = [
 
 // ── Account State ──────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
+=======
+/** Per-account proxy configuration, passed through providerSpecificData.accountProxies. */
+export interface AccountProxyConfig {
+  fingerprint: string;
+  proxy: {
+    type: string;
+    host: string;
+    port: number;
+    username?: string;
+    password?: string;
+  } | null;
+}
+
+>>>>>>> upstream/main
 interface AccountState {
   fingerprint: string;
   jwt: string;
   expiresAt: number;
   cooldownUntil: number;
   consecutiveFails: number;
+<<<<<<< HEAD
+=======
+  /** Resolved proxy config for this account (null = direct). */
+  proxy: AccountProxyConfig["proxy"];
+>>>>>>> upstream/main
 }
 
 function parseJwtExp(jwt: string): number {
@@ -67,7 +130,13 @@ function getCpuModel(): string {
   try {
     const cpus = os.cpus();
     if (cpus.length > 0 && cpus[0].model) return cpus[0].model.trim();
+<<<<<<< HEAD
   } catch { /* ignore */ }
+=======
+  } catch {
+    /* ignore */
+  }
+>>>>>>> upstream/main
   return "unknown-cpu";
 }
 
@@ -80,8 +149,18 @@ export function generateFingerprint(seed?: string): string {
   let username = "unknown-user";
   try {
     username = os.userInfo().username;
+<<<<<<< HEAD
   } catch { /* ignore */ }
   return crypto.createHash("sha256").update(`${hostname}|${platform}|${arch}|${cpu}|${username}`).digest("hex");
+=======
+  } catch {
+    /* ignore */
+  }
+  return crypto
+    .createHash("sha256")
+    .update(`${hostname}|${platform}|${arch}|${cpu}|${username}`)
+    .digest("hex");
+>>>>>>> upstream/main
 }
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
@@ -91,7 +170,11 @@ const bootstrapInflight = new Map<string, Promise<{ jwt: string; expiresAt: numb
 async function bootstrapJwt(
   baseUrl: string,
   fingerprint: string,
+<<<<<<< HEAD
   signal?: AbortSignal | null,
+=======
+  signal?: AbortSignal | null
+>>>>>>> upstream/main
 ): Promise<{ jwt: string; expiresAt: number }> {
   const existing = bootstrapInflight.get(fingerprint);
   if (existing) return existing;
@@ -146,24 +229,79 @@ export class MimocodeExecutor extends BaseExecutor {
   constructor() {
     super("mimocode", { format: "openai" });
     this.baseUrl = this.getBaseUrls()[0] || "https://api.xiaomimimo.com";
+<<<<<<< HEAD
     this.accounts.push({ fingerprint: generateFingerprint(), jwt: "", expiresAt: 0, cooldownUntil: 0, consecutiveFails: 0 });
+=======
+    this.accounts.push({
+      fingerprint: generateFingerprint(),
+      jwt: "",
+      expiresAt: 0,
+      cooldownUntil: 0,
+      consecutiveFails: 0,
+      proxy: null,
+    });
+>>>>>>> upstream/main
   }
 
   private syncAccountsFromCredentials(credentials: ProviderCredentials): void {
     const fingerprints = credentials?.providerSpecificData?.fingerprints;
+<<<<<<< HEAD
     if (!Array.isArray(fingerprints)) return;
     const existing = new Set(this.accounts.map((a) => a.fingerprint));
     for (const fp of fingerprints) {
       if (typeof fp === "string" && !existing.has(fp)) {
         this.accounts.push({ fingerprint: fp, jwt: "", expiresAt: 0, cooldownUntil: 0, consecutiveFails: 0 });
         existing.add(fp);
+=======
+    if (Array.isArray(fingerprints)) {
+      const existing = new Set(this.accounts.map((a) => a.fingerprint));
+      for (const fp of fingerprints) {
+        if (typeof fp === "string" && !existing.has(fp)) {
+          this.accounts.push({
+            fingerprint: fp,
+            jwt: "",
+            expiresAt: 0,
+            cooldownUntil: 0,
+            consecutiveFails: 0,
+            proxy: null,
+          });
+          existing.add(fp);
+        }
+      }
+    }
+
+    const accountProxies = credentials?.providerSpecificData
+      ?.accountProxies as AccountProxyConfig[] | undefined;
+    const proxyMap = Array.isArray(accountProxies)
+      ? new Map(accountProxies.map((ap) => [ap.fingerprint, ap.proxy] as const))
+      : null;
+
+    for (const acct of this.accounts) {
+      if (proxyMap) {
+        const entry = proxyMap.get(acct.fingerprint);
+        acct.proxy = entry !== undefined ? (entry ?? null) : null;
+      } else {
+        acct.proxy = null;
+>>>>>>> upstream/main
       }
     }
   }
 
+<<<<<<< HEAD
   private async getJwtForAccount(account: AccountState, signal?: AbortSignal | null): Promise<string> {
     if (isAccountReady(account)) return account.jwt;
     const result = await bootstrapJwt(this.baseUrl, account.fingerprint, signal);
+=======
+  private async getJwtForAccount(
+    account: AccountState,
+    signal?: AbortSignal | null
+  ): Promise<string> {
+    if (isAccountReady(account)) return account.jwt;
+    const proxy = account.proxy;
+    const result = await runWithProxyContext(proxy, () =>
+      bootstrapJwt(this.baseUrl, account.fingerprint, signal)
+    );
+>>>>>>> upstream/main
     account.jwt = result.jwt;
     account.expiresAt = result.expiresAt;
     return account.jwt;
@@ -185,7 +323,14 @@ export class MimocodeExecutor extends BaseExecutor {
 
   private markCooldown(account: AccountState): void {
     account.consecutiveFails++;
+<<<<<<< HEAD
     const backoff = Math.min(COOLDOWN_BASE_MS * Math.pow(2, account.consecutiveFails - 1), COOLDOWN_MAX_MS);
+=======
+    const backoff = Math.min(
+      COOLDOWN_BASE_MS * Math.pow(2, account.consecutiveFails - 1),
+      COOLDOWN_MAX_MS
+    );
+>>>>>>> upstream/main
     account.cooldownUntil = Date.now() + backoff + Math.random() * 1000;
   }
 
@@ -193,7 +338,16 @@ export class MimocodeExecutor extends BaseExecutor {
     account.consecutiveFails = 0;
   }
 
+<<<<<<< HEAD
   buildUrl(_model: string, _stream: boolean, _urlIndex = 0, _credentials?: ProviderCredentials | null): string {
+=======
+  buildUrl(
+    _model: string,
+    _stream: boolean,
+    _urlIndex = 0,
+    _credentials?: ProviderCredentials | null
+  ): string {
+>>>>>>> upstream/main
     return `${this.baseUrl.replace(/\/$/, "")}${CHAT_PATH}`;
   }
 
@@ -201,7 +355,11 @@ export class MimocodeExecutor extends BaseExecutor {
     _credentials: ProviderCredentials,
     stream = true,
     _clientHeaders?: Record<string, string> | null,
+<<<<<<< HEAD
     _model?: string,
+=======
+    _model?: string
+>>>>>>> upstream/main
   ): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -212,9 +370,21 @@ export class MimocodeExecutor extends BaseExecutor {
     return headers;
   }
 
+<<<<<<< HEAD
   transformRequest(model: string, body: unknown, _stream: boolean, _credentials?: ProviderCredentials | null): unknown {
     if (typeof body === "object" && body !== null) {
       return { ...(body as Record<string, unknown>), model: rewriteModelName(model) };
+=======
+  transformRequest(
+    model: string,
+    body: unknown,
+    _stream: boolean,
+    _credentials?: ProviderCredentials | null
+  ): unknown {
+    if (typeof body === "object" && body !== null) {
+      const withModel = { ...(body as Record<string, unknown>), model: rewriteModelName(model) };
+      return injectSystemMarker(withModel);
+>>>>>>> upstream/main
     }
     return body;
   }
@@ -222,6 +392,7 @@ export class MimocodeExecutor extends BaseExecutor {
   async testConnection(
     _credentials: ProviderCredentials,
     _signal?: AbortSignal | null,
+<<<<<<< HEAD
     log?: ExecuteInput["log"],
   ): Promise<boolean> {
     try {
@@ -233,6 +404,33 @@ export class MimocodeExecutor extends BaseExecutor {
         body: JSON.stringify({ model: "mimo-auto", messages: [{ role: "user", content: "ping" }], stream: false }),
         signal: _signal ?? undefined,
       });
+=======
+    log?: ExecuteInput["log"]
+  ): Promise<boolean> {
+    try {
+      this.syncAccountsFromCredentials(_credentials);
+      const account = this.accounts[0];
+      const jwt = await this.getJwtForAccount(account, _signal);
+      const proxy = account.proxy;
+      const resp = await runWithProxyContext(proxy, () =>
+        fetch(this.buildUrl("mimo-auto", false), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`,
+            "X-Mimo-Source": MIMO_SOURCE,
+          },
+          body: JSON.stringify(
+            injectSystemMarker({
+              model: "mimo-auto",
+              messages: [{ role: "user", content: "ping" }],
+              stream: false,
+            })
+          ),
+          signal: _signal ?? undefined,
+        })
+      );
+>>>>>>> upstream/main
       return resp.status === 200;
     } catch {
       log?.warn?.("MIMOCODE", "testConnection network error");
@@ -251,9 +449,20 @@ export class MimocodeExecutor extends BaseExecutor {
 
     if (signal?.aborted) {
       return {
+<<<<<<< HEAD
         response: new Response(encoder.encode(JSON.stringify({
           error: { message: "Request aborted", type: "abort", code: "ABORTED" },
         })), { status: 499, headers: { "Content-Type": "application/json" } }),
+=======
+        response: new Response(
+          encoder.encode(
+            JSON.stringify({
+              error: { message: "Request aborted", type: "abort", code: "ABORTED" },
+            })
+          ),
+          { status: 499, headers: { "Content-Type": "application/json" } }
+        ),
+>>>>>>> upstream/main
         url: this.buildUrl(model, stream),
         headers: this.buildHeaders(input.credentials, stream),
         transformedBody: body,
@@ -272,6 +481,7 @@ export class MimocodeExecutor extends BaseExecutor {
         const jwt = await this.getJwtForAccount(account, signal);
         const headers = this.buildHeaders(input.credentials, stream);
         headers["Authorization"] = `Bearer ${jwt}`;
+<<<<<<< HEAD
 
         let resp = await fetch(url, {
           method: "POST",
@@ -283,44 +493,125 @@ export class MimocodeExecutor extends BaseExecutor {
         // On auth failure, re-bootstrap this account and retry once
         if (resp.status === 401 || resp.status === 403) {
           log?.warn?.("MIMOCODE", `Auth failed (${resp.status}) on account ${account.fingerprint.slice(0, 8)}…`);
+=======
+        const proxy = account.proxy;
+
+        let resp = await runWithProxyContext(proxy, () =>
+          fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(reqBody),
+            signal: signal ?? undefined,
+          })
+        );
+
+        // On auth failure, re-bootstrap this account and retry once
+        if (resp.status === 401 || resp.status === 403) {
+          log?.warn?.(
+            "MIMOCODE",
+            `Auth failed (${resp.status}) on account ${account.fingerprint.slice(0, 8)}…`
+          );
+>>>>>>> upstream/main
           account.jwt = "";
           account.expiresAt = 0;
           account.consecutiveFails = 0;
           const freshJwt = await this.getJwtForAccount(account, signal);
           headers["Authorization"] = `Bearer ${freshJwt}`;
+<<<<<<< HEAD
           resp = await fetch(url, { method: "POST", headers, body: JSON.stringify(reqBody), signal: signal ?? undefined });
+=======
+          resp = await runWithProxyContext(proxy, () =>
+            fetch(url, {
+              method: "POST",
+              headers,
+              body: JSON.stringify(reqBody),
+              signal: signal ?? undefined,
+            })
+          );
+>>>>>>> upstream/main
         }
 
         if (resp.status === 429) {
           this.markCooldown(account);
+<<<<<<< HEAD
           log?.warn?.("MIMOCODE", `Rate limited on account ${account.fingerprint.slice(0, 8)}, trying next…`);
+=======
+          log?.warn?.(
+            "MIMOCODE",
+            `Rate limited on account ${account.fingerprint.slice(0, 8)}, trying next…`
+          );
+>>>>>>> upstream/main
           continue;
         }
 
         this.markSuccess(account);
         const respHeaders: Record<string, string> = {};
+<<<<<<< HEAD
         resp.headers.forEach((v, k) => { respHeaders[k] = v; });
         return { response: resp as unknown as Response, url, headers: respHeaders, transformedBody: reqBody };
+=======
+        resp.headers.forEach((v, k) => {
+          respHeaders[k] = v;
+        });
+        return {
+          response: resp as unknown as Response,
+          url,
+          headers: respHeaders,
+          transformedBody: reqBody,
+        };
+>>>>>>> upstream/main
       } catch (err) {
         this.markCooldown(account);
         if (attempt === this.accounts.length - 1) {
           const msg = err instanceof Error ? err.message : String(err);
           log?.error?.("MIMOCODE", `Executor error: ${msg}`);
           return {
+<<<<<<< HEAD
             response: new Response(encoder.encode(JSON.stringify({
               error: { message: msg, type: "upstream_error", code: "EXECUTOR_ERROR" },
             })), { status: 502, headers: { "Content-Type": "application/json" } }),
             url, headers: this.buildHeaders(input.credentials, stream), transformedBody: body,
+=======
+            response: new Response(
+              encoder.encode(
+                JSON.stringify({
+                  error: { message: msg, type: "upstream_error", code: "EXECUTOR_ERROR" },
+                })
+              ),
+              { status: 502, headers: { "Content-Type": "application/json" } }
+            ),
+            url,
+            headers: this.buildHeaders(input.credentials, stream),
+            transformedBody: body,
+>>>>>>> upstream/main
           };
         }
       }
     }
 
     return {
+<<<<<<< HEAD
       response: new Response(encoder.encode(JSON.stringify({
         error: { message: "All accounts exhausted", type: "upstream_error", code: "NO_ACCOUNTS" },
       })), { status: 502, headers: { "Content-Type": "application/json" } }),
       url, headers: this.buildHeaders(input.credentials, stream), transformedBody: body,
+=======
+      response: new Response(
+        encoder.encode(
+          JSON.stringify({
+            error: {
+              message: "All accounts exhausted",
+              type: "upstream_error",
+              code: "NO_ACCOUNTS",
+            },
+          })
+        ),
+        { status: 502, headers: { "Content-Type": "application/json" } }
+      ),
+      url,
+      headers: this.buildHeaders(input.credentials, stream),
+      transformedBody: body,
+>>>>>>> upstream/main
     };
   }
 }

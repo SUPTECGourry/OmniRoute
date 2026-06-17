@@ -21,7 +21,7 @@ import {
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import { startLocalServer } from "@/lib/oauth/utils/server";
-import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import { runWithProxyContextOrDirect } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import {
   jsonObjectSchema,
   oauthDeviceCompleteSchema,
@@ -129,7 +129,9 @@ export async function GET(
           error:
             `Browser OAuth disabled for ${earlyParams.provider} — use import-token via ` +
             `/api/oauth/${earlyParams.provider}/import-token. ` +
-            `Visit https://windsurf.com/show-auth-token to obtain a token.`,
+            `In the Windsurf/VS Code IDE, run the "Windsurf: Provide Auth Token" command ` +
+            `(or click the Jupyter "Get Windsurf Authentication Token" button), then copy+paste the shown token. ` +
+            `Opening https://windsurf.com/show-auth-token directly only shows a "Redirecting" page — the IDE must initiate the ?state=... flow.`,
         },
         { status: 410 }
       );
@@ -163,6 +165,19 @@ export async function GET(
           supported: false,
           error:
             "Qoder browser OAuth is experimental and disabled by default. Configure QODER_OAUTH_* environment variables or use a Personal Access Token.",
+        });
+      }
+      // #3861: GitLab Duo needs a self-registered OAuth app. Without a client_id,
+      // buildAuthUrl returns null — surface a clear setup message instead of a 500.
+      if (provider === "gitlab-duo" && !authData.authUrl) {
+        return NextResponse.json({
+          ...authData,
+          supported: false,
+          error:
+            "GitLab Duo OAuth is not configured. Register an OAuth application at " +
+            "https://gitlab.com/-/profile/applications with redirect URI " +
+            'http://localhost:20128/callback and scopes "ai_features read_user", then set ' +
+            "GITLAB_DUO_OAUTH_CLIENT_ID (and optionally GITLAB_DUO_OAUTH_CLIENT_SECRET) and restart.",
         });
       }
       return NextResponse.json(authData);
@@ -206,15 +221,17 @@ export async function GET(
             ssoOidcEndpoint: `https://oidc.${region}.amazonaws.com`,
           };
 
-          deviceData = await runWithProxyContext(proxy, () =>
+          deviceData = await runWithProxyContextOrDirect(proxy, () =>
             (requestDeviceCode as any)(provider, null, providerOverrideConfig)
           );
         } else {
-          deviceData = await runWithProxyContext(proxy, () => (requestDeviceCode as any)(provider));
+          deviceData = await runWithProxyContextOrDirect(proxy, () =>
+            (requestDeviceCode as any)(provider)
+          );
         }
       } else {
         // Qwen and other providers use PKCE
-        deviceData = await runWithProxyContext(proxy, () =>
+        deviceData = await runWithProxyContextOrDirect(proxy, () =>
           requestDeviceCode(provider, authData.codeChallenge)
         );
       }
@@ -357,7 +374,9 @@ export async function POST(
           error:
             `Browser OAuth disabled for ${earlyParams.provider} — use import-token via ` +
             `/api/oauth/${earlyParams.provider}/import-token. ` +
-            `Visit https://windsurf.com/show-auth-token to obtain a token.`,
+            `In the Windsurf/VS Code IDE, run the "Windsurf: Provide Auth Token" command ` +
+            `(or click the Jupyter "Get Windsurf Authentication Token" button), then copy+paste the shown token. ` +
+            `Opening https://windsurf.com/show-auth-token directly only shows a "Redirecting" page — the IDE must initiate the ?state=... flow.`,
         },
         { status: 410 }
       );
@@ -382,7 +401,9 @@ export async function POST(
           error:
             `Browser OAuth disabled for ${provider} — use import-token via ` +
             `/api/oauth/${provider}/import-token. ` +
-            `Visit https://windsurf.com/show-auth-token to obtain a token.`,
+            `In the Windsurf/VS Code IDE, run the "Windsurf: Provide Auth Token" command ` +
+            `(or click the Jupyter "Get Windsurf Authentication Token" button), then copy+paste the shown token. ` +
+            `Opening https://windsurf.com/show-auth-token directly only shows a "Redirecting" page — the IDE must initiate the ?state=... flow.`,
         },
         { status: 410 }
       );
@@ -464,7 +485,7 @@ export async function POST(
       const proxy = await resolveProxyForProvider(provider);
 
       // Exchange code for tokens (through proxy if configured)
-      const tokenData = await runWithProxyContext(proxy, () =>
+      const tokenData = await runWithProxyContextOrDirect(proxy, () =>
         exchangeTokens(provider, code, redirectUri, codeVerifier, normalizedState)
       );
 
@@ -537,12 +558,12 @@ export async function POST(
       let result;
       if (provider === "github" || provider === "kimi-coding" || provider === "kilocode") {
         // For providers that don't use PKCE (GitHub, Kimi Coding, KiloCode), don't pass codeVerifier
-        result = await runWithProxyContext(proxy, () =>
+        result = await runWithProxyContextOrDirect(proxy, () =>
           (pollForToken as any)(provider, deviceCode)
         );
       } else if (provider === "kiro" || provider === "amazon-q") {
         // Kiro needs extraData (clientId, clientSecret) from device code response
-        result = await runWithProxyContext(proxy, () =>
+        result = await runWithProxyContextOrDirect(proxy, () =>
           (pollForToken as any)(provider, deviceCode, null, extraData)
         );
       } else {
@@ -550,7 +571,7 @@ export async function POST(
         if (!codeVerifier) {
           return NextResponse.json({ error: "Missing code verifier" }, { status: 400 });
         }
-        result = await runWithProxyContext(proxy, () =>
+        result = await runWithProxyContextOrDirect(proxy, () =>
           (pollForToken as any)(provider, deviceCode, codeVerifier)
         );
       }
@@ -690,7 +711,7 @@ export async function POST(
         const proxy = await resolveProxyForProvider(provider);
 
         // Exchange code for tokens (through proxy if configured)
-        const tokenData = await runWithProxyContext(proxy, () =>
+        const tokenData = await runWithProxyContextOrDirect(proxy, () =>
           exchangeTokens(provider, params.code, redirectUri, codeVerifier, params.state)
         );
 

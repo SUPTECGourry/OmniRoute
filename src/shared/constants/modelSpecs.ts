@@ -77,6 +77,9 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
   "gemini-2.5-flash": {
     maxOutputTokens: 65536,
     contextWindow: 1048576,
+    // #3842: real Google max thinking budget for 2.5-flash is 24576; declaring the
+    // cap makes capThinkingBudget() actually clamp instead of passing values through.
+    thinkingBudgetCap: 24576,
     supportsThinking: false,
     supportsTools: true,
     supportsVision: true,
@@ -274,6 +277,18 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     aliases: ["kimi-k2.6-thinking", "kimi-for-coding"],
   },
 
+  // ── Kimi K2.7 Code (Moonshot — 262K native, parity with K2.6) ───
+  // #3761: importing this via Ollama Cloud's sparse /v1/models gave it no caps, so it
+  // fell back to the 128K/8K defaults and lost vision/thinking. Pin the real values.
+  "kimi-k2.7-code": {
+    maxOutputTokens: 262144,
+    contextWindow: 262144,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    aliases: ["kimi-k2.7", "kimi-k2.7-code-thinking"],
+  },
+
   // ── Kimi K2.5 (Moonshot — 262K native, parity with K2.6) ────────
   "kimi-k2.5": {
     maxOutputTokens: 262144,
@@ -336,6 +351,26 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
   "mimo-v2-flash": {
     maxOutputTokens: 65536,
     contextWindow: 262144,
+    supportsTools: true,
+  },
+
+  // ── Z.AI GLM-5.2 (1M context, 128K max output, effort tiers) ────
+  "glm-5.2": {
+    maxOutputTokens: 131072,
+    contextWindow: 1000000,
+    supportsThinking: true,
+    supportsTools: true,
+  },
+  "glm-5.2-high": {
+    maxOutputTokens: 131072,
+    contextWindow: 1000000,
+    supportsThinking: true,
+    supportsTools: true,
+  },
+  "glm-5.2-max": {
+    maxOutputTokens: 131072,
+    contextWindow: 1000000,
+    supportsThinking: true,
     supportsTools: true,
   },
 

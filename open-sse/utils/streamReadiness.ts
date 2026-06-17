@@ -71,38 +71,11 @@ function hasUsefulJsonPayload(payload: unknown): boolean {
   return hasUsefulValue(payload);
 }
 
-function hasOpenAIResponseLifecyclePayload(
-  payload: Record<string, unknown>,
-  type: string
-): boolean {
-  if (type === "response.created" || type === "response.in_progress") {
-    const response = payload.response;
-    if (!isRecord(response)) return false;
-
-    return (
-      hasNonEmptyString(response.id) ||
-      hasNonEmptyString(response.object) ||
-      hasNonEmptyString(response.status) ||
-      typeof response.created_at === "number"
-    );
-  }
-
-  if (type === "response.output_item.added") {
-    const item = payload.item;
-    if (!isRecord(item)) return false;
-
-    return (
-      hasNonEmptyString(item.id) ||
-      hasNonEmptyString(item.type) ||
-      hasNonEmptyString(item.status) ||
-      Array.isArray(item.content) ||
-      isRecord(item.content)
-    );
-  }
-
-  return false;
+function isPingEventType(type: string): boolean {
+  return /^(?:ping|keepalive|heartbeat)$/i.test(type);
 }
 
+<<<<<<< HEAD
 function hasChatCompletionToolCallStart(value: unknown): boolean {
   // Accept a tool_call item if it has a non-empty id (fully-formed chunk) OR if it
   // carries a numeric index (first OpenAI streaming chunk — id/name arrive in later
@@ -158,6 +131,20 @@ function hasAcceptedStreamStartPayload(payload: unknown, eventType = ""): boolea
   if (hasChatCompletionChunkStartPayload(payload)) return true;
 
   return false;
+=======
+function getPayloadType(payload: unknown, eventType = ""): string {
+  if (!isRecord(payload)) return eventType;
+  const type = payload.type ?? payload.event ?? payload.object;
+  return typeof type === "string" ? type : eventType;
+}
+
+function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean {
+  const type = getPayloadType(payload, eventType);
+  if (isPingEventType(eventType) || isPingEventType(type)) return false;
+  if (Array.isArray(payload)) return payload.length > 0;
+  if (isRecord(payload)) return Object.keys(payload).length > 0;
+  return payload !== null && payload !== undefined;
+>>>>>>> upstream/main
 }
 
 export function hasUsefulStreamContent(text: string): boolean {
@@ -184,13 +171,33 @@ export function hasUsefulStreamContent(text: string): boolean {
 
 type StreamReadinessSignalState = {
   currentEvent: string;
+  dataLines: string[];
   pendingLine: string;
 };
+
+function resetCurrentEvent(state: StreamReadinessSignalState): void {
+  state.currentEvent = "";
+  state.dataLines = [];
+}
+
+function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean {
+  const eventType = state.currentEvent;
+  const data = state.dataLines.join("\n").trim();
+  resetCurrentEvent(state);
+
+  if (isPingEventType(eventType) || !data || data === "[DONE]") return false;
+
+  try {
+    return hasNonPingStructuredPayload(JSON.parse(data), eventType);
+  } catch {
+    return data.length > 0;
+  }
+}
 
 function processStreamReadinessLine(state: StreamReadinessSignalState, line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed || trimmed.startsWith(":")) {
-    if (!trimmed) state.currentEvent = "";
+    if (!trimmed) return processStreamReadinessEvent(state);
     return false;
   }
 
@@ -199,20 +206,10 @@ function processStreamReadinessLine(state: StreamReadinessSignalState, line: str
     return false;
   }
 
-  if (/^(?:ping|keepalive)$/i.test(state.currentEvent)) return false;
-  if (!trimmed.startsWith("data:")) return false;
-
-  const data = trimmed.slice(5).trim();
-  if (!data || data === "[DONE]") return false;
-
-  try {
-    const parsed = JSON.parse(data);
-    return (
-      hasUsefulJsonPayload(parsed) || hasAcceptedStreamStartPayload(parsed, state.currentEvent)
-    );
-  } catch {
-    return data.length > 0;
+  if (trimmed.startsWith("data:")) {
+    state.dataLines.push(trimmed.slice(5).trimStart());
   }
+  return false;
 }
 
 function appendStreamReadinessSignal(state: StreamReadinessSignalState, chunk: string): boolean {
@@ -226,14 +223,20 @@ function appendStreamReadinessSignal(state: StreamReadinessSignalState, chunk: s
   return false;
 }
 
+function finishStreamReadinessSignal(state: StreamReadinessSignalState): boolean {
+  if (state.pendingLine && processStreamReadinessLine(state, state.pendingLine)) return true;
+  state.pendingLine = "";
+  return processStreamReadinessEvent(state);
+}
+
 export function hasStreamReadinessSignal(text: string): boolean {
   const state: StreamReadinessSignalState = {
     currentEvent: "",
+    dataLines: [],
     pendingLine: "",
   };
   if (appendStreamReadinessSignal(state, text)) return true;
-  if (state.pendingLine) return processStreamReadinessLine(state, state.pendingLine);
-  return false;
+  return finishStreamReadinessSignal(state);
 }
 
 function createErrorResponse(
@@ -320,17 +323,29 @@ export async function ensureStreamReadiness(
   const decoder = new TextDecoder();
   const readinessState: StreamReadinessSignalState = {
     currentEvent: "",
+    dataLines: [],
     pendingLine: "",
   };
   const startedAt = Date.now();
-  const deadline = startedAt + options.timeoutMs;
+  const effectiveTimeoutMs = Math.max(0, Math.floor(options.timeoutMs));
+  const deadline = startedAt + effectiveTimeoutMs;
   let handedOffReader = false;
+
+  const buildReadyResponse = () =>
+    new Response(prependBufferedChunks(chunks, reader), {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+
+  const timeoutReason = () =>
+    `Stream produced no non-ping SSE event within ${effectiveTimeoutMs}ms`;
 
   try {
     while (true) {
       const remainingMs = deadline - Date.now();
       if (remainingMs <= 0) {
-        const reason = `Stream produced no useful content within ${options.timeoutMs}ms`;
+        const reason = timeoutReason();
         options.log?.warn?.(
           "STREAM",
           `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
@@ -354,7 +369,7 @@ export async function ensureStreamReadiness(
       try {
         readResult = await readWithTimeout(reader, remainingMs);
       } catch {
-        const reason = `Stream produced no useful content within ${options.timeoutMs}ms`;
+        const reason = timeoutReason();
         options.log?.warn?.(
           "STREAM",
           `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
@@ -375,7 +390,17 @@ export async function ensureStreamReadiness(
       }
 
       if (readResult.done) {
-        const reason = "Stream ended before producing useful content";
+        const tail = decoder.decode(undefined, { stream: false });
+        if (tail && appendStreamReadinessSignal(readinessState, tail)) {
+          handedOffReader = true;
+          return { ok: true, response: buildReadyResponse() };
+        }
+        if (finishStreamReadinessSignal(readinessState)) {
+          handedOffReader = true;
+          return { ok: true, response: buildReadyResponse() };
+        }
+
+        const reason = "Stream ended before producing a non-ping SSE event";
         options.log?.warn?.(
           "STREAM",
           `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`
@@ -406,11 +431,7 @@ export async function ensureStreamReadiness(
         handedOffReader = true;
         return {
           ok: true,
-          response: new Response(prependBufferedChunks(chunks, reader), {
-            status: response.status,
-            statusText: response.statusText,
-            headers: response.headers,
-          }),
+          response: buildReadyResponse(),
         };
       }
     }

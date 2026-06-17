@@ -87,11 +87,36 @@ describe("conn-modals (Phase 1c extraction)", () => {
     expect(c.querySelector("*")).not.toBeNull();
   });
 
+<<<<<<< HEAD
   it("AddApiKeyModal returns null when provider is falsy", () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const c = renderModal(
       <AddApiKeyModal isOpen={true} onSave={onSave} onClose={vi.fn()} />
     );
+=======
+  it("AddApiKeyModal renders OpenRouter preset outside advanced settings", () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const c = renderModal(
+      <AddApiKeyModal
+        isOpen={true}
+        provider="openrouter"
+        providerName="OpenRouter"
+        isCompatible={true}
+        onSave={onSave}
+        onClose={vi.fn()}
+      />
+    );
+    const presetInput = c.querySelector<HTMLInputElement>(
+      '[data-testid="openrouter-preset-input"]'
+    );
+    expect(presetInput?.placeholder).toBe("@preset/slug");
+    expect(presetInput?.closest("#add-api-key-advanced-settings")).toBeNull();
+  });
+
+  it("AddApiKeyModal returns null when provider is falsy", () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const c = renderModal(<AddApiKeyModal isOpen={true} onSave={onSave} onClose={vi.fn()} />);
+>>>>>>> upstream/main
     // No provider → renders null
     expect(c.textContent).toBe("");
   });
@@ -102,6 +127,10 @@ describe("conn-modals (Phase 1c extraction)", () => {
       <EditConnectionModal
         isOpen={false}
         connection={null}
+<<<<<<< HEAD
+=======
+        providerId="openai"
+>>>>>>> upstream/main
         onSave={onSave}
         onClose={vi.fn()}
       />
@@ -123,6 +152,10 @@ describe("conn-modals (Phase 1c extraction)", () => {
       <EditConnectionModal
         isOpen={true}
         connection={connection}
+<<<<<<< HEAD
+=======
+        providerId="openai"
+>>>>>>> upstream/main
         onSave={onSave}
         onClose={vi.fn()}
       />
@@ -130,6 +163,35 @@ describe("conn-modals (Phase 1c extraction)", () => {
     expect(c.querySelector("*")).not.toBeNull();
   });
 
+<<<<<<< HEAD
+=======
+  it("EditConnectionModal renders OpenRouter preset when provider comes from the page", () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const connection = {
+      id: "conn-openrouter",
+      name: "OpenRouter",
+      authType: "apikey",
+      priority: 1,
+      providerSpecificData: { preset: "prefer" },
+    };
+    const c = renderModal(
+      <EditConnectionModal
+        isOpen={true}
+        connection={connection}
+        providerId="openrouter"
+        onSave={onSave}
+        onClose={vi.fn()}
+      />
+    );
+    const presetInput = c.querySelector<HTMLInputElement>(
+      '[data-testid="openrouter-preset-input"]'
+    );
+    expect(presetInput?.value).toBe("prefer");
+    expect(presetInput?.placeholder).toBe("@preset/slug");
+    expect(presetInput?.closest("#edit-connection-advanced-settings")).toBeNull();
+  });
+
+>>>>>>> upstream/main
   it("EditConnectionModal renders without ReferenceError for oauth connection", () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const connection = {
@@ -146,6 +208,10 @@ describe("conn-modals (Phase 1c extraction)", () => {
         <EditConnectionModal
           isOpen={true}
           connection={connection}
+<<<<<<< HEAD
+=======
+          providerId="claude"
+>>>>>>> upstream/main
           onSave={onSave}
           onClose={vi.fn()}
         />

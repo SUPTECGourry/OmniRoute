@@ -48,6 +48,7 @@ type RequestLoggerOptions = {
   captureStreamChunks?: boolean;
   maxStreamChunkBytes?: number;
   maxStreamChunkItems?: number;
+  requestId?: string | null;
   model?: string;
   provider?: string;
   connectionId?: string | null;
@@ -238,16 +239,35 @@ function makeStreamChunkMethods(options: RequestLoggerOptions, captureChunks: bo
 
   const push = () => {
     if (pendingPushed) return;
-    if (!options.connectionId || !options.model) return;
+    if (!options.requestId && (!options.connectionId || !options.model)) return;
     pendingPushed = true;
     try {
       const pending = getPendingById();
+<<<<<<< HEAD
       for (const entry of pending.values()) {
         if (entry?.model === options.model && entry.provider === (options.provider || "")) {
           entry.streamChunks = { ...streamChunks };
           return;
         }
       }
+=======
+      const exactEntry = options.requestId ? pending.get(options.requestId) : null;
+      if (exactEntry) {
+        exactEntry.streamChunks = { ...streamChunks };
+        return;
+      }
+
+      for (const entry of pending.values()) {
+        if (
+          entry?.connectionId === options.connectionId &&
+          entry?.model === options.model &&
+          entry?.provider === (options.provider || "")
+        ) {
+          entry.streamChunks = { ...streamChunks };
+          return;
+        }
+      }
+>>>>>>> upstream/main
     } catch (e) {
       // Do not allow logging failures to disrupt request handling
       try {

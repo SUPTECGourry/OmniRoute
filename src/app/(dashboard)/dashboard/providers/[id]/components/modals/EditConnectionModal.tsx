@@ -1,8 +1,11 @@
 "use client";
 
+<<<<<<< HEAD
 // Issue #3501 Phase 1c — extracted from the god-component.
 // ~1091-LOC modal for editing an existing provider connection.
 
+=======
+>>>>>>> upstream/main
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Badge, Input, Modal, Toggle, Select } from "@/shared/components";
@@ -48,7 +51,14 @@ import {
   formatTimeAgo,
 } from "../../providerPageHelpers";
 import { getWebSessionCredentialRequirement } from "../../webSessionCredentials";
+<<<<<<< HEAD
 import WebSessionCredentialGuide from "../WebSessionCredentialGuide";
+=======
+import { useOpenRouterPresetControl } from "../OpenRouterPresetInput";
+import WebSessionCredentialGuide from "../WebSessionCredentialGuide";
+import CcCompatibleRequestDefaultsFields from "./CcCompatibleRequestDefaultsFields";
+import { mergeCcCompatibleRequestDefaults } from "./ccCompatibleRequestDefaults";
+>>>>>>> upstream/main
 
 export interface EditConnectionModalConnection {
   id?: string;
@@ -68,18 +78,35 @@ export interface EditConnectionModalConnection {
 export interface EditConnectionModalProps {
   isOpen: boolean;
   connection: EditConnectionModalConnection | null;
+<<<<<<< HEAD
+=======
+  providerId: string;
+>>>>>>> upstream/main
   onSave: (data: unknown) => Promise<void | unknown>;
   onClose: () => void;
 }
 
+<<<<<<< HEAD
 export default function EditConnectionModal({
   isOpen,
   connection,
+=======
+const stringField = (value: unknown) => (typeof value === "string" ? value : "");
+
+export default function EditConnectionModal({
+  isOpen,
+  connection,
+  providerId,
+>>>>>>> upstream/main
   onSave,
   onClose,
 }: EditConnectionModalProps) {
   const t = useTranslations("providers");
   const notify = useNotificationStore();
+<<<<<<< HEAD
+=======
+  const provider = connection?.provider || providerId;
+>>>>>>> upstream/main
   const [formData, setFormData] = useState({
     name: "",
     priority: 1,
@@ -106,6 +133,7 @@ export default function EditConnectionModal({
     codexOpenaiStoreEnabled: false,
     consoleApiKey: "",
     ccCompatibleContext1m: false,
+<<<<<<< HEAD
     cloudCodeProjectId: "",
     antigravityClientProfile: "ide",
     blockExtraUsage:
@@ -113,6 +141,17 @@ export default function EditConnectionModal({
         ? isClaudeExtraUsageBlockEnabled(connection?.provider, connection?.providerSpecificData)
         : false,
     passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
+=======
+    ccCompatibleRedactThinking: false,
+    cloudCodeProjectId: "",
+    antigravityClientProfile: "ide",
+    blockExtraUsage:
+      provider === "claude"
+        ? isClaudeExtraUsageBlockEnabled(provider, connection?.providerSpecificData)
+        : false,
+    passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
+    disableCooling: connection?.providerSpecificData?.disableCooling === true,
+>>>>>>> upstream/main
   });
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
@@ -135,6 +174,7 @@ export default function EditConnectionModal({
     >
   >({});
   const [showAdvanced, setShowAdvanced] = useState(false);
+<<<<<<< HEAD
   const { emailsVisible: showEmail, toggleEmailVisibility: toggleShowEmail } =
     useEmailPrivacyStore();
 
@@ -163,6 +203,40 @@ export default function EditConnectionModal({
   const apiKeyOptional =
     providerAllowsOptionalApiKey(connection?.provider) || Boolean(isNoAuthWebSessionCredential);
   const isCcCompatible = isClaudeCodeCompatibleProvider(connection?.provider);
+=======
+  const showEmail = useEmailPrivacyStore((state) => state.emailsVisible);
+
+  const usesBaseUrl = isBaseUrlConfigurableProvider(provider);
+  const defaultBaseUrl = getProviderBaseUrlDefault(provider);
+  const isVertex = provider === "vertex" || provider === "vertex-partner";
+  const isBedrock = provider === "bedrock";
+  const showsRegion = isVertex || isBedrock;
+  const isGlm = isGlmProvider(provider);
+  const isCloudflare = provider === "cloudflare-ai";
+  const openRouterPreset = useOpenRouterPresetControl(provider, t);
+  const setOpenRouterPreset = openRouterPreset.setValue;
+  const isCodex = provider === "codex";
+  const isClaude = provider === "claude";
+  const isGeminiCli = provider === "gemini-cli";
+  const isAntigravity = provider === "antigravity";
+  const supportsGoogleProjectId = isGeminiCli || isAntigravity;
+  const localProviderMetadata = getLocalProviderMetadata(provider);
+  const isLocalSelfHostedProvider = !!localProviderMetadata;
+  const isGooglePse = provider === "google-pse-search";
+  const webSessionCredential = getWebSessionCredentialRequirement(provider);
+  const isNoAuthWebSessionCredential = webSessionCredential?.kind === "none";
+  const isWebSessionCredential = !!webSessionCredential && webSessionCredential.kind !== "none";
+  const providerDisplayName =
+    (provider ? resolveDashboardProviderInfo(provider)?.name : null) ||
+    localProviderMetadata?.name ||
+    provider ||
+    "";
+  const apiKeyOptional =
+    providerAllowsOptionalApiKey(provider) || Boolean(isNoAuthWebSessionCredential);
+  const isCcCompatible = isClaudeCodeCompatibleProvider(provider);
+  const isCompatible =
+    isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider);
+>>>>>>> upstream/main
   const defaultRegion = isBedrock ? "eu-west-2" : "us-central1";
   const apiCredentialLabel = webSessionCredential
     ? getWebSessionCredentialLabel(t, webSessionCredential, apiKeyOptional)
@@ -178,7 +252,11 @@ export default function EditConnectionModal({
     ? getWebSessionCredentialHint(t, webSessionCredential, providerDisplayName, true)
     : isLocalSelfHostedProvider
       ? t("localProviderApiKeyOptionalHint", {
+<<<<<<< HEAD
           provider: localProviderMetadata?.name || connection?.provider || "",
+=======
+          provider: localProviderMetadata?.name || provider || "",
+>>>>>>> upstream/main
         })
       : apiKeyOptional
         ? t("apiKeyOptionalHint")
@@ -194,6 +272,7 @@ export default function EditConnectionModal({
 
   useEffect(() => {
     if (isOpen && connection) {
+<<<<<<< HEAD
       const rawBaseUrl = connection.providerSpecificData?.baseUrl;
       const existingBaseUrl = typeof rawBaseUrl === "string" ? rawBaseUrl : "";
       const rawRegion = connection.providerSpecificData?.region;
@@ -205,12 +284,25 @@ export default function EditConnectionModal({
       const existingCx = typeof rawCx === "string" ? rawCx : "";
       const rawAccountId = connection.providerSpecificData?.accountId;
       const existingAccountId = typeof rawAccountId === "string" ? rawAccountId : "";
+=======
+      const effectiveProvider = connection.provider || providerId;
+      const existingBaseUrl = stringField(connection.providerSpecificData?.baseUrl);
+      const existingRegion = stringField(connection.providerSpecificData?.region);
+      const existingCustomUserAgent = stringField(connection.providerSpecificData?.customUserAgent);
+      const existingOpenRouterPreset = stringField(connection.providerSpecificData?.preset);
+      const existingCx = stringField(connection.providerSpecificData?.cx);
+      const existingAccountId = stringField(connection.providerSpecificData?.accountId);
+>>>>>>> upstream/main
       const codexRequestDefaults = getCodexRequestDefaults(connection.providerSpecificData);
       const ccRequestDefaults = getClaudeCodeCompatibleRequestDefaults(
         connection.providerSpecificData
       );
+<<<<<<< HEAD
       const rawConsoleApiKey = connection.providerSpecificData?.consoleApiKey;
       const existingConsoleApiKey = typeof rawConsoleApiKey === "string" ? rawConsoleApiKey : "";
+=======
+      const existingConsoleApiKey = stringField(connection.providerSpecificData?.consoleApiKey);
+>>>>>>> upstream/main
       setFormData({
         name: connection.name || "",
         priority: connection.priority || 1,
@@ -258,12 +350,17 @@ export default function EditConnectionModal({
         codexOpenaiStoreEnabled: connection.providerSpecificData?.openaiStoreEnabled === true,
         consoleApiKey: existingConsoleApiKey,
         ccCompatibleContext1m: ccRequestDefaults.context1m,
+<<<<<<< HEAD
+=======
+        ccCompatibleRedactThinking: ccRequestDefaults.redactThinking,
+>>>>>>> upstream/main
         cloudCodeProjectId:
           (connection.providerSpecificData?.projectId as string) || connection.projectId || "",
         antigravityClientProfile: normalizeAntigravityClientProfileSetting(
           connection.providerSpecificData?.clientProfile
         ),
         blockExtraUsage: isClaudeExtraUsageBlockEnabled(
+<<<<<<< HEAD
           connection.provider,
           connection.providerSpecificData
         ),
@@ -273,6 +370,16 @@ export default function EditConnectionModal({
       const existing = connection.providerSpecificData?.extraApiKeys;
       setExtraApiKeys(Array.isArray(existing) ? existing : []);
       // Load API key health status
+=======
+          effectiveProvider,
+          connection.providerSpecificData
+        ),
+        passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
+        disableCooling: connection?.providerSpecificData?.disableCooling === true,
+      });
+      const existing = connection.providerSpecificData?.extraApiKeys;
+      setExtraApiKeys(Array.isArray(existing) ? existing : []);
+>>>>>>> upstream/main
       const health = connection.providerSpecificData?.apiKeyHealth as
         | Record<
             string,
@@ -287,16 +394,36 @@ export default function EditConnectionModal({
         | undefined;
       setApiKeyHealth(health || {});
       setNewExtraKey("");
+<<<<<<< HEAD
       setShowAdvanced(!!existingCustomUserAgent);
       // email visibility controlled by global store
+=======
+      setOpenRouterPreset(existingOpenRouterPreset);
+      setShowAdvanced(!!existingCustomUserAgent);
+>>>>>>> upstream/main
       setTestResult(null);
       setValidationResult(null);
       setSaveError(null);
     }
+<<<<<<< HEAD
   }, [isOpen, connection, defaultBaseUrl, showsRegion, defaultRegion]);
 
   const handleTest = async () => {
     if (!connection?.provider) return;
+=======
+  }, [
+    isOpen,
+    connection,
+    providerId,
+    defaultBaseUrl,
+    showsRegion,
+    defaultRegion,
+    setOpenRouterPreset,
+  ]);
+
+  const handleTest = async () => {
+    if (!provider) return;
+>>>>>>> upstream/main
     setTesting(true);
     setTestResult(null);
     try {
@@ -326,7 +453,11 @@ export default function EditConnectionModal({
 
   const handleValidate = async () => {
     if (
+<<<<<<< HEAD
       !connection?.provider ||
+=======
+      !provider ||
+>>>>>>> upstream/main
       isNoAuthWebSessionCredential ||
       (!isCompatible && !apiKeyOptional && !formData.apiKey)
     ) {
@@ -339,7 +470,11 @@ export default function EditConnectionModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+<<<<<<< HEAD
           provider: connection.provider,
+=======
+          provider,
+>>>>>>> upstream/main
           apiKey: formData.apiKey,
           validationModelId: formData.validationModelId || undefined,
           customUserAgent: formData.customUserAgent.trim() || undefined,
@@ -391,7 +526,10 @@ export default function EditConnectionModal({
         healthCheckInterval: formData.healthCheckInterval,
       };
 
+<<<<<<< HEAD
       // Build rateLimitOverrides from non-empty fields
+=======
+>>>>>>> upstream/main
       const overrides: Record<string, number> = {};
       if (formData.rpm.trim()) overrides.rpm = Number(formData.rpm);
       if (formData.tpm.trim()) overrides.tpm = Number(formData.tpm);
@@ -431,7 +569,11 @@ export default function EditConnectionModal({
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
+<<<<<<< HEAD
                 provider: connection.provider,
+=======
+                provider,
+>>>>>>> upstream/main
                 apiKey: formData.apiKey,
                 validationModelId: formData.validationModelId || undefined,
                 customUserAgent: formData.customUserAgent.trim() || undefined,
@@ -459,7 +601,10 @@ export default function EditConnectionModal({
           updates.rateLimitedUntil = null;
         }
       }
+<<<<<<< HEAD
       // Persist extra API keys and baseUrl in providerSpecificData
+=======
+>>>>>>> upstream/main
       if (!isOAuth) {
         updates.providerSpecificData = {
           ...(connection.providerSpecificData || {}),
@@ -468,10 +613,17 @@ export default function EditConnectionModal({
           tags: parseRoutingTagsInput(formData.routingTags),
           excludedModels: parseExcludedModelsInput(formData.excludedModels),
           customUserAgent: formData.customUserAgent.trim(),
+<<<<<<< HEAD
           // Only write when explicitly enabled; omit to let registry default take effect
           ...(formData.passthroughModels ? { passthroughModels: true } : {}),
         };
         if (connection.provider === "bailian-coding-plan") {
+=======
+          ...openRouterPreset.getPatch(),
+          ...(formData.passthroughModels ? { passthroughModels: true } : {}),
+        };
+        if (provider === "bailian-coding-plan") {
+>>>>>>> upstream/main
           if (formData.consoleApiKey.trim()) {
             updates.providerSpecificData.consoleApiKey = formData.consoleApiKey.trim();
           } else {
@@ -497,6 +649,7 @@ export default function EditConnectionModal({
           updates.providerSpecificData.projectId = trimmedCloudCodeProjectId || null;
         }
         if (isCcCompatible) {
+<<<<<<< HEAD
           const currentRequestDefaults =
             updates.providerSpecificData.requestDefaults &&
             typeof updates.providerSpecificData.requestDefaults === "object" &&
@@ -513,6 +666,14 @@ export default function EditConnectionModal({
         }
       } else {
         // Also persist tag for OAuth accounts
+=======
+          updates.providerSpecificData.requestDefaults = mergeCcCompatibleRequestDefaults(
+            updates.providerSpecificData.requestDefaults,
+            formData
+          );
+        }
+      } else {
+>>>>>>> upstream/main
         updates.providerSpecificData = {
           ...(connection.providerSpecificData || {}),
           tag: formData.tag.trim() || undefined,
@@ -545,6 +706,12 @@ export default function EditConnectionModal({
           ),
         };
       }
+<<<<<<< HEAD
+=======
+      if (updates.providerSpecificData) {
+        updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
+      }
+>>>>>>> upstream/main
       const error = (await onSave(updates)) as void | unknown;
       if (error) {
         setSaveError(typeof error === "string" ? error : t("failedSaveConnection"));
@@ -557,9 +724,12 @@ export default function EditConnectionModal({
   if (!connection) return null;
 
   const isOAuth = connection.authType === "oauth";
+<<<<<<< HEAD
   const isCompatible =
     isOpenAICompatibleProvider(connection.provider) ||
     isAnthropicCompatibleProvider(connection.provider);
+=======
+>>>>>>> upstream/main
   const testErrorMeta =
     !testResult?.valid && testResult?.diagnosis?.type
       ? ERROR_TYPE_LABELS[testResult.diagnosis.type] || null
@@ -638,6 +808,7 @@ export default function EditConnectionModal({
             />
           </div>
         )}
+<<<<<<< HEAD
         {isCcCompatible && (
           <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
             <Toggle
@@ -648,6 +819,33 @@ export default function EditConnectionModal({
             />
           </div>
         )}
+=======
+        {(isCcCompatible || openRouterPreset.input) && (
+          <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
+            {isCcCompatible && (
+              <CcCompatibleRequestDefaultsFields
+                context1m={formData.ccCompatibleContext1m}
+                redactThinking={formData.ccCompatibleRedactThinking}
+                onContext1mChange={(checked) =>
+                  setFormData({ ...formData, ccCompatibleContext1m: checked })
+                }
+                onRedactThinkingChange={(checked) =>
+                  setFormData({ ...formData, ccCompatibleRedactThinking: checked })
+                }
+              />
+            )}
+            {openRouterPreset.input}
+          </div>
+        )}
+        <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
+          <Toggle
+            checked={formData.disableCooling}
+            onChange={(checked) => setFormData({ ...formData, disableCooling: checked })}
+            label={t("disableCoolingLabel")}
+            description={t("disableCoolingDescription")}
+          />
+        </div>
+>>>>>>> upstream/main
         {supportsGoogleProjectId && (
           <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
             {isAntigravity && (
@@ -681,6 +879,7 @@ export default function EditConnectionModal({
         {isOAuth && connection.email && (
           <div className="bg-sidebar/50 p-3 rounded-lg">
             <p className="text-sm text-text-muted mb-1">{t("email")}</p>
+<<<<<<< HEAD
             <div className="flex items-center gap-2">
               <p className="font-medium" title={showEmail ? connection.email : undefined}>
                 {showEmail ? connection.email : maskEmail(connection.email)}
@@ -696,6 +895,11 @@ export default function EditConnectionModal({
                 </span>
               </button>
             </div>
+=======
+            <p className="font-medium" title={showEmail ? connection.email : undefined}>
+              {showEmail ? connection.email : maskEmail(connection.email)}
+            </p>
+>>>>>>> upstream/main
           </div>
         )}
         {isOAuth && (
@@ -835,7 +1039,11 @@ export default function EditConnectionModal({
                   label={t("perModelQuotaLabel")}
                   description={t("perModelQuotaDescription")}
                 />
+<<<<<<< HEAD
                 {connection.provider === "bailian-coding-plan" && (
+=======
+                {provider === "bailian-coding-plan" && (
+>>>>>>> upstream/main
                   <Input
                     label={t("consoleApiKeyOracleLabel")}
                     value={formData.consoleApiKey}
@@ -916,8 +1124,13 @@ export default function EditConnectionModal({
             label={t("baseUrlLabel")}
             value={formData.baseUrl}
             onChange={(e) => setFormData({ ...formData, baseUrl: e.target.value })}
+<<<<<<< HEAD
             placeholder={getProviderBaseUrlPlaceholder(connection.provider)}
             hint={getProviderBaseUrlHint(connection.provider, t)}
+=======
+            placeholder={getProviderBaseUrlPlaceholder(provider)}
+            hint={getProviderBaseUrlHint(provider, t)}
+>>>>>>> upstream/main
           />
         )}
 
@@ -958,12 +1171,18 @@ export default function EditConnectionModal({
           </div>
         )}
 
+<<<<<<< HEAD
         {/* T07: API Key Health Status */}
+=======
+>>>>>>> upstream/main
         {!isOAuth && connection?.apiKey && (
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-text-main">{t("apiKeyHealthLabel")}</label>
             <div className="flex flex-col gap-1.5">
+<<<<<<< HEAD
               {/* Primary Key Health */}
+=======
+>>>>>>> upstream/main
               {(() => {
                 const keyId = "primary";
                 const health = apiKeyHealth[keyId];
@@ -1009,7 +1228,10 @@ export default function EditConnectionModal({
           </div>
         )}
 
+<<<<<<< HEAD
         {/* T07: Extra API Keys for round-robin rotation */}
+=======
+>>>>>>> upstream/main
         {!isOAuth && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
@@ -1133,7 +1355,10 @@ export default function EditConnectionModal({
           </div>
         )}
 
+<<<<<<< HEAD
         {/* Test Connection */}
+=======
+>>>>>>> upstream/main
         {!isCompatible && (
           <div className="flex items-center gap-3">
             <Button onClick={handleTest} variant="secondary" disabled={testing}>

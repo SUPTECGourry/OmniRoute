@@ -1,15 +1,13 @@
 /**
  * Provider Registry — Single source of truth for all provider configuration.
- *
- * Adding a new provider? Just add an entry here. Everything else
- * (PROVIDERS, PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS, executor lookup)
- * is auto-generated from this registry.
+ * Modularized into `open-sse/config/providers/`
  */
 
-import { ANTIGRAVITY_BASE_URLS } from "./antigravityUpstream.ts";
-import { ANTIGRAVITY_PUBLIC_MODELS } from "./antigravityModelAliases.ts";
-import { AGY_PUBLIC_MODELS } from "./agyModels.ts";
+export * from "./providers/shared.ts";
+export { REGISTRY } from "./providers/index.ts";
+import { REGISTRY } from "./providers/index.ts";
 import {
+<<<<<<< HEAD
   ANTHROPIC_BETA_API_KEY,
   ANTHROPIC_BETA_CLAUDE_OAUTH,
   ANTHROPIC_VERSION_HEADER,
@@ -4480,13 +4478,30 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
 };
 
 export const REGISTRY: Record<string, RegistryEntry> = _REGISTRY_EAGER;
+=======
+  RegistryModel,
+  REASONING_UNSUPPORTED,
+  RegistryOAuth,
+  RegistryEntry,
+  LegacyProvider,
+  KIMI_CODING_SHARED,
+  buildModels,
+  ALIBABA_DASHSCOPE_MODELS,
+  GPT_5_5_CONTEXT_LENGTH,
+  GPT_5_5_CODEX_CAPABILITIES,
+  GPT_5_4_CODEX_CAPABILITIES,
+  CHAT_OPENAI_COMPAT_MODELS,
+  mapStainlessOs,
+  mapStainlessArch,
+} from "./providers/shared.ts";
+>>>>>>> upstream/main
 
 // ── Generator Functions ───────────────────────────────────────────────────
 
 /** Generate legacy PROVIDERS object shape for constants.js backward compatibility */
 export function generateLegacyProviders(): Record<string, LegacyProvider> {
   const providers: Record<string, LegacyProvider> = {};
-  for (const [id, entry] of Object.entries(_REGISTRY_EAGER)) {
+  for (const [id, entry] of Object.entries(REGISTRY)) {
     const p: LegacyProvider = { format: entry.format };
 
     // URL(s)
@@ -4540,7 +4555,7 @@ export function generateLegacyProviders(): Record<string, LegacyProvider> {
 /** Generate PROVIDER_MODELS map (alias → model list) */
 export function generateModels(): Record<string, RegistryModel[]> {
   const models: Record<string, RegistryModel[]> = {};
-  for (const entry of Object.values(_REGISTRY_EAGER)) {
+  for (const entry of Object.values(REGISTRY)) {
     if (entry.models && entry.models.length > 0) {
       const key = entry.alias || entry.id;
       // If alias already exists, don't overwrite (first wins)
@@ -4555,7 +4570,7 @@ export function generateModels(): Record<string, RegistryModel[]> {
 /** Generate PROVIDER_ID_TO_ALIAS map */
 export function generateAliasMap(): Record<string, string> {
   const map: Record<string, string> = {};
-  for (const entry of Object.values(_REGISTRY_EAGER)) {
+  for (const entry of Object.values(REGISTRY)) {
     map[entry.id] = entry.alias || entry.id;
   }
   return map;
@@ -4602,7 +4617,7 @@ function ensurePassthroughProviderIds(): Set<string> {
   if (_passthroughProviderIds) return _passthroughProviderIds;
   try {
     const ids = new Set<string>();
-    for (const entry of Object.values(_REGISTRY_EAGER)) {
+    for (const entry of Object.values(REGISTRY)) {
       if (entry.passthroughModels) ids.add(entry.id);
     }
     _passthroughProviderIds = ids;
@@ -4622,7 +4637,7 @@ let _byAliasPopulated = false;
 function ensureByAliasPopulated(): void {
   if (_byAliasPopulated) return;
   _byAliasPopulated = true;
-  for (const entry of Object.values(_REGISTRY_EAGER)) {
+  for (const entry of Object.values(REGISTRY)) {
     if (entry.alias && entry.alias !== entry.id) {
       _byAlias.set(entry.alias, entry);
     }
@@ -4646,8 +4661,9 @@ let _unsupportedParamsPopulated = false;
 function ensureUnsupportedParamsPopulated(): void {
   if (_unsupportedParamsPopulated) return;
   _unsupportedParamsPopulated = true;
-  for (const entry of Object.values(_REGISTRY_EAGER)) {
-    for (const model of entry.models) {
+  for (const entry of Object.values(REGISTRY)) {
+    // Some entries (e.g. the `mimocode` proxy) legitimately have no model catalogue.
+    for (const model of entry.models ?? []) {
       if (model.unsupportedParams && !_unsupportedParamsMap.has(model.id)) {
         _unsupportedParamsMap.set(model.id, model.unsupportedParams);
       }
@@ -4665,7 +4681,7 @@ export function getUnsupportedParams(provider: string, modelId: string): readonl
   ensureUnsupportedParamsPopulated();
   // 1. Check current provider's registry (exact match)
   const entry = getRegistryEntry(provider);
-  const modelEntry = entry?.models.find((m) => m.id === modelId);
+  const modelEntry = entry?.models?.find((m) => m.id === modelId);
   if (modelEntry?.unsupportedParams) return modelEntry.unsupportedParams;
 
   // 2. O(1) lookup in precomputed map (handles cross-provider routing)

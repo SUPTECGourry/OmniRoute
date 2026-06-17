@@ -130,6 +130,12 @@ omniroute
 
 **Fix (v3.5.5+):** OmniRoute now uses undici's own `fetch()` function when a proxy dispatcher is active, ensuring consistent behavior. Update to v3.5.5+.
 
+### MITM proxy under WSL: desktop apps on the Windows host are not intercepted
+
+**Cause:** The MITM proxy and its CA certificate install into the environment where OmniRoute runs. Under WSL that environment is the Linux guest, while the AI desktop apps (Kiro, Trae, Copilot, Zed, …) run on the Windows host. The host apps do not trust the guest's certificate store and do not route through the guest's system proxy, so desktop interception does not engage there.
+
+**Recommendation:** Run OmniRoute natively on the same OS as the desktop apps you want to intercept (Windows for Windows apps; macOS/Linux likewise). Keeping OmniRoute inside WSL while targeting host apps requires manually trusting the generated CA certificate on the Windows host and pointing each host app's network/proxy settings at the WSL proxy endpoint — an unsupported, fragile setup.
+
 ---
 
 ## Provider Issues
@@ -262,6 +268,9 @@ curl http://localhost:20128/api/monitoring/health
 - Usage: SQLite tables in `storage.sqlite` (`usage_history`, `call_logs`, `proxy_logs`) + optional `${DATA_DIR}/call_logs/`
 - Application logs: `<repo>/logs/...` (when `APP_LOG_TO_FILE=true`)
 - Call log artifacts: `${DATA_DIR}/call_logs/YYYY-MM-DD/...` when the call log pipeline is enabled
+
+The Request Logs page's **Clean history** action clears `call_logs`, legacy
+`request_detail_logs`, and the local `${DATA_DIR}/call_logs/` artifact directory.
 
 ---
 
