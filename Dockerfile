@@ -69,10 +69,13 @@ RUN --mount=type=cache,target=/root/.npm \
   || true
 
 # Ensure material-symbols/outlined.css (imported by globals.css for icons) is present.
-# The base npm ci uses --ignore-scripts (supply-chain hardening); some packages rely on
-# postinstall or file layout that buildx may not fully materialize for optional/font assets.
+# The base npm ci uses --ignore-scripts (supply-chain hardening). We run this force step
+# *without* --ignore-scripts so that material-symbols' own install layout (or any postinstall
+# that materializes outlined.css) completes. Upstream succeeds with the same ci --ignore-scripts
+# + declared dep; the extra step here compensates for buildx cross-arch + optional tracing gaps
+# in the fork's multi-arch GHCR matrix.
 RUN --mount=type=cache,target=/root/.npm \
-  npm install --no-save material-symbols --legacy-peer-deps --ignore-scripts --no-audit --no-fund || true
+  npm install --no-save material-symbols@^0.45.1 --legacy-peer-deps --no-audit --no-fund || true
 
 # Fallback dirs (in case install fails for a platform in cross-build); COPY will
 # succeed and at runtime the package will use what's available or fall back.
