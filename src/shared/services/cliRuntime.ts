@@ -4,10 +4,7 @@ import os from "os";
 import path from "path";
 import { spawn, execFileSync } from "child_process";
 import { getHermesHome } from "@/lib/cli-helper/config-generator/hermesHome";
-<<<<<<< HEAD
-=======
-import { getCachedLoginShellPath, mergeShellPath } from "./loginShellPath";
->>>>>>> upstream/main
+
 
 const VALID_RUNTIME_MODES = new Set(["auto", "host", "container"]);
 const FALSE_VALUES = new Set(["0", "false", "no", "off"]);

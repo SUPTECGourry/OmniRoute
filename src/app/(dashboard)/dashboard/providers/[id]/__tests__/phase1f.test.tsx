@@ -10,16 +10,9 @@
 // Uses createRoot + act to mount each hook inside a minimal wrapper component
 // so we test real React hook semantics without a full Next.js server context.
 
-<<<<<<< HEAD
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-=======
-import React, { act, useEffect } from "react";
-import { createRoot } from "react-dom/client";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import path from "node:path";
->>>>>>> upstream/main
 
 // ---------------------------------------------------------------------------
 // Global mocks required by the extracted hooks
@@ -34,14 +27,10 @@ vi.mock("next/navigation", () => ({
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string, values?: Record<string, unknown>) => {
     if (values) {
-<<<<<<< HEAD
-      return Object.entries(values).reduce(
+return Object.entries(values).reduce(
         (acc, [k, v]) => acc.replace(`{${k}}`, String(v)),
         key
       );
-=======
-      return Object.entries(values).reduce((acc, [k, v]) => acc.replace(`{${k}}`, String(v)), key);
->>>>>>> upstream/main
     }
     return key;
   },
@@ -94,20 +83,10 @@ describe("useProviderConnections — initial state", () => {
     let result: HookResult | null = null;
 
     function TestWrapper() {
-<<<<<<< HEAD
-      result = useProviderConnections("openai", true, false);
+result = useProviderConnections("openai", true, false);
       return (
         <span data-testid="loaded">
           {String(result.connections.length)}|{String(result.batchTesting)}
-=======
-      const hookResult = useProviderConnections("openai", true, false);
-      useEffect(() => {
-        result = hookResult;
-      }, [hookResult]);
-      return (
-        <span data-testid="loaded">
-          {String(hookResult.connections.length)}|{String(hookResult.batchTesting)}
->>>>>>> upstream/main
         </span>
       );
     }
@@ -133,14 +112,7 @@ describe("useProviderConnections — initial state", () => {
     let result: HookResult | null = null;
 
     function TestWrapper() {
-<<<<<<< HEAD
-      result = useProviderConnections("openai", true, false);
-=======
-      const hookResult = useProviderConnections("openai", true, false);
-      useEffect(() => {
-        result = hookResult;
-      }, [hookResult]);
->>>>>>> upstream/main
+result = useProviderConnections("openai", true, false);
       return <span />;
     }
 
@@ -209,14 +181,7 @@ describe("useProviderSettings — initial state", () => {
     let result: HookResult | null = null;
 
     function TestWrapper() {
-<<<<<<< HEAD
-      result = useProviderSettings("openai");
-=======
-      const hookResult = useProviderSettings("openai");
-      useEffect(() => {
-        result = hookResult;
-      }, [hookResult]);
->>>>>>> upstream/main
+result = useProviderSettings("openai");
       return <span />;
     }
 
@@ -242,14 +207,7 @@ describe("useProviderSettings — initial state", () => {
     let result: HookResult | null = null;
 
     function TestWrapper() {
-<<<<<<< HEAD
-      result = useProviderSettings("codex");
-=======
-      const hookResult = useProviderSettings("codex");
-      useEffect(() => {
-        result = hookResult;
-      }, [hookResult]);
->>>>>>> upstream/main
+result = useProviderSettings("codex");
       return <span />;
     }
 
@@ -295,14 +253,7 @@ describe("useProviderModels — initial state", () => {
     let result: HookResult | null = null;
 
     function TestWrapper() {
-<<<<<<< HEAD
-      result = useProviderModels("openai", false);
-=======
-      const hookResult = useProviderModels("openai", false);
-      useEffect(() => {
-        result = hookResult;
-      }, [hookResult]);
->>>>>>> upstream/main
+result = useProviderModels("openai", false);
       return <span />;
     }
 
@@ -324,14 +275,7 @@ describe("useProviderModels — initial state", () => {
     let result: HookResult | null = null;
 
     function TestWrapper() {
-<<<<<<< HEAD
-      result = useProviderModels("openai", false);
-=======
-      const hookResult = useProviderModels("openai", false);
-      useEffect(() => {
-        result = hookResult;
-      }, [hookResult]);
->>>>>>> upstream/main
+result = useProviderModels("openai", false);
       return <span />;
     }
 
@@ -372,18 +316,8 @@ describe("useProviderModels — initial state", () => {
 // Cycle-safety: hooks must NOT import from ProviderDetailPageClient
 // ---------------------------------------------------------------------------
 
-<<<<<<< HEAD
 const HOOKS_DIR =
   "/home/diegosouzapw/dev/proxys/OmniRoute/.worktrees/fix-3501-phase1f/src/app/(dashboard)/dashboard/providers/[id]/hooks";
-=======
-// Resolve the hooks dir from the repo root (vitest runs from cwd). Was a
-// hardcoded absolute worktree path that broke the test outside that worktree
-// (#3501 Phase 1g-1j).
-const HOOKS_DIR = path.join(
-  process.cwd(),
-  "src/app/(dashboard)/dashboard/providers/[id]/hooks"
-);
->>>>>>> upstream/main
 
 describe("Cycle-safety — hooks do not import ProviderDetailPageClient", () => {
   // We allow the name in JSDoc comments; what we forbid is an actual ES import statement.

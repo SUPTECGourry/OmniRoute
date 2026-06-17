@@ -3092,22 +3092,6 @@ async function getKiroUsage(accessToken?: string, providerSpecificData?: JsonRec
       return { message: "Kiro connected. Profile ARN not available for quota tracking." };
     }
 
-    // Enterprise IAM Identity Center accounts are region-bound: the profileArn, token and
-    // endpoint must all match the region. Derive the region from the stored region (preferred)
-    // or the profileArn, then route to the regional Amazon Q endpoint (us-east-1 keeps the
-    // legacy codewhisperer host; codewhisperer.{region} does not resolve for other regions).
-    const regionFromArn =
-      typeof profileArn === "string"
-        ? profileArn.toLowerCase().match(/^arn:aws:codewhisperer:([a-z0-9-]+):/)?.[1]
-        : undefined;
-    const region =
-      (typeof providerSpecificData?.region === "string" &&
-        providerSpecificData.region.trim().toLowerCase()) ||
-      regionFromArn ||
-      "us-east-1";
-    const usageBaseUrl =
-      region === "us-east-1" ? CODEWHISPERER_BASE_URL : `https://q.${region}.amazonaws.com`;
-
     // Kiro uses AWS CodeWhisperer GetUsageLimits API
     const payload = {
       origin: "AI_EDITOR",

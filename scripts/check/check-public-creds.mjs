@@ -23,42 +23,10 @@ import { assertNoStale } from "./lib/allowlist.mjs";
 
 const cwd = process.cwd();
 
-<<<<<<< HEAD
 // Arquivos que carregam configuração de credencial de upstream. O escopo é restrito
 // de propósito: estes são os únicos pontos onde client_id/secret públicos vivem.
 // Adicionar um novo arquivo de config de credencial? Inclua-o aqui.
 const SCANNED_FILES = ["open-sse/config/providerRegistry.ts", "src/lib/oauth/constants/oauth.ts"];
-=======
-// 6A.8: Instead of a static hardcoded list, scan the two credential-bearing subtrees
-// dynamically so new files (new executor, new OAuth provider) are caught automatically.
-// Anchor files (providerRegistry.ts, oauth.ts) are the canonical credential config;
-// the broader scan covers new additions in open-sse/ and src/lib/oauth/.
-// Exclusions: test files, node_modules, .next.
-const SCAN_ROOTS = [path.join(cwd, "open-sse"), path.join(cwd, "src", "lib", "oauth")];
-
-function walkTs(dir, acc = []) {
-  if (!fs.existsSync(dir)) return acc;
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) {
-      if (e.name !== "node_modules" && e.name !== ".next") walkTs(p, acc);
-    } else if (/\.tsx?$/.test(e.name) && !/\.test\.tsx?$/.test(e.name)) {
-      acc.push(p);
-    }
-  }
-  return acc;
-}
-
-function collectScannedFiles() {
-  const files = [];
-  for (const root of SCAN_ROOTS) {
-    for (const abs of walkTs(root)) {
-      files.push(path.relative(cwd, abs).replace(/\\/g, "/"));
-    }
-  }
-  return files;
-}
->>>>>>> upstream/main
 
 // Chaves de objeto cujo valor é uma credencial. Atribuir qualquer uma destas a uma
 // string literal não-vazia viola a Hard Rule #11.

@@ -101,11 +101,7 @@ export default function LanguageSelector() {
                   : "text-text-main hover:bg-surface-hover"
               }`}
             >
-<<<<<<< HEAD
-              <span className="text-base leading-none">{lang.flag}</span>
-=======
               <CountryFlag emoji={lang.flag} alt={lang.name} />
->>>>>>> upstream/main
               <span className="flex-1 text-start">{lang.name}</span>
               {lang.code === locale && (
                 <span className="material-symbols-outlined text-[16px] text-primary">check</span>

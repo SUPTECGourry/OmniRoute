@@ -272,13 +272,10 @@ function main() {
         `${INTENTIONALLY_INTERNAL.size} intencionalmente-internos (Rule #2); ${EXTERNAL_DB_ALLOWED.size} leituras de DB externo permitidas (#3500))`
     );
   }
-<<<<<<< HEAD
-  console.log(
+console.log(
     `[check-db-rules] OK (${dbModules.length} módulos db/, ${reexported.size} re-exportados, ` +
       `${INTENTIONALLY_INTERNAL.size} intencionalmente-internos (Rule #2); ${EXTERNAL_DB_ALLOWED.size} leituras de DB externo permitidas (#3500))`
   );
-=======
->>>>>>> upstream/main
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();

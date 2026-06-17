@@ -663,10 +663,7 @@ async function handlePut(req, res, absPath) {
         limitExceeded = true;
         req.destroy();
         writeStream.destroy();
-<<<<<<< HEAD
-=======
-        resolve();
->>>>>>> upstream/main
+
       } else {
         writeStream.write(chunk);
       }
@@ -674,11 +671,7 @@ async function handlePut(req, res, absPath) {
 
     req.on("end", () => {
       writeStream.end();
-<<<<<<< HEAD
-      resolve();
-=======
-      // Don't resolve here — wait for the stream to finish flushing.
->>>>>>> upstream/main
+resolve();
     });
 
     req.on("error", () => {
@@ -686,16 +679,9 @@ async function handlePut(req, res, absPath) {
       resolve();
     });
 
-<<<<<<< HEAD
-    writeStream.on("error", () => {
+writeStream.on("error", () => {
       resolve();
     });
-=======
-    // Resolve only after all data has been flushed to the OS (prevents
-    // fs.renameSync from running before the write stream closes the file).
-    writeStream.on("finish", resolve);
-    writeStream.on("error", resolve);
->>>>>>> upstream/main
   });
 
   if (limitExceeded) {

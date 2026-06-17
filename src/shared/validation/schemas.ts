@@ -16,8 +16,6 @@ export * from "./schemas/cloud";
 export * from "./schemas/misc";
 export { validateBody, isValidationFailure } from "./helpers";
 export type { ValidationResult } from "./helpers";
-<<<<<<< HEAD
-
 // ──── Provider Schemas ────
 
 export const createProviderSchema = z
@@ -2253,5 +2251,3 @@ export const zedImportSchema = z.object({
 });
 
 export type ConfirmedAccount = z.infer<typeof confirmedAccountSchema>;
-=======
->>>>>>> upstream/main

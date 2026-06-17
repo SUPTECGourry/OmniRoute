@@ -149,18 +149,7 @@ export function ModelVisibilityToolbar({
         </div>
       )}
       {onAutoHideFailedChange && (
-<<<<<<< HEAD
-        <label className="flex items-center gap-1.5 text-xs text-text-muted">
-=======
-        <label
-          className="flex items-center gap-1.5 text-xs text-text-muted"
-          title={providerText(
-            t,
-            "autoHideFailedHint",
-            "When enabled, Test all hides non-transient failures from public catalogs such as /v1/models. Single-model tests never auto-hide."
-          )}
-        >
->>>>>>> upstream/main
+<label className="flex items-center gap-1.5 text-xs text-text-muted">
           <input
             type="checkbox"
             checked={autoHideFailed ?? false}

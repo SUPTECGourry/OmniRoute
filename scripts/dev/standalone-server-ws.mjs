@@ -3,10 +3,7 @@ import { randomUUID } from "node:crypto";
 import { createResponsesWsProxy } from "./responses-ws-proxy.mjs";
 import { ensurePeerStampToken, wrapRequestListenerWithPeerStamp } from "./peer-stamp.mjs";
 import { maybeHandleWebdav } from "./webdav-handler.mjs";
-<<<<<<< HEAD
-=======
-import methodGuard from "./http-method-guard.cjs";
->>>>>>> upstream/main
+
 
 const originalCreateServer = http.createServer.bind(http);
 const proxiesByPort = new Map();
@@ -76,15 +73,9 @@ http.createServer = function createServerWithResponsesWs(...args) {
   // createServer; wrap it so the real TCP peer IP is stamped before Next runs.
   const lastFnIdx = args.map((a) => typeof a === "function").lastIndexOf(true);
   if (lastFnIdx >= 0) {
-<<<<<<< HEAD
-    // WebDAV intercept wraps outermost (first to run), then peer-stamp, then Next.
+// WebDAV intercept wraps outermost (first to run), then peer-stamp, then Next.
     args[lastFnIdx] = wrapRequestListenerWithWebdav(
       wrapRequestListenerWithPeerStamp(args[lastFnIdx])
-=======
-    // Method guard runs before Next because Next 16 rejects TRACE while constructing requests.
-    args[lastFnIdx] = wrapRequestListenerWithMethodGuard(
-      wrapRequestListenerWithWebdav(wrapRequestListenerWithPeerStamp(args[lastFnIdx]))
->>>>>>> upstream/main
     );
   }
 
@@ -100,13 +91,7 @@ http.createServer = function createServerWithResponsesWs(...args) {
     if (eventName === "request" && typeof listener === "function") {
       return originalOn(
         eventName,
-<<<<<<< HEAD
-        wrapRequestListenerWithWebdav(wrapRequestListenerWithPeerStamp(listener))
-=======
-        wrapRequestListenerWithMethodGuard(
-          wrapRequestListenerWithWebdav(wrapRequestListenerWithPeerStamp(listener))
-        )
->>>>>>> upstream/main
+wrapRequestListenerWithWebdav(wrapRequestListenerWithPeerStamp(listener))
       );
     }
     return originalOn(eventName, listener);
@@ -119,13 +104,7 @@ http.createServer = function createServerWithResponsesWs(...args) {
     if (eventName === "request" && typeof listener === "function") {
       return originalAddListener(
         eventName,
-<<<<<<< HEAD
-        wrapRequestListenerWithWebdav(wrapRequestListenerWithPeerStamp(listener))
-=======
-        wrapRequestListenerWithMethodGuard(
-          wrapRequestListenerWithWebdav(wrapRequestListenerWithPeerStamp(listener))
-        )
->>>>>>> upstream/main
+wrapRequestListenerWithWebdav(wrapRequestListenerWithPeerStamp(listener))
       );
     }
     return originalAddListener(eventName, listener);

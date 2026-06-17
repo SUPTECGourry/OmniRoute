@@ -22,14 +22,11 @@ interface Props {
   resolvedPlan: string | null;
   emailsVisible: boolean;
   hasStaleData: boolean;
-<<<<<<< HEAD
-  /** Disabled when loading. */
+/** Disabled when loading. */
   refreshing: boolean;
   onRefresh: () => void;
   onOpenCutoff: () => void;
   hasCutoffOverrides: boolean;
-=======
->>>>>>> upstream/main
   /** Toggle the connection's active state (routing on/off). */
   onToggleActive: (nextActive: boolean) => void;
   /** True while the active-state PUT is in flight. */
@@ -44,13 +41,10 @@ export default function QuotaCardHeader({
   resolvedPlan,
   emailsVisible,
   hasStaleData,
-<<<<<<< HEAD
-  refreshing,
+refreshing,
   onRefresh,
   onOpenCutoff,
   hasCutoffOverrides,
-=======
->>>>>>> upstream/main
   onToggleActive,
   togglingActive,
 }: Props) {
@@ -143,8 +137,7 @@ export default function QuotaCardHeader({
         <button
           type="button"
           disabled={togglingActive}
-<<<<<<< HEAD
-          onClick={(e) => {
+onClick={(e) => {
             e.stopPropagation();
             if (togglingActive) return;
             onToggleActive(!isActive);
@@ -161,8 +154,6 @@ export default function QuotaCardHeader({
         </button>
         <button
           type="button"
-=======
->>>>>>> upstream/main
           onClick={(e) => {
             e.stopPropagation();
             if (togglingActive) return;

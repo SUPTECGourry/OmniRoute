@@ -580,15 +580,9 @@ export function exportAllSummaryRows(): ExportAllRows {
 export function getTableNamesFromAdapter(adapter: {
   prepare: (sql: string) => { all: () => unknown[] };
 }): string[] {
-<<<<<<< HEAD
-  const rows = adapter
+const rows = adapter
     .prepare("SELECT name FROM sqlite_master WHERE type='table'")
     .all() as Array<{ name: string }>;
-=======
-  const rows = adapter.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{
-    name: string;
-  }>;
->>>>>>> upstream/main
   return rows.map((r) => r.name);
 }
 
@@ -607,14 +601,9 @@ export function countImportedRows(): {
     (db.prepare("SELECT COUNT(*) as cnt FROM provider_connections").get() as any)?.cnt || 0;
   const nodeCount =
     (db.prepare("SELECT COUNT(*) as cnt FROM provider_nodes").get() as any)?.cnt || 0;
-<<<<<<< HEAD
-  const comboCount =
+const comboCount =
     (db.prepare("SELECT COUNT(*) as cnt FROM combos").get() as any)?.cnt || 0;
   const keyCount =
     (db.prepare("SELECT COUNT(*) as cnt FROM api_keys").get() as any)?.cnt || 0;
-=======
-  const comboCount = (db.prepare("SELECT COUNT(*) as cnt FROM combos").get() as any)?.cnt || 0;
-  const keyCount = (db.prepare("SELECT COUNT(*) as cnt FROM api_keys").get() as any)?.cnt || 0;
->>>>>>> upstream/main
   return { connCount, nodeCount, comboCount, keyCount };
 }

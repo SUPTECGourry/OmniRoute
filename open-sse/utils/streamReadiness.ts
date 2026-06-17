@@ -75,7 +75,6 @@ function isPingEventType(type: string): boolean {
   return /^(?:ping|keepalive|heartbeat)$/i.test(type);
 }
 
-<<<<<<< HEAD
 function hasChatCompletionToolCallStart(value: unknown): boolean {
   // Accept a tool_call item if it has a non-empty id (fully-formed chunk) OR if it
   // carries a numeric index (first OpenAI streaming chunk — id/name arrive in later
@@ -131,20 +130,6 @@ function hasAcceptedStreamStartPayload(payload: unknown, eventType = ""): boolea
   if (hasChatCompletionChunkStartPayload(payload)) return true;
 
   return false;
-=======
-function getPayloadType(payload: unknown, eventType = ""): string {
-  if (!isRecord(payload)) return eventType;
-  const type = payload.type ?? payload.event ?? payload.object;
-  return typeof type === "string" ? type : eventType;
-}
-
-function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean {
-  const type = getPayloadType(payload, eventType);
-  if (isPingEventType(eventType) || isPingEventType(type)) return false;
-  if (Array.isArray(payload)) return payload.length > 0;
-  if (isRecord(payload)) return Object.keys(payload).length > 0;
-  return payload !== null && payload !== undefined;
->>>>>>> upstream/main
 }
 
 export function hasUsefulStreamContent(text: string): boolean {

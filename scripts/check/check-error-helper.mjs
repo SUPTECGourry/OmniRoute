@@ -22,18 +22,7 @@ import { pathToFileURL } from "node:url";
 import { assertNoStale } from "./lib/allowlist.mjs";
 
 const cwd = process.cwd();
-<<<<<<< HEAD
 const SCAN_DIRS = [path.join(cwd, "open-sse/executors"), path.join(cwd, "open-sse/handlers")];
-=======
-
-// Directories to scan (Hard Rule #12 applies to ALL error-response-building surfaces).
-// 6A.8: expanded from executors+handlers to include MCP server tools and API route files.
-const SCAN_DIRS = [
-  path.join(cwd, "open-sse/executors"),
-  path.join(cwd, "open-sse/handlers"),
-  path.join(cwd, "open-sse/mcp-server"),
-];
->>>>>>> upstream/main
 
 // Glob-style pattern for API route files under src/app/api/ (matched by path test below).
 const IS_API_ROUTE = /^src\/app\/api\/.+\/route\.tsx?$/;

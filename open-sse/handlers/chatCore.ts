@@ -2898,14 +2898,7 @@ export async function handleChatCore({
           comboTargetLimits,
         });
         contextLimit = resolved.limit;
-<<<<<<< HEAD
-        log?.info?.("CONTEXT", `Combo context limit: ${resolved.limit} (source=${resolved.source})`);
-=======
-        log?.info?.(
-          "CONTEXT",
-          `Combo context limit: ${resolved.limit} (source=${resolved.source})`
-        );
->>>>>>> upstream/main
+log?.info?.("CONTEXT", `Combo context limit: ${resolved.limit} (source=${resolved.source})`);
       } catch (err) {
         log?.warn?.("CONTEXT", "Failed to resolve combo limits for compression: " + err);
       }
@@ -5660,8 +5653,7 @@ export async function handleChatCore({
       cacheSource: "upstream",
     });
 
-<<<<<<< HEAD
-    // Ensure the completed details cache is populated so the UI's fast-poll
+// Ensure the completed details cache is populated so the UI's fast-poll
     // can pick up provider/client response payloads immediately after the
     // streaming request finishes.
     try {
@@ -5679,9 +5671,6 @@ export async function handleChatCore({
         console.warn("finalizeMostRecentPendingRequest failed:", e && (e.message || e));
       } catch {}
     }
-
-=======
->>>>>>> upstream/main
     if (apiKeyInfo?.id && streamUsage) {
       calculateCost(provider, model, streamUsage, { serviceTier: effectiveServiceTier })
         .then((estimatedCost) => {

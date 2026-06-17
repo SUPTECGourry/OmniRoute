@@ -729,19 +729,11 @@ export async function GET(
       const isNoAuthProvider =
         (NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>)[id]?.noAuth === true;
       if (isNoAuthProvider) {
-<<<<<<< HEAD
-        // #3611 — if the registry entry has a modelsUrl, attempt a live fetch so
+// #3611 — if the registry entry has a modelsUrl, attempt a live fetch so
         // the model picker shows the current catalog instead of the stale
         // hardcoded list (opencode provider had 9 hardcoded models while the live
         // endpoint exposes many more). No auth header is added because noAuth
         // providers are genuinely public. Fall through to local_catalog on any error.
-=======
-        if (isProviderBlockedByIdOrAlias(id, (await getSettings()).blockedProviders)) {
-          return NextResponse.json({ error: "Provider is disabled" }, { status: 403 });
-        }
-
-        // #3611 — prefer the live public modelsUrl when present; fall back to local_catalog.
->>>>>>> upstream/main
         const noAuthRegistryEntry = getRegistryEntry(id);
         const noAuthModelsUrl =
           typeof noAuthRegistryEntry?.modelsUrl === "string" &&
@@ -764,12 +756,8 @@ export async function GET(
                 (data.data || data.models || []) as Array<Record<string, unknown>>
               )
                 .map((item) => {
-<<<<<<< HEAD
-                  const itemId =
+const itemId =
                     typeof item.id === "string" ? item.id.trim() : "";
-=======
-                  const itemId = typeof item.id === "string" ? item.id.trim() : "";
->>>>>>> upstream/main
                   if (!itemId) return null;
                   const itemName =
                     typeof item.display_name === "string"

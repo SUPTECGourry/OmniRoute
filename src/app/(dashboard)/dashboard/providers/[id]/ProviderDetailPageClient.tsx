@@ -1,6 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 // Phase 1f extractions — Issue #3501
 import { useProviderConnections } from "./hooks/useProviderConnections";
@@ -42,36 +41,20 @@ import {
   LOCAL_PROVIDERS,
   NOAUTH_PROVIDERS,
   AI_PROVIDERS,
-=======
-// Issue #3501 strangler-fig decomposition — Phase 1t (final push)
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { Card, Button, CardSkeleton } from "@/shared/components";
-import {
-  NOAUTH_PROVIDERS,
->>>>>>> upstream/main
   getProviderAlias,
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
   isClaudeCodeCompatibleProvider,
-<<<<<<< HEAD
-  isSelfHostedChatProvider,
+isSelfHostedChatProvider,
   supportsApiKeyOnFreeProvider,
   // providerAllowsOptionalApiKey + supportsBulkApiKey used by extracted AddApiKeyModal
 } from "@/shared/constants/providers";
 // antigravityClientProfile + parseBulkApiKeys used by extracted modals (AddApiKeyModal, EditConnectionModal)
-=======
-  supportsApiKeyOnFreeProvider,
-} from "@/shared/constants/providers";
->>>>>>> upstream/main
 import { getModelsByProviderId } from "@/shared/constants/models";
 import {
   compatibleProviderSupportsModelImport,
   getCompatibleFallbackModels,
 } from "@/lib/providers/managedAvailableModels";
-<<<<<<< HEAD
 import {
   matchesModelCatalogQuery,
   normalizeModelCatalogSource,
@@ -79,7 +62,6 @@ import {
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
-import EmailPrivacyToggle from "@/shared/components/EmailPrivacyToggle";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
 import { type CodexGlobalServiceMode } from "@/lib/providers/codexFastTier";
@@ -262,43 +244,6 @@ function ProviderPlaygroundPanel({ providerId }: { providerId: string }) {
 export default function ProviderDetailPageClient() {
   const params = useParams();
   const router = useRouter();
-=======
-import { normalizeModelCatalogSource } from "@/shared/utils/modelCatalogSearch";
-import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
-import useEmailPrivacyStore from "@/store/emailPrivacyStore";
-import { useNotificationStore } from "@/store/notificationStore";
-import { resolveDashboardProviderInfo } from "../providerPageUtils";
-import { type ConnectionRowConnection } from "./components/ConnectionRow";
-import { useProviderConnections } from "./hooks/useProviderConnections";
-import { useProviderSettings } from "./hooks/useProviderSettings";
-import { useProviderModels } from "./hooks/useProviderModels";
-import { useCommandCodeAuth } from "./hooks/useCommandCodeAuth";
-import { useExternalLinkFlow } from "./hooks/useExternalLinkFlow";
-import { useAuthFileHandlers } from "./hooks/useAuthFileHandlers";
-import { useModelImportHandlers } from "./hooks/useModelImportHandlers";
-import { useApiKeySave } from "./hooks/useApiKeySave";
-import { useModelVisibilityHandlers } from "./hooks/useModelVisibilityHandlers";
-import { useModelCompatState } from "./hooks/useModelCompatState";
-import { useConnectionGate } from "./hooks/useConnectionGate";
-import { useProviderNodeActions } from "./hooks/useProviderNodeActions";
-import ProviderPlaygroundPanel from "./components/ProviderPlaygroundPanel";
-import ProviderModelsSection from "./components/ProviderModelsSection";
-import CustomModelsSection from "./components/CustomModelsSection";
-import ConnectionsListPanel from "./components/ConnectionsListPanel";
-import ConnectionsHeaderToolbar from "./components/ConnectionsHeaderToolbar";
-import ZedImportCard from "./components/ZedImportCard";
-import ProviderPageHeader from "./components/ProviderPageHeader";
-import CompatibleNodeCard from "./components/CompatibleNodeCard";
-import ProviderModalsPanel from "./components/ProviderModalsPanel";
-import EmptyConnectionsPlaceholder from "./components/EmptyConnectionsPlaceholder";
-import UpstreamProxyCard from "./components/UpstreamProxyCard";
-import SearchProviderCard from "./components/SearchProviderCard";
-import NoAuthProviderControls from "./components/NoAuthProviderControls";
-// providerText used by UpstreamProxyCard (Phase 1t.7)
-
-export default function ProviderDetailPageClient() {
-  const params = useParams();
->>>>>>> upstream/main
   const providerId = params.id as string;
 
   // ── UI-only modal state (not owned by hooks) ─────────────────────────────
@@ -307,8 +252,7 @@ export default function ProviderDetailPageClient() {
   const [showAddApiKeyModal, setShowAddApiKeyModal] = useState(false);
   const [showSiliconFlowEndpointModal, setShowSiliconFlowEndpointModal] = useState(false);
   const [siliconFlowInitialBaseUrl, setSiliconFlowInitialBaseUrl] = useState<string | undefined>();
-<<<<<<< HEAD
-  const [showRiskNoticeModal, setShowRiskNoticeModal] = useState(false);
+const [showRiskNoticeModal, setShowRiskNoticeModal] = useState(false);
   const [commandCodeAuthState, setCommandCodeAuthState] = useState<CommandCodeAuthFlowState>({
     phase: "idle",
     state: "",
@@ -317,15 +261,12 @@ export default function ProviderDetailPageClient() {
     expiresAt: null,
     message: "",
   });
-=======
->>>>>>> upstream/main
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditNodeModal, setShowEditNodeModal] = useState(false);
   const [showTutorialModal, setShowTutorialModal] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState(null);
   const [proxyTarget, setProxyTarget] = useState(null);
-<<<<<<< HEAD
-  const [importingModels, setImportingModels] = useState(false);
+const [importingModels, setImportingModels] = useState(false);
   const [importingZed, setImportingZed] = useState(false);
   const [showZedManual, setShowZedManual] = useState(false);
   const [zedManualProvider, setZedManualProvider] = useState("openai");
@@ -384,12 +325,6 @@ export default function ProviderDetailPageClient() {
   const pendingRiskActionRef = useRef<(() => void) | null>(null);
   const { acknowledged: riskAcknowledged, acknowledge: acknowledgeRisk } =
     useRiskAcknowledged(providerId);
-=======
-  const [importCodexModalOpen, setImportCodexModalOpen] = useState(false);
-  const [codexCliGuideOpen, setCodexCliGuideOpen] = useState(false);
-  const [importClaudeModalOpen, setImportClaudeModalOpen] = useState(false);
-  const [importGeminiModalOpen, setImportGeminiModalOpen] = useState(false);
->>>>>>> upstream/main
   const isOpenAICompatible = isOpenAICompatibleProvider(providerId);
   const isCcCompatible = isClaudeCodeCompatibleProvider(providerId);
   const isCommandCode = providerId === "command-code";
@@ -424,10 +359,7 @@ export default function ProviderDetailPageClient() {
     setSelectedIds,
     setBatchDeleteConfirmOpen,
     setBatchTestResults,
-<<<<<<< HEAD
-    setConnections,
-=======
->>>>>>> upstream/main
+setConnections,
     setProviderNode,
     fetchConnections,
     fetchProxyConfig,
@@ -487,21 +419,7 @@ export default function ProviderDetailPageClient() {
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const notify = useNotificationStore();
 
-<<<<<<< HEAD
-=======
-  // Phase 1i: external link flow — placed after notify/fetchConnections are defined
-  const {
-    externalLinkModalOpen,
-    setExternalLinkModalOpen,
-    externalLinkUrl,
-    externalLinkLoading,
-    externalLinkError,
-    externalLinkCopied,
-    externalLinkCopy,
-    openExternalLinkFlow,
-  } = useExternalLinkFlow({ providerId, notify, fetchConnections });
 
->>>>>>> upstream/main
   const setShowOAuthModal = (show: boolean, connectionRow?: ConnectionRowConnection) => {
     _setShowOAuthModal(show);
     setReauthConnection(show && connectionRow ? connectionRow : null);
@@ -518,23 +436,8 @@ export default function ProviderDetailPageClient() {
   const providerSupportsOAuth =
     providerInfo?.toggleAuthType === "oauth" || providerInfo?.toggleAuthType === "free";
   const subscriptionRisk = providerInfo?.subscriptionRisk === true;
-<<<<<<< HEAD
-  const providerSupportsPat = supportsApiKeyOnFreeProvider(providerId);
+const providerSupportsPat = supportsApiKeyOnFreeProvider(providerId);
   const isOAuth = providerSupportsOAuth && !providerSupportsPat;
-=======
-
-  // ── Phase 1t.3: connection gate + risk-notice modal state ───────────────
-  const {
-    showRiskNoticeModal,
-    gateConnectionFlow,
-    handleConfirmRiskNotice,
-    handleCancelRiskNotice,
-  } = useConnectionGate({ providerId, subscriptionRisk });
-
-  const providerSupportsPat = supportsApiKeyOnFreeProvider(providerId);
-  const isOAuth = providerSupportsOAuth && !providerSupportsPat;
-  const providerAlias = getProviderAlias(providerId);
->>>>>>> upstream/main
   const isFreeNoAuth = NOAUTH_PROVIDERS[providerId]?.noAuth === true;
   const registryModels = getModelsByProviderId(providerId);
   // Prefer synced API-discovered models when available, then merge built-ins
@@ -573,10 +476,7 @@ export default function ProviderDetailPageClient() {
     }
     return Array.from(deduped.values());
   }, [providerId, registryModels, syncedAvailableModels, modelMeta.customModels]);
-<<<<<<< HEAD
-  const providerAlias = getProviderAlias(providerId);
-=======
->>>>>>> upstream/main
+const providerAlias = getProviderAlias(providerId);
   const isManagedAvailableModelsProvider = isCompatible || providerId === "openrouter";
   // isSearchProvider declared earlier (before hooks)
   const isUpstreamProxyProvider = providerInfo?.category === "upstream-proxy";
@@ -585,8 +485,7 @@ export default function ProviderDetailPageClient() {
   const providerStorageAlias = isCompatible ? providerId : providerAlias;
   const providerDisplayAlias = isCompatible ? providerNode?.prefix || providerId : providerAlias;
 
-<<<<<<< HEAD
-  const getApiLabel = () => {
+const getApiLabel = () => {
     if (isAnthropicProtocolCompatible) return t("messagesApi");
     const type = providerNode?.apiType;
     switch (type) {
@@ -640,36 +539,6 @@ export default function ProviderDetailPageClient() {
   // handleToggleCliproxyapiMode, handleToggleCodexLimit, handleSwapPriority → hooks/useProviderConnections.ts (Phase 1f)
   // handleToggleClaudeRoutingPreference, handleChangeCodexGlobalServiceMode → hooks/useProviderSettings.ts (Phase 1f)
   // handleRefreshToken → hooks/useProviderConnections.ts (Phase 1f)
-=======
-  // ── Phase 1k: model import handlers ─────────────────────────────────────
-  const {
-    importingModels,
-    showImportModal,
-    importProgress,
-    togglingAutoSync,
-    canImportModels,
-    isAutoSyncEnabled,
-    setShowImportModal,
-    setImportProgress,
-    handleImportModels,
-    handleCompatibleImportWithProgress,
-    handleToggleAutoSync,
-  } = useModelImportHandlers({
-    providerId,
-    models,
-    modelMeta,
-    modelAliases,
-    connections,
-    isFreeNoAuth,
-    handleSetAlias,
-    fetchAliases,
-    fetchProviderModelMeta,
-    fetchConnections,
-    notify,
-    t,
-    providerStorageAlias,
-  });
->>>>>>> upstream/main
 
   // ── model-related effects (loading gate) ────────────────────────────────
   useEffect(() => {
@@ -678,8 +547,7 @@ export default function ProviderDetailPageClient() {
     fetchAliases();
   }, [loading, isSearchProvider, fetchProviderModelMeta, fetchAliases]);
 
-<<<<<<< HEAD
-  const handleUpdateNode = async (formData: any) => {
+const handleUpdateNode = async (formData: any) => {
     try {
       const res = await fetch(`/api/provider-nodes/${providerId}`, {
         method: "PUT",
@@ -868,9 +736,6 @@ export default function ProviderDetailPageClient() {
 
   // handleToggleSelectOne/All, handleBatchDeleteOpenModal/Confirm, handleDelete,
   // handleBatchSetActive → hooks/useProviderConnections.ts (Phase 1f)
-
-=======
->>>>>>> upstream/main
   const handleOAuthSuccess = useCallback(() => {
     fetchConnections();
     setShowOAuthModal(false);
@@ -892,8 +757,7 @@ export default function ProviderDetailPageClient() {
     openApiKeyAddFlow();
   }, [isOAuth, openApiKeyAddFlow]);
 
-<<<<<<< HEAD
-  // "Adicionar Externo": generate a single-use public link so a third party can
+// "Adicionar Externo": generate a single-use public link so a third party can
   // complete the Codex device flow in their own browser.
   const openExternalLinkFlow = useCallback(async () => {
     setExternalLinkModalOpen(true);
@@ -1934,71 +1798,6 @@ export default function ProviderDetailPageClient() {
     modelMeta.modelCompatOverrides
   );
   const { customMap, overrideMap } = compat;
-=======
-  // ── Phase 1h: commandCode auth flow ─────────────────────────────────────
-  const {
-    commandCodeAuthState,
-    handleCloseAddApiKeyModal,
-    handleStartCommandCodeAuth,
-    handleOpenCommandCodeConnect,
-  } = useCommandCodeAuth({
-    providerId,
-    fetchConnections,
-    setSiliconFlowInitialBaseUrl,
-    setShowAddApiKeyModal,
-    notify,
-  });
-
-  // Phase 1s: handleSaveApiKey extracted to hooks/useApiKeySave.ts
-  const { handleSaveApiKey } = useApiKeySave({
-    providerId,
-    fetchConnections,
-    fetchProviderModelMeta,
-    setImportProgress,
-    setShowImportModal,
-    setShowAddApiKeyModal,
-    setSiliconFlowInitialBaseUrl,
-    notify,
-    t,
-  });
-
-  // ── Phase 1t.4: node/connection update handlers ──────────────────────────
-  const { handleUpdateNode, handleUpdateConnection } = useProviderNodeActions({
-    providerId,
-    fetchConnections,
-    selectedConnection,
-    setProviderNode,
-    setShowEditNodeModal,
-    setShowEditModal,
-    t,
-  });
-
-  // Phase 1j: auth file handlers
-  const {
-    applyingCodexAuthId,
-    applyCodexModalConnectionId,
-    setApplyCodexModalConnectionId,
-    exportingCodexAuthId,
-    handleApplyCodexAuthLocal,
-    handleExportCodexAuthFile,
-    applyingClaudeAuthId,
-    applyClaudeModalConnectionId,
-    setApplyClaudeModalConnectionId,
-    exportingClaudeAuthId,
-    handleApplyClaudeAuthLocal,
-    handleExportClaudeAuthFile,
-    applyingGeminiAuthId,
-    applyGeminiModalConnectionId,
-    setApplyGeminiModalConnectionId,
-    exportingGeminiAuthId,
-    handleApplyGeminiAuthLocal,
-    handleExportGeminiAuthFile,
-  } = useAuthFileHandlers({ parseApiErrorMessage, getAttachmentFilename, notify, t });
-
-  // Phase 1e: compat-state derivations
-  const compat = useModelCompatState(modelMeta.customModels, modelMeta.modelCompatOverrides);
-  const { customMap } = compat;
->>>>>>> upstream/main
   const effectiveModelNormalize = compat.effectiveModelNormalize;
   const effectiveModelPreserveDeveloper = compat.effectiveModelPreserveDeveloper;
   const effectiveModelHidden = compat.isModelHidden;
@@ -2009,8 +1808,7 @@ export default function ProviderDetailPageClient() {
     [providerId, modelMeta.customModels]
   );
 
-<<<<<<< HEAD
-  const saveModelCompatFlags = async (modelId: string, patch: ModelCompatSavePatch) => {
+const saveModelCompatFlags = async (modelId: string, patch: ModelCompatSavePatch) => {
     setCompatSavingModelId(modelId);
     try {
       const c = customMap.get(modelId) as Record<string, unknown> | undefined;
@@ -2433,46 +2231,6 @@ export default function ProviderDetailPageClient() {
       </div>
     );
   };
-=======
-  // ── Phase 1l: model visibility handlers ─────────────────────────────────
-  const {
-    compatSavingModelId,
-    togglingModelId,
-    bulkVisibilityAction,
-    clearingModels,
-    modelFilter,
-    testingModelId,
-    modelTestStatus,
-    testingAll,
-    testProgress,
-    autoHideFailed,
-    visibilityFilter,
-    providerAliasEntries,
-    setModelFilter,
-    setAutoHideFailed,
-    setVisibilityFilter,
-    saveModelCompatFlags,
-    handleToggleModelHidden,
-    handleBulkToggleModelHidden,
-    handleClearAllModels,
-    onTestModel,
-    handleTestAll,
-    onModelTestStatusChange,
-  } = useModelVisibilityHandlers({
-    providerId,
-    modelAliases,
-    customMap,
-    providerStorageAlias,
-    fetchProviderModelMeta,
-    fetchAliases,
-    notify,
-    t,
-    selectedConnection,
-    providerNode,
-  });
-
-  // renderModelsSection → components/ProviderModelsSection.tsx (Phase 1m)
->>>>>>> upstream/main
 
   if (loading) {
     return (
@@ -2494,8 +2252,7 @@ export default function ProviderDetailPageClient() {
     );
   }
 
-<<<<<<< HEAD
-  // OpenAI/Anthropic compatible providers use their specialized pseudo-provider icons.
+// OpenAI/Anthropic compatible providers use their specialized pseudo-provider icons.
   const getHeaderIconProviderId = () => {
     if (isOpenAICompatible && providerInfo.apiType) {
       return providerInfo.apiType === "responses" ? "oai-r" : "oai-cc";
@@ -2543,7 +2300,6 @@ export default function ProviderDetailPageClient() {
               <p className="text-text-muted">
                 {t("connectionCountLabel", { count: connections.length })}
               </p>
-              <EmailPrivacyToggle size="md" />
               {providerId === "adapta-web" && (
                 <button
                   onClick={() => setShowTutorialModal(true)}
@@ -3687,245 +3443,12 @@ export default function ProviderDetailPageClient() {
           </div>
         </Card>
       )}
-=======
-  return (
-    <div className="flex flex-col gap-8">
-      {/* Header — Phase 1t.1: extracted to components/ProviderPageHeader.tsx */}
-      <ProviderPageHeader
-        providerId={providerId}
-        providerInfo={providerInfo}
-        connectionsCount={connections.length}
-        isOpenAICompatible={isOpenAICompatible}
-        isAnthropicProtocolCompatible={isAnthropicProtocolCompatible}
-        onOpenTutorial={() => setShowTutorialModal(true)}
-        t={t}
-      />
-
-      {providerId === "zed" && (
-        <ZedImportCard fetchConnections={fetchConnections} notify={notify} />
-      )}
-
-      {/* CompatibleNodeCard — Phase 1t.2: extracted to components/CompatibleNodeCard.tsx */}
-      {isCompatible && providerNode && (
-        <CompatibleNodeCard
-          providerId={providerId}
-          providerNode={providerNode}
-          isCcCompatible={isCcCompatible}
-          isAnthropicCompatible={isAnthropicCompatible}
-          isAnthropicProtocolCompatible={isAnthropicProtocolCompatible}
-          gateConnectionFlow={gateConnectionFlow}
-          openApiKeyAddFlow={openApiKeyAddFlow}
-          onOpenEditNodeModal={() => setShowEditNodeModal(true)}
-          t={t}
-        />
-      )}
-
-      {/* Connections */}
-      {!isUpstreamProxyProvider && isFreeNoAuth && (
-        <NoAuthProviderControls
-          providerId={providerId}
-          providerName={providerInfo?.name || providerId}
-        />
-      )}
-      {!isUpstreamProxyProvider && !isFreeNoAuth && (
-        <Card>
-          <ConnectionsHeaderToolbar
-            providerId={providerId}
-            providerInfo={providerInfo}
-            isCompatible={isCompatible}
-            isCommandCode={isCommandCode}
-            isOAuth={isOAuth}
-            providerSupportsPat={providerSupportsPat}
-            connections={connections}
-            batchTesting={batchTesting}
-            batchRetesting={batchRetesting}
-            retestingId={retestingId}
-            distributingProxies={distributingProxies}
-            proxyConfig={proxyConfig}
-            preferClaudeCodeForUnprefixedClaudeModels={preferClaudeCodeForUnprefixedClaudeModels}
-            claudeRoutingSettingsLoaded={claudeRoutingSettingsLoaded}
-            claudeRoutingSettingsLoadError={claudeRoutingSettingsLoadError}
-            savingClaudeRoutingPreference={savingClaudeRoutingPreference}
-            handleToggleClaudeRoutingPreference={handleToggleClaudeRoutingPreference}
-            loadClaudeRoutingSettings={loadClaudeRoutingSettings}
-            codexGlobalServiceMode={codexGlobalServiceMode}
-            codexGlobalServiceModeOptions={codexGlobalServiceModeOptions}
-            codexSettingsLoaded={codexSettingsLoaded}
-            codexSettingsLoadError={codexSettingsLoadError}
-            savingCodexGlobalServiceMode={savingCodexGlobalServiceMode}
-            handleChangeCodexGlobalServiceMode={handleChangeCodexGlobalServiceMode}
-            loadCodexSettings={loadCodexSettings}
-            onSetProxyTarget={setProxyTarget}
-            handleDistributeProxies={handleDistributeProxies}
-            handleBatchTestAll={handleBatchTestAll}
-            gateConnectionFlow={gateConnectionFlow}
-            openApiKeyAddFlow={openApiKeyAddFlow}
-            openPrimaryAddFlow={openPrimaryAddFlow}
-            openExternalLinkFlow={openExternalLinkFlow}
-            handleOpenCommandCodeConnect={handleOpenCommandCodeConnect}
-            commandCodeAuthState={commandCodeAuthState}
-            onOpenOAuthModal={() => setShowOAuthModal(true)}
-            onOpenCodexCliGuide={() => setCodexCliGuideOpen(true)}
-            onOpenImportCodex={() => setImportCodexModalOpen(true)}
-            onOpenImportClaude={() => setImportClaudeModalOpen(true)}
-            onOpenImportGemini={() => setImportGeminiModalOpen(true)}
-            t={t}
-          />
-
-          {connections.length === 0 ? (
-            <EmptyConnectionsPlaceholder
-              isOAuth={isOAuth}
-              isCompatible={isCompatible}
-              isCommandCode={isCommandCode}
-              providerId={providerId}
-              providerSupportsPat={providerSupportsPat}
-              commandCodeAuthState={commandCodeAuthState}
-              gateConnectionFlow={gateConnectionFlow}
-              openApiKeyAddFlow={openApiKeyAddFlow}
-              openPrimaryAddFlow={openPrimaryAddFlow}
-              handleOpenCommandCodeConnect={handleOpenCommandCodeConnect}
-              onOpenOAuthModal={() => setShowOAuthModal(true)}
-              onOpenImportCodex={() => setImportCodexModalOpen(true)}
-              onOpenImportClaude={() => setImportClaudeModalOpen(true)}
-              onOpenImportGemini={() => setImportGeminiModalOpen(true)}
-              t={t}
-            />
-          ) : (
-            <ConnectionsListPanel
-              connections={connections}
-              providerId={providerId}
-              isCcCompatible={isCcCompatible}
-              isOAuth={isOAuth}
-              codexGlobalServiceMode={codexGlobalServiceMode}
-              selectedIds={selectedIds}
-              batchUpdating={batchUpdating}
-              batchRetesting={batchRetesting}
-              batchDeleting={batchDeleting}
-              batchTesting={batchTesting}
-              retestingId={retestingId}
-              refreshingId={refreshingId}
-              distributingProxies={distributingProxies}
-              healthFilter={healthFilter}
-              page={page}
-              PAGE_SIZE={PAGE_SIZE}
-              connProxyMap={connProxyMap}
-              proxyConfig={proxyConfig}
-              applyingCodexAuthId={applyingCodexAuthId}
-              exportingCodexAuthId={exportingCodexAuthId}
-              applyingClaudeAuthId={applyingClaudeAuthId}
-              exportingClaudeAuthId={exportingClaudeAuthId}
-              applyingGeminiAuthId={applyingGeminiAuthId}
-              exportingGeminiAuthId={exportingGeminiAuthId}
-              emailsVisible={emailsVisible}
-              setSelectedIds={setSelectedIds}
-              setPage={setPage}
-              setHealthFilter={setHealthFilter}
-              handleDelete={handleDelete}
-              handleUpdateConnectionStatus={handleUpdateConnectionStatus}
-              handleToggleRateLimit={handleToggleRateLimit}
-              handleToggleClaudeExtraUsage={handleToggleClaudeExtraUsage}
-              handleToggleCliproxyapiMode={handleToggleCliproxyapiMode}
-              handleToggleCodexLimit={handleToggleCodexLimit}
-              handleToggleProxyEnabled={handleToggleProxyEnabled}
-              handleTogglePerKeyProxyEnabled={handleTogglePerKeyProxyEnabled}
-              handleRetestConnection={handleRetestConnection}
-              handleRefreshToken={handleRefreshToken}
-              handleSwapPriority={handleSwapPriority}
-              handleBatchSetActive={handleBatchSetActive}
-              handleBatchDeleteOpenModal={handleBatchDeleteOpenModal}
-              handleBatchRetest={handleBatchRetest}
-              handleToggleSelectOne={handleToggleSelectOne}
-              handleToggleSelectAll={handleToggleSelectAll}
-              handleDistributeProxies={handleDistributeProxies}
-              cpaProviderEnabled={cpaProviderEnabled}
-              onOpenEditModal={(conn) => {
-                setSelectedConnection(conn);
-                setShowEditModal(true);
-              }}
-              onOpenOAuth={(conn) => gateConnectionFlow(() => setShowOAuthModal(true, conn))}
-              onSetProxyTarget={setProxyTarget}
-              onOpenApplyCodexModal={setApplyCodexModalConnectionId}
-              onExportCodexAuthFile={handleExportCodexAuthFile}
-              onOpenApplyClaudeModal={setApplyClaudeModalConnectionId}
-              onExportClaudeAuthFile={handleExportClaudeAuthFile}
-              onOpenApplyGeminiModal={setApplyGeminiModalConnectionId}
-              onExportGeminiAuthFile={handleExportGeminiAuthFile}
-              gateConnectionFlow={gateConnectionFlow}
-              t={t}
-            />
-          )}
-        </Card>
-      )}
-      {isUpstreamProxyProvider && <UpstreamProxyCard t={t} />}
->>>>>>> upstream/main
 
       {/* Models — hidden for search providers (they don't have models) */}
       {!isSearchProvider && !isUpstreamProxyProvider && (
         <Card>
           <h2 className="text-lg font-semibold mb-4">{t("availableModels")}</h2>
-<<<<<<< HEAD
-          {renderModelsSection()}
-=======
-          {/* Phase 1m: extracted to components/ProviderModelsSection.tsx */}
-          <ProviderModelsSection
-            providerId={providerId}
-            providerAlias={providerAlias}
-            providerStorageAlias={providerStorageAlias}
-            providerDisplayAlias={providerDisplayAlias}
-            providerInfo={providerInfo}
-            isCcCompatible={isCcCompatible}
-            isAnthropicCompatible={isAnthropicCompatible}
-            isAnthropicProtocolCompatible={isAnthropicProtocolCompatible}
-            isManagedAvailableModelsProvider={isManagedAvailableModelsProvider}
-            compatibleSupportsModelImport={compatibleSupportsModelImport}
-            models={models}
-            modelMeta={modelMeta}
-            modelAliases={modelAliases}
-            syncedAvailableModels={syncedAvailableModels}
-            compatibleFallbackModels={compatibleFallbackModels}
-            copied={copied}
-            onCopy={copy}
-            onSetAlias={handleSetAlias}
-            onDeleteAlias={handleDeleteAlias}
-            fetchProviderModelMeta={fetchProviderModelMeta}
-            connections={connections}
-            selectedConnection={selectedConnection}
-            canImportModels={canImportModels}
-            importingModels={importingModels}
-            handleImportModels={handleImportModels}
-            isAutoSyncEnabled={isAutoSyncEnabled}
-            togglingAutoSync={togglingAutoSync}
-            handleToggleAutoSync={handleToggleAutoSync}
-            handleCompatibleImportWithProgress={handleCompatibleImportWithProgress}
-            compatSavingModelId={compatSavingModelId}
-            togglingModelId={togglingModelId}
-            bulkVisibilityAction={bulkVisibilityAction}
-            clearingModels={clearingModels}
-            modelFilter={modelFilter}
-            testingModelId={testingModelId}
-            modelTestStatus={modelTestStatus}
-            onModelTestStatusChange={onModelTestStatusChange}
-            testingAll={testingAll}
-            testProgress={testProgress}
-            autoHideFailed={autoHideFailed}
-            visibilityFilter={visibilityFilter}
-            providerAliasEntries={providerAliasEntries}
-            setModelFilter={setModelFilter}
-            setAutoHideFailed={setAutoHideFailed}
-            setVisibilityFilter={setVisibilityFilter}
-            saveModelCompatFlags={saveModelCompatFlags}
-            handleToggleModelHidden={handleToggleModelHidden}
-            handleBulkToggleModelHidden={handleBulkToggleModelHidden}
-            handleClearAllModels={handleClearAllModels}
-            onTestModel={onTestModel}
-            handleTestAll={handleTestAll}
-            effectiveModelNormalize={effectiveModelNormalize}
-            effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
-            effectiveModelHidden={effectiveModelHidden}
-            getUpstreamHeadersRecordForModel={getUpstreamHeadersRecordForModel}
-            t={t}
-          />
->>>>>>> upstream/main
+{renderModelsSection()}
 
           {/* Custom Models — available for all providers */}
           <CustomModelsSection
@@ -3939,8 +3462,7 @@ export default function ProviderDetailPageClient() {
       )}
 
       {/* Search provider info */}
-<<<<<<< HEAD
-      {isSearchProvider && (
+{isSearchProvider && (
         <Card>
           <h2 className="text-lg font-semibold mb-4">{t("searchProvider")}</h2>
           <p className="text-sm text-text-muted">{t("searchProviderDesc")}</p>
@@ -3964,15 +3486,11 @@ export default function ProviderDetailPageClient() {
           )}
         </Card>
       )}
-=======
-      {isSearchProvider && <SearchProviderCard providerId={providerId} t={t} />}
->>>>>>> upstream/main
 
       {/* Playground panel — rendered for providers that declare serviceKinds */}
       <ProviderPlaygroundPanel providerId={providerId} />
 
-<<<<<<< HEAD
-      {/* Modals */}
+{/* Modals */}
       {showRiskNoticeModal && subscriptionRisk && (
         <RiskNoticeModal
           variant={providerInfo.riskNoticeVariant ?? "oauth"}
@@ -4540,89 +4058,3 @@ export default function ProviderDetailPageClient() {
 // Phase 1d: CooldownTimer, inferErrorType, getStatusPresentation, ConnectionRow → components/ConnectionRow.tsx
 // Phase 1d: ModelCompatPopover, recordToHeaderRows → components/ModelCompatPopover.tsx
 // Phase 1d: SiliconFlowEndpointModal → components/SiliconFlowEndpointModal.tsx
-=======
-      {/* Modals — Phase 1t.5: extracted to components/ProviderModalsPanel.tsx */}
-      <ProviderModalsPanel
-        providerId={providerId}
-        providerInfo={providerInfo}
-        isCompatible={isCompatible}
-        isAnthropicProtocolCompatible={isAnthropicProtocolCompatible}
-        isCcCompatible={isCcCompatible}
-        isCommandCode={isCommandCode}
-        isUpstreamProxyProvider={isUpstreamProxyProvider}
-        subscriptionRisk={subscriptionRisk}
-        showRiskNoticeModal={showRiskNoticeModal}
-        handleConfirmRiskNotice={handleConfirmRiskNotice}
-        handleCancelRiskNotice={handleCancelRiskNotice}
-        showOAuthModal={showOAuthModal}
-        reauthConnection={reauthConnection}
-        handleOAuthSuccess={handleOAuthSuccess}
-        setShowOAuthModal={setShowOAuthModal}
-        showSiliconFlowEndpointModal={showSiliconFlowEndpointModal}
-        setSiliconFlowInitialBaseUrl={setSiliconFlowInitialBaseUrl}
-        setShowSiliconFlowEndpointModal={setShowSiliconFlowEndpointModal}
-        setShowAddApiKeyModal={setShowAddApiKeyModal}
-        showAddApiKeyModal={showAddApiKeyModal}
-        siliconFlowInitialBaseUrl={siliconFlowInitialBaseUrl}
-        commandCodeAuthState={commandCodeAuthState}
-        handleStartCommandCodeAuth={handleStartCommandCodeAuth}
-        handleSaveApiKey={handleSaveApiKey}
-        handleCloseAddApiKeyModal={handleCloseAddApiKeyModal}
-        batchDeleteConfirmOpen={batchDeleteConfirmOpen}
-        setBatchDeleteConfirmOpen={setBatchDeleteConfirmOpen}
-        handleBatchDeleteConfirm={handleBatchDeleteConfirm}
-        selectedIds={selectedIds}
-        batchDeleting={batchDeleting}
-        applyCodexModalConnectionId={applyCodexModalConnectionId}
-        setApplyCodexModalConnectionId={setApplyCodexModalConnectionId}
-        applyingCodexAuthId={applyingCodexAuthId}
-        handleApplyCodexAuthLocal={handleApplyCodexAuthLocal}
-        importCodexModalOpen={importCodexModalOpen}
-        setImportCodexModalOpen={setImportCodexModalOpen}
-        fetchConnections={fetchConnections}
-        externalLinkModalOpen={externalLinkModalOpen}
-        setExternalLinkModalOpen={setExternalLinkModalOpen}
-        externalLinkLoading={externalLinkLoading}
-        externalLinkError={externalLinkError}
-        externalLinkUrl={externalLinkUrl}
-        externalLinkCopied={externalLinkCopied}
-        externalLinkCopy={externalLinkCopy}
-        showEditModal={showEditModal}
-        setShowEditModal={setShowEditModal}
-        selectedConnection={selectedConnection}
-        handleUpdateConnection={handleUpdateConnection}
-        showEditNodeModal={showEditNodeModal}
-        setShowEditNodeModal={setShowEditNodeModal}
-        providerNode={providerNode}
-        handleUpdateNode={handleUpdateNode}
-        codexCliGuideOpen={codexCliGuideOpen}
-        setCodexCliGuideOpen={setCodexCliGuideOpen}
-        applyClaudeModalConnectionId={applyClaudeModalConnectionId}
-        setApplyClaudeModalConnectionId={setApplyClaudeModalConnectionId}
-        applyingClaudeAuthId={applyingClaudeAuthId}
-        handleApplyClaudeAuthLocal={handleApplyClaudeAuthLocal}
-        importClaudeModalOpen={importClaudeModalOpen}
-        setImportClaudeModalOpen={setImportClaudeModalOpen}
-        applyGeminiModalConnectionId={applyGeminiModalConnectionId}
-        setApplyGeminiModalConnectionId={setApplyGeminiModalConnectionId}
-        applyingGeminiAuthId={applyingGeminiAuthId}
-        handleApplyGeminiAuthLocal={handleApplyGeminiAuthLocal}
-        importGeminiModalOpen={importGeminiModalOpen}
-        setImportGeminiModalOpen={setImportGeminiModalOpen}
-        batchTestResults={batchTestResults}
-        setBatchTestResults={setBatchTestResults}
-        emailsVisible={emailsVisible}
-        proxyTarget={proxyTarget}
-        setProxyTarget={setProxyTarget}
-        fetchProxyConfig={fetchProxyConfig}
-        importProgress={importProgress}
-        showImportModal={showImportModal}
-        setShowImportModal={setShowImportModal}
-        showTutorialModal={showTutorialModal}
-        setShowTutorialModal={setShowTutorialModal}
-        t={t}
-      />
-    </div>
-  );
-}
->>>>>>> upstream/main
