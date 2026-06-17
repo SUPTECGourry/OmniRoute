@@ -30,4 +30,4 @@ export function smartFilterText(text: string, config: McpAccessibilityConfig): s
 }
 
 export type { McpAccessibilityConfig } from "./constants.ts";
-export { DEFAULT_MCP_ACCESSIBILITY_CONFIG } from "./constants.ts";
+export { DEFAULT_MCP_ACCESSIBILITY_CONFIG } from "./constants";

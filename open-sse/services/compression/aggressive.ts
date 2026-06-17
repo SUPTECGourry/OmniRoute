@@ -5,7 +5,7 @@ import { applyAging } from "./progressiveAging.ts";
 import { RuleBasedSummarizer } from "./summarizer.ts";
 import { cavemanCompress } from "./caveman.ts";
 import { applyLiteCompression } from "./lite.ts";
-import { extractTextContent, replaceTextContent, type ChatMessageLike } from "./messageContent.ts";
+import { extractTextContent, replaceTextContent, type ChatMessageLike } from "./messageContent";
 
 const COMPRESSED_MARKER_RE = /^\[COMPRESSED:/;
 

@@ -9,7 +9,7 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { FETCH_TIMEOUT_MS } from "../config/constants.ts";
-import { getAccessToken } from "../services/tokenRefresh.ts";
+import { getAccessToken } from "../services/tokenRefresh";
 import {
   buildGitLabDirectGatewayUrl,
   buildGitLabOAuthEndpoints,

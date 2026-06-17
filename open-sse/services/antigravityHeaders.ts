@@ -2,7 +2,7 @@ import {
   ANTIGRAVITY_FALLBACK_VERSION,
   getCachedAntigravityVersion,
   resolveAntigravityVersion,
-} from "./antigravityVersion.ts";
+} from "./antigravityVersion";
 
 /**
  * Antigravity header utilities.

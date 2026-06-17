@@ -9,7 +9,7 @@
  */
 
 import { sanitizeErrorMessage, buildErrorBody } from "../utils/error.ts";
-import type { WebFetchResult, WebFetchFormat, WebFetchCredentials } from "../handlers/webFetch.ts";
+import type { WebFetchResult, WebFetchFormat, WebFetchCredentials } from "../handlers/webFetch";
 
 const TAVILY_EXTRACT_URL = "https://api.tavily.com/extract";
 const TAVILY_TIMEOUT_MS = 30_000;

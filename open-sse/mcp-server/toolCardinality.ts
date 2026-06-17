@@ -24,7 +24,7 @@
  *  7. Return type mirrors the input type: array → array, object → object.
  */
 
-import { estimateCompressionTokens } from "../services/compression/stats.ts";
+import { estimateCompressionTokens } from "../services/compression/stats";
 
 // ---------------------------------------------------------------------------
 // Types

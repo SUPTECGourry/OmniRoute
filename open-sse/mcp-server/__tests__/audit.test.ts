@@ -125,7 +125,7 @@ describe("MCP audit shutdown", () => {
     });
     vi.doMock("node:sqlite", () => ({ DatabaseSync }));
 
-    const audit = await import("../audit.ts");
+    const audit = await import("../audit");
 
     await audit.logToolCall("omniroute_get_health", { ok: true }, { ok: true }, 4, true);
     expect(DatabaseSync).toHaveBeenCalledWith(dbFile);

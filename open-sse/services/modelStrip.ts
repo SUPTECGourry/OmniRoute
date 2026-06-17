@@ -1,4 +1,4 @@
-import { PROVIDER_ID_TO_ALIAS, getModelStripTypes } from "../config/providerModels.ts";
+import { PROVIDER_ID_TO_ALIAS, getModelStripTypes } from "../config/providerModels";
 
 type JsonRecord = Record<string, unknown>;
 

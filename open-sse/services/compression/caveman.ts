@@ -11,7 +11,7 @@ import { extractPreservedBlocks, restorePreservedBlocks } from "./preservation.t
 import { createCompressionStats, estimateCompressionTokens } from "./stats.ts";
 import { validateCompression } from "./validation.ts";
 import { mapTextContent } from "./messageContent.ts";
-import { detectCompressionLanguage } from "./languageDetector.ts";
+import { detectCompressionLanguage } from "./languageDetector";
 
 interface ChatMessage {
   role: string;

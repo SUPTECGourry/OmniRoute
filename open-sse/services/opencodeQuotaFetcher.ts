@@ -46,7 +46,7 @@
  */
 
 import { registerQuotaFetcher, registerQuotaWindows, type QuotaInfo } from "./quotaPreflight.ts";
-import { registerMonitorFetcher } from "./quotaMonitor.ts";
+import { registerMonitorFetcher } from "./quotaMonitor";
 
 // OpenCode quota endpoint — same key works across opencode, opencode-go, opencode-zen
 // Default points at /zen/go/v1/quota which returns 404 today (no public quota API yet,

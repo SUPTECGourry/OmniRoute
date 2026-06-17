@@ -1,4 +1,4 @@
-import type { CompressionEngine, EngineRegistryEntry, EngineValidationResult } from "./types.ts";
+import type { CompressionEngine, EngineRegistryEntry, EngineValidationResult } from "./types";
 
 const ENGINES = new Map<string, EngineRegistryEntry>();
 

@@ -10,7 +10,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { createMcpServer } from "./server.ts";
+import { createMcpServer } from "./server";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 

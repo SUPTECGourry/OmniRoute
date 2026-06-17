@@ -23,7 +23,7 @@ import {
   getAntigravityBootstrapHeaders,
   type AntigravityClientProfile,
 } from "./antigravityClientProfile.ts";
-import { ANTIGRAVITY_BASE_URLS } from "../config/antigravityUpstream.ts";
+import { ANTIGRAVITY_BASE_URLS } from "../config/antigravityUpstream";
 
 const LOAD_CODE_ASSIST_PATH = "/v1internal:loadCodeAssist";
 const BOOTSTRAP_TIMEOUT_MS = 8_000;

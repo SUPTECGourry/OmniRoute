@@ -5,7 +5,7 @@ import {
   compareByCostEffectiveness,
   estimateRequestCost,
 } from "../manifestAdapter.ts";
-import type { ResolvedComboTarget } from "../combo.ts";
+import type { ResolvedComboTarget } from "../combo";
 
 function makeTarget(provider: string, model: string): ResolvedComboTarget {
   return {

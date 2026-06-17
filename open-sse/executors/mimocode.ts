@@ -17,7 +17,7 @@
 
 import * as crypto from "node:crypto";
 import * as os from "node:os";
-import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base.ts";
+import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base";
 
 
 const BOOTSTRAP_PATH = "/api/free-ai/bootstrap";

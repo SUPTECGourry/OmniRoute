@@ -34,4 +34,4 @@ export {
   replayTranscripts,
   type Transcript,
   type TranscriptTurn,
-} from "./replay.ts";
+} from "./replay";

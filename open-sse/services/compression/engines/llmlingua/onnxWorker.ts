@@ -26,7 +26,7 @@ import {
   configureTransformersEnv,
   type TransformersEnvLike,
 } from "./modelStore.ts";
-import type { LlmlinguaModelEntry } from "./constants.ts";
+import type { LlmlinguaModelEntry } from "./constants";
 
 /**
  * Dynamic-import indirection. These four deps are OPTIONAL and not installed by

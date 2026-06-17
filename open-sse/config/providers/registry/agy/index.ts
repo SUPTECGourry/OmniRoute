@@ -5,7 +5,7 @@ import {
   AGY_PUBLIC_MODELS,
   getAntigravityProviderHeaders,
   resolvePublicCred,
-} from "../../shared.ts";
+} from "../../shared";
 
 export const agyProvider: RegistryEntry = {
   id: "agy",

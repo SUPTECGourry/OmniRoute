@@ -28,7 +28,7 @@ import {
   isPrivateHost,
   OutboundUrlGuardError,
 } from "@/shared/network/outboundUrlGuard";
-import type { EncodedImage } from "./cursorAgentProtobuf.ts";
+import type { EncodedImage } from "./cursorAgentProtobuf";
 
 // 1 MiB per image — matches composer-api's MAX_CURSOR_IMAGE_BYTES. Large
 // enough for a typical screenshot, small enough to bound request size and

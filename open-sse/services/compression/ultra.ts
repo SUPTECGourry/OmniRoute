@@ -1,7 +1,7 @@
 import { pruneByScore } from "./ultraHeuristic.ts";
 import { DEFAULT_ULTRA_CONFIG } from "./types.ts";
 import type { UltraConfig, CompressionStats, CompressionMode } from "./types.ts";
-import { extractTextContent, mapTextContent, type ChatMessageLike } from "./messageContent.ts";
+import { extractTextContent, mapTextContent, type ChatMessageLike } from "./messageContent";
 
 const COMPRESSED_PREFIX = "[COMPRESSED:";
 

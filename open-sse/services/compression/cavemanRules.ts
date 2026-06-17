@@ -1,5 +1,5 @@
 import type { CavemanRule } from "./types.ts";
-import { loadAllRulesForLanguage } from "./ruleLoader.ts";
+import { loadAllRulesForLanguage } from "./ruleLoader";
 
 const CAVEMAN_RULES: CavemanRule[] = [
   // ── Category 1: Filler Removal (10+ rules) ──────────────────────────

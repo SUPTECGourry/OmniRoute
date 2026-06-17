@@ -6,7 +6,7 @@ import {
   getRecommendedMinTier,
   isHighSpecificity,
   isLowSpecificity,
-} from "../specificityDetector.ts";
+} from "../specificityDetector";
 
 describe("SpecificityDetector", () => {
   describe("analyzeSpecificity - trivial query", () => {

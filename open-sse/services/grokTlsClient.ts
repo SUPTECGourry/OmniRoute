@@ -205,7 +205,7 @@ export interface TlsFetchOptions {
 }
 
 import { resolveProxyForRequest } from "../utils/proxyFetch.ts";
-import { resolveTlsClientProxyUrl } from "./tlsClientProxy.ts";
+import { resolveTlsClientProxyUrl } from "./tlsClientProxy";
 
 /**
  * Resolve the proxy URL for a tls-client request. Per-call value wins;

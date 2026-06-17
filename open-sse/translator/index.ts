@@ -23,7 +23,7 @@ import {
 } from "../services/reasoningCache.ts";
 
 bootstrapTranslatorRegistry();
-export { register } from "./registry.ts";
+export { register } from "./registry";
 
 function normalizeResponsesInputItem(item) {
   if (typeof item === "string") {

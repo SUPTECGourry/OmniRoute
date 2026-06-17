@@ -9,7 +9,7 @@
  * SSE response with data: prefixed JSON chunks (OpenAI-compatible delta format)
  */
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
-import { makeExecutorErrorResult as makeErrorResult, normalizeCookie } from "../utils/error.ts";
+import { makeExecutorErrorResult as makeErrorResult, normalizeCookie } from "../utils/error";
 
 const BASE_URL = "https://www.phind.com";
 const CHAT_URL = `${BASE_URL}/api/agent`;

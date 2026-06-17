@@ -156,7 +156,7 @@ export class QoderExecutor extends BaseExecutor {
               // skip unparseable chunks
             }
           }
-          const { buildQoderCompletionPayload } = await import("../services/qoderCli.ts");
+          const { buildQoderCompletionPayload } = await import("../services/qoderCli");
           const cosyPayload = buildQoderCompletionPayload({
             model: mappedModel || resolvedModel,
             text: fullContent,

@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../../shared.ts";
-import { resolvePublicCred } from "../../../shared.ts";
+import { resolvePublicCred } from "../../../shared";
 
 export const gemini_cliProvider: RegistryEntry = {
   id: "gemini-cli",

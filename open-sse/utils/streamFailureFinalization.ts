@@ -4,7 +4,7 @@ import {
 } from "@/lib/usage/usageHistory.ts";
 
 import { HTTP_STATUS } from "../config/constants.ts";
-import { buildErrorBody } from "./error.ts";
+import { buildErrorBody } from "./error";
 
 export type StreamCompletionPayload = {
   status: number;

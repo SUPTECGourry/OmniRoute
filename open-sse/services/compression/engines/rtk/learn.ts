@@ -28,7 +28,7 @@
  *    caller can save it directly without rename.
  */
 
-import { discoverRepeatedNoise, discoverNormalizeLine, type CommandSample } from "./discover.ts";
+import { discoverRepeatedNoise, discoverNormalizeLine, type CommandSample } from "./discover";
 
 // ---------------------------------------------------------------------------
 // Public types

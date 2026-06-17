@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../shared.ts";
-import { getQoderDefaultHeaders } from "../../shared.ts";
+import { getQoderDefaultHeaders } from "../../shared";
 
 export const qoderProvider: RegistryEntry = {
   id: "qoder",

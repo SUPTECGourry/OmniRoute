@@ -1,4 +1,4 @@
-import type { ToolStrategiesConfig } from "./types.ts";
+import type { ToolStrategiesConfig } from "./types";
 
 export interface CompressionResult {
   compressed: string;

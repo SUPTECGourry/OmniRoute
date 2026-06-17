@@ -4,7 +4,7 @@
  */
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
-import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
+import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments";
 
 function normalizeToolName(value) {
   return typeof value === "string" ? value.trim() : "";

@@ -51,7 +51,7 @@ import {
 import { getCursorVersion } from "../utils/cursorVersionDetector.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { generateToolCallId } from "../translator/helpers/toolCallHelper.ts";
-import { cursorSessionManager, type CursorSession } from "../services/cursorSessionManager.ts";
+import { cursorSessionManager, type CursorSession } from "../services/cursorSessionManager";
 import crypto from "crypto";
 import * as fs from "node:fs";
 import * as zlib from "node:zlib";

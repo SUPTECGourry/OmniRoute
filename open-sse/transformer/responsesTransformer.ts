@@ -1,4 +1,4 @@
-import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
+import { appendToolCallArgumentDelta } from "../utils/toolCallArguments";
 import * as fs from "fs";
 import * as path from "path";
 /**

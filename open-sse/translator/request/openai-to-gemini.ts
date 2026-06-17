@@ -29,7 +29,7 @@ import {
   tryParseJSON,
   cleanJSONSchemaForAntigravity,
 } from "../helpers/geminiHelper.ts";
-import { buildGeminiTools, sanitizeGeminiToolName } from "../helpers/geminiToolsSanitizer.ts";
+import { buildGeminiTools, sanitizeGeminiToolName } from "../helpers/geminiToolsSanitizer";
 
 // Observed Antigravity wrapper output cap, not an underlying model capability.
 // Keep this bridge-local: capMaxOutputTokens() falls back to OmniRoute's generic

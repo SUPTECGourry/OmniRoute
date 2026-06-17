@@ -7,7 +7,7 @@
  * structured text blocks in user messages.
  */
 import { register } from "../registry.ts";
-import { FORMATS } from "../formats.ts";
+import { FORMATS } from "../formats";
 
 type TextPart = { type?: string; text?: string };
 type ToolUsePart = { type?: string; id?: string; name?: string; input?: unknown };

@@ -1,4 +1,4 @@
-import { MAX_TOOLS_LIMIT } from "../config/constants.ts";
+import { MAX_TOOLS_LIMIT } from "../config/constants";
 
 const DETECTED_LIMITS = new Map<string, { limit: number; timestamp: number }>();
 const TTL_MS = 24 * 60 * 60 * 1000;

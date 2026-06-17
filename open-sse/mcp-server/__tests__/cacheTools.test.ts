@@ -11,7 +11,7 @@ import {
 } from "../schemas/tools.ts";
 import { createMcpServer } from "../server.ts";
 
-vi.mock("../audit.ts", () => ({
+vi.mock("../audit", () => ({
   logToolCall: vi.fn().mockResolvedValue(undefined),
   closeAuditDb: vi.fn(),
 }));

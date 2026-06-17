@@ -5,7 +5,7 @@ import {
   ANTIGRAVITY_PUBLIC_MODELS,
   getAntigravityProviderHeaders,
   resolvePublicCred,
-} from "../../shared.ts";
+} from "../../shared";
 
 export const antigravityProvider: RegistryEntry = {
   id: "antigravity",

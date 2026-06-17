@@ -35,7 +35,7 @@ import {
   checkTokensPerTaskGate,
   type BudgetBaseline,
   type BudgetGateResult,
-} from "./budgetGate.ts";
+} from "./budgetGate";
 
 // Register all built-in engines once (idempotent).
 registerBuiltinCompressionEngines();

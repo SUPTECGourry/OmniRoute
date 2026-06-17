@@ -260,7 +260,7 @@ describe("claudeTlsClient", () => {
 
     it("falls back to env var when per-call proxyUrl not provided", async () => {
       const { __setTlsFetchOverrideForTesting, tlsFetchClaude } =
-        await import("../claudeTlsClient.ts");
+        await import("../claudeTlsClient");
 
       process.env.HTTPS_PROXY = "http://env-proxy:8080";
       const mockFn = vi.fn().mockResolvedValue({

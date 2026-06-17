@@ -1,4 +1,4 @@
-import { CORS_HEADERS } from "./cors.ts";
+import { CORS_HEADERS } from "./cors";
 
 type PendingToolCall = {
   id?: string;

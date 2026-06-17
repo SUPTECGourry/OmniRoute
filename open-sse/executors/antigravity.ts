@@ -54,7 +54,7 @@ import {
   getAntigravityEnvelopeUserAgent,
   getAntigravitySessionId,
 } from "../services/antigravityIdentity.ts";
-import * as prl from "../utils/providerRequestLogging.ts";
+import * as prl from "../utils/providerRequestLogging";
 
 const MAX_RETRY_AFTER_MS = 60_000;
 const LONG_RETRY_THRESHOLD_MS = 60_000;

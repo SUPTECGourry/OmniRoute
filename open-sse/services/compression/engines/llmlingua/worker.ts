@@ -132,7 +132,7 @@ function resolveWorkerFile(): { workerFile: string; execArgv: string[] } {
   );
 
   // 1. Dev: sibling source/compiled file next to this module.
-  const devTs = path.join(moduleDir, "onnxWorker.ts");
+  const devTs = path.join(moduleDir, "onnxWorker");
   if (fs.existsSync(devTs)) return { workerFile: devTs, execArgv: ["--import", "tsx/esm"] };
   const devJs = path.join(moduleDir, "onnxWorker.js");
   if (fs.existsSync(devJs)) return { workerFile: devJs, execArgv: [] };

@@ -260,7 +260,7 @@ export async function runWithProxyContext(
       const u = new URL(resolvedProxyUrl);
       const fam = u.searchParams.get("family");
       if (fam === "ipv6" || fam === "ipv4") {
-        const { assertHostnameSupportsFamily } = await import("./proxyFamilyResolve.ts");
+        const { assertHostnameSupportsFamily } = await import("./proxyFamilyResolve");
         await assertHostnameSupportsFamily(u.hostname, fam === "ipv6" ? 6 : 4);
       }
     } catch (familyErr) {

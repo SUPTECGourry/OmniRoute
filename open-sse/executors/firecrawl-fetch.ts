@@ -9,7 +9,7 @@
  */
 
 import { sanitizeErrorMessage, buildErrorBody } from "../utils/error.ts";
-import type { WebFetchResult, WebFetchFormat, WebFetchCredentials } from "../handlers/webFetch.ts";
+import type { WebFetchResult, WebFetchFormat, WebFetchCredentials } from "../handlers/webFetch";
 
 const FIRECRAWL_API_BASE = "https://api.firecrawl.dev/v1";
 const FIRECRAWL_TIMEOUT_MS = 30_000;

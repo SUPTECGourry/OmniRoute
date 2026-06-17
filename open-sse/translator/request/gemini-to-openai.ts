@@ -1,6 +1,6 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
-import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
+import { adjustMaxTokens } from "../helpers/maxTokensHelper";
 
 // Convert Gemini request to OpenAI format
 export function geminiToOpenAIRequest(model, body, stream) {

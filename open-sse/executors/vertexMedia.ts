@@ -22,7 +22,7 @@ import {
   getAccessToken,
   looksLikeServiceAccountJson,
   isExpressApiKey,
-} from "./vertex.ts";
+} from "./vertex";
 
 export interface VertexMediaCredentials {
   apiKey?: string | null;

@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 
 export const cloudflare_aiProvider: RegistryEntry = {
   id: "cloudflare-ai",

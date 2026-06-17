@@ -1,4 +1,4 @@
-import { getModelSpec } from "../../src/shared/constants/modelSpecs.ts";
+import { getModelSpec } from "../../src/shared/constants/modelSpecs";
 
 const CLOUD_CODE_REASONING_UNSUPPORTED_PATTERNS = [/^claude-/i, /^gpt-oss-/i, /^tab_/i];
 

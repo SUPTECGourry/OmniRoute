@@ -1,5 +1,5 @@
 import { getResolvedModelCapabilities } from "../../src/lib/modelCapabilities.ts";
-import { MODEL_SPECS } from "../../src/shared/constants/modelSpecs.ts";
+import { MODEL_SPECS } from "../../src/shared/constants/modelSpecs";
 
 const DEFAULT_MAX_OUTPUT_TOKENS = MODEL_SPECS.__default__.maxOutputTokens;
 

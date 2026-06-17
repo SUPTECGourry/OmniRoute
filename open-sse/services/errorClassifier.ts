@@ -4,7 +4,7 @@ import {
   isDailyQuotaExhausted,
   isOAuthInvalidToken,
 } from "./accountFallback.ts";
-import { getProviderCategory } from "../config/providerRegistry.ts";
+import { getProviderCategory } from "../config/providerRegistry";
 
 // Terminal stop signals where an empty content payload is still a legitimate,
 // successful completion (truncated at the token limit, or a tool-call turn) —

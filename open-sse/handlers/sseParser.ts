@@ -1,5 +1,5 @@
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 /**
  * Extract a provider error message from a buffered SSE stream that carries an

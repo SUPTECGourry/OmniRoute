@@ -25,4 +25,4 @@ export type {
   WebExecutorResponse,
 } from "./types.ts";
 
-export { DEFAULT_POOL_CONFIG } from "./types.ts";
+export { DEFAULT_POOL_CONFIG } from "./types";

@@ -4,7 +4,7 @@ import {
   MCP_TOOL_MAP,
   setRoutingStrategyInput,
   setRoutingStrategyTool,
-} from "../schemas/tools.ts";
+} from "../schemas/tools";
 
 describe("omniroute_set_routing_strategy MCP tool schema", () => {
   it("should be registered in MCP_TOOLS", () => {

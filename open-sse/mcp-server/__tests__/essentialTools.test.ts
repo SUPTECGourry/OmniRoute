@@ -147,7 +147,7 @@ describe("MCP Essential Tools", () => {
 // These tests use InMemoryTransport + Client to exercise the actual registered
 // handler (not mockFetch directly), ensuring real handler coverage.
 
-vi.mock("../audit.ts", () => ({
+vi.mock("../audit", () => ({
   logToolCall: vi.fn().mockResolvedValue(undefined),
 }));
 

@@ -8,7 +8,7 @@
 import crypto from "crypto";
 import { v5 as uuidv5 } from "uuid";
 import { getCursorUserAgent } from "../config/providerHeaderProfiles.ts";
-import { getCursorVersion } from "./cursorVersionDetector.ts";
+import { getCursorVersion } from "./cursorVersionDetector";
 
 /**
  * Generate SHA-256 hash like generateHashed64Hex

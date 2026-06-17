@@ -12,7 +12,7 @@
  *   - Cooldown state (exponential backoff on rate limits)
  */
 
-import { type Fingerprint, type SessionStatus } from "./types.ts";
+import { type Fingerprint, type SessionStatus } from "./types";
 
 export class Session {
   readonly id: string;

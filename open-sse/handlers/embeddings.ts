@@ -24,7 +24,7 @@ import { isDetailedLoggingEnabled } from "@/lib/db/detailedLogs";
 import { getCallLogPipelineCaptureStreamChunks } from "@/lib/logEnv";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { stripStaleEncodingHeaders } from "../utils/upstreamResponseHeaders.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 interface ClientRawRequest {
   endpoint: string;

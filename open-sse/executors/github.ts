@@ -5,7 +5,7 @@ import {
   getGitHubCopilotChatHeaders,
   getGitHubCopilotRefreshHeaders,
 } from "../config/providerHeaderProfiles.ts";
-import { sanitizeResponsesInputItems } from "../services/responsesInputSanitizer.ts";
+import { sanitizeResponsesInputItems } from "../services/responsesInputSanitizer";
 
 export class GithubExecutor extends BaseExecutor {
   constructor() {

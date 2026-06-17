@@ -23,7 +23,7 @@
  */
 
 import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
-import { registerMonitorFetcher } from "./quotaMonitor.ts";
+import { registerMonitorFetcher } from "./quotaMonitor";
 
 // DeepSeek API config
 const DEEPSEEK_CONFIG = {

@@ -11,7 +11,7 @@
 import Bottleneck from "bottleneck";
 import { parseRetryAfterFromBody } from "./accountFallback.ts";
 import { getProviderCategory } from "../config/providerRegistry.ts";
-import { getCodexRateLimitKey } from "../executors/codex.ts";
+import { getCodexRateLimitKey } from "../executors/codex";
 import {
   DEFAULT_RESILIENCE_SETTINGS,
   resolveResilienceSettings,

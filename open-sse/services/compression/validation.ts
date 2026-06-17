@@ -1,4 +1,4 @@
-import { findFencedCodeBlocks } from "./preservation.ts";
+import { findFencedCodeBlocks } from "./preservation";
 
 export interface ValidationResult {
   valid: boolean;

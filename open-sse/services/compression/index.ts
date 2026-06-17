@@ -156,4 +156,4 @@ export type { SLMInterface, UltraCompressResult } from "./ultra.ts";
 export { createSLMStub, ultraCompress } from "./ultra.ts";
 
 export type { UltraConfig } from "./types.ts";
-export { DEFAULT_ULTRA_CONFIG } from "./types.ts";
+export { DEFAULT_ULTRA_CONFIG } from "./types";

@@ -4,7 +4,7 @@ import {
   RESPONSES_PREVIOUS_RESPONSE_ID_MODES,
   type ResponsesPreviousResponseIdMode,
 } from "@/shared/constants/responsesPreviousResponseId";
-import { FORMATS } from "../translator/formats.ts";
+import { FORMATS } from "../translator/formats";
 
 type JsonRecord = Record<string, unknown>;
 

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { CavemanIntensity, CavemanRule } from "./types.ts";
+import type { CavemanIntensity, CavemanRule } from "./types";
 
 type CavemanRuleCategory = NonNullable<CavemanRule["category"]>;
 type CavemanRuleContext = CavemanRule["context"];

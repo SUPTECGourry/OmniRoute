@@ -31,7 +31,7 @@ import { translateRequest } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { createSSETransformStreamWithLogger } from "../utils/stream.ts";
 import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
-import { STREAM_READINESS_TIMEOUT_MS } from "../config/constants.ts";
+import { STREAM_READINESS_TIMEOUT_MS } from "../config/constants";
 
 type JsonRecord = Record<string, unknown>;
 type GlmExecuteResult = Awaited<ReturnType<DefaultExecutor["execute"]>> & {

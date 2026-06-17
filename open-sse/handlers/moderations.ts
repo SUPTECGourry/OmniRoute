@@ -6,7 +6,7 @@ import { CORS_HEADERS } from "../utils/cors.ts";
  */
 
 import { getModerationProvider, parseModerationModel } from "../config/moderationRegistry.ts";
-import { errorResponse } from "../utils/error.ts";
+import { errorResponse } from "../utils/error";
 
 /**
  * Handle moderation request

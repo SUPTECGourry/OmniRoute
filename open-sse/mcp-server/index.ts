@@ -16,4 +16,4 @@ export {
   shutdownMcpHttp,
   isMcpHttpActive,
 } from "./httpTransport.ts";
-export * from "./schemas/index.ts";
+export * from "./schemas/index";

@@ -1,5 +1,5 @@
 import { cloneLogPayload } from "@/lib/logPayloads";
-import { FORMATS } from "../translator/formats.ts";
+import { FORMATS } from "../translator/formats";
 
 type StructuredSSEEvent = {
   index: number;

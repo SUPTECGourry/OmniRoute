@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createNotionClient } from "../../../src/lib/notion/api.ts";
-import { getNotionToken } from "../../../src/lib/db/notion.ts";
+import { getNotionToken } from "../../../src/lib/db/notion";
 
 function requireToken(): string {
   const token = getNotionToken();

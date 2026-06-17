@@ -3,7 +3,7 @@ import { calculateCost } from "@/lib/usage/costCalculator";
 import { trackPendingRequest } from "@/lib/usageDb";
 import { synthesizeOpenAiSseFromJson } from "../../utils/jsonToSse.ts";
 import { buildOmniRouteResponseMetaHeaders } from "@/domain/omnirouteResponseMeta";
-import { extractUsageFromResponse } from "../usageExtractor.ts";
+import { extractUsageFromResponse } from "../usageExtractor";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 
 export async function checkSemanticCache({

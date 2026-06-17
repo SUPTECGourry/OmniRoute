@@ -42,7 +42,7 @@ import {
 } from "../utils/comfyuiClient.ts";
 import { fetchRemoteImage } from "@/shared/network/remoteImageFetch";
 import { FetchTimeoutError, fetchWithTimeout, getConfiguredTimeout } from "@/shared/utils/fetchTimeout";
-import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error.ts";
+import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error";
 
 interface KieImageOptions {
   model: string;

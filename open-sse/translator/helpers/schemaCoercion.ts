@@ -1,7 +1,7 @@
 import {
   isDeepSeekReasoningModel,
   requiresReasoningReplay,
-} from "../../services/reasoningCache.ts";
+} from "../../services/reasoningCache";
 
 /**
  * Shared sanitizers for tool payloads that arrive from IDEs/SDKs with

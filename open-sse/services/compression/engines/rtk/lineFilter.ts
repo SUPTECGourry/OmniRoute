@@ -1,5 +1,5 @@
 import type { RtkFilterDefinition } from "./filterSchema.ts";
-import { smartTruncate } from "./smartTruncate.ts";
+import { smartTruncate } from "./smartTruncate";
 
 export interface LineFilterResult {
   text: string;

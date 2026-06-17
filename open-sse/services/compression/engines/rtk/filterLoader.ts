@@ -4,7 +4,7 @@ import path from "node:path";
 import os from "node:os";
 import crypto from "node:crypto";
 import { detectCommandType } from "./commandDetector.ts";
-import { validateRtkFilter, type RtkFilterDefinition } from "./filterSchema.ts";
+import { validateRtkFilter, type RtkFilterDefinition } from "./filterSchema";
 
 let cache: RtkFilterDefinition[] | null = null;
 let cacheKey: string | null = null;

@@ -14,7 +14,7 @@ import {
   type TlsFetchResult,
 } from "../services/perplexityTlsClient.ts";
 import { prepareToolMessages, buildToolAwareResult } from "../translator/webTools.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 const PPLX_SSE_ENDPOINT = "https://www.perplexity.ai/rest/sse/perplexity_ask";
 // Perplexity's current request schema version (sent in params.version). Perplexity rejects

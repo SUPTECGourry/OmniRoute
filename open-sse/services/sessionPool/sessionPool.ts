@@ -38,7 +38,7 @@ import {
   type PoolSessionDetail,
   type PoolStats,
   DEFAULT_POOL_CONFIG,
-} from "./types.ts";
+} from "./types";
 
 export class SessionPool {
   readonly provider: string;

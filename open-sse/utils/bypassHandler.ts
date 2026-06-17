@@ -3,7 +3,7 @@ import { detectFormat } from "../services/provider.ts";
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { SKIP_PATTERNS } from "../config/constants.ts";
-import { formatSSE } from "./stream.ts";
+import { formatSSE } from "./stream";
 
 /**
  * Check for bypass patterns — return fake response without calling provider.

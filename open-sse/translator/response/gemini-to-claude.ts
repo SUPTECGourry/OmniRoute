@@ -1,5 +1,5 @@
 import { register } from "../registry.ts";
-import { FORMATS } from "../formats.ts";
+import { FORMATS } from "../formats";
 
 /**
  * Direct Gemini → Claude response translator.

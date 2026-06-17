@@ -8,7 +8,7 @@ import {
   CLAUDE_CLI_STAINLESS_PACKAGE_VERSION,
   CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
   CLAUDE_CLI_USER_AGENT,
-} from "../../shared.ts";
+} from "../../shared";
 
 export const agentrouterProvider: RegistryEntry = {
   id: "agentrouter",

@@ -9,7 +9,7 @@ import {
   CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
   CLAUDE_CLI_USER_AGENT,
   resolvePublicCred,
-} from "../../shared.ts";
+} from "../../shared";
 
 export const claudeProvider: RegistryEntry = {
   id: "claude",

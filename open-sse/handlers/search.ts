@@ -22,7 +22,7 @@ import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { z } from "zod";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 // ── Types ────────────────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../shared.ts";
-import { getAnthropicCompatHeaders, ANTHROPIC_VERSION_HEADER } from "../../shared.ts";
+import { getAnthropicCompatHeaders, ANTHROPIC_VERSION_HEADER } from "../../shared";
 
 export const minimaxProvider: RegistryEntry = {
   id: "minimax",

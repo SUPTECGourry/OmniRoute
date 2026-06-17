@@ -7,7 +7,7 @@ import {
   getProviderModels,
 } from "../../config/providerModels.ts";
 import { buildGlmAnthropicMessagesUrl, buildGlmOpenAIChatUrl } from "../../config/glmProvider.ts";
-import { getPricingForModel } from "../../../src/shared/constants/pricing.ts";
+import { getPricingForModel } from "../../../src/shared/constants/pricing";
 
 describe("GLM Coding provider registry surfaces", () => {
   it("registers the GLM Coding provider with the expected transport metadata", () => {

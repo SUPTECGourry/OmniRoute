@@ -3639,7 +3639,7 @@ log?.info?.("CONTEXT", `Combo context limit: ${resolved.limit} (source=${resolve
       });
 
       if (decision.kind === "block") {
-        const { buildErrorBody } = await import("../utils/error.ts");
+        const { buildErrorBody } = await import("../utils/error");
         log?.warn?.(
           "QUOTA_SHARE",
           `[quotaShare] blocked apiKeyId=${apiKeyInfo.id} provider=${provider ?? "unknown"}: ${decision.reason}`

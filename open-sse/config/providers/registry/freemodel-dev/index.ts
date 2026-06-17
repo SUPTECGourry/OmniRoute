@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 
 export const freemodel_devProvider: RegistryEntry = {
   id: "freemodel-dev",

@@ -1,5 +1,5 @@
 import { FORMATS } from "../../translator/formats.ts";
-import { sanitizeOpenAITool } from "../../services/toolSchemaSanitizer.ts";
+import { sanitizeOpenAITool } from "../../services/toolSchemaSanitizer";
 
 export function sanitizeChatRequestBody(
   body: Record<string, unknown>,

@@ -17,7 +17,7 @@
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { createHash, randomBytes } from "node:crypto";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 

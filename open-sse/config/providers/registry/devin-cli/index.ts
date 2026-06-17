@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 
 export const devin_cliProvider: RegistryEntry = {
   id: "devin-cli",

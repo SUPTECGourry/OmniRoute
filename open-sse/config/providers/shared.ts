@@ -38,7 +38,7 @@ import {
   getRuntimeArch,
 } from "../providerHeaderProfiles.ts";
 import type { ProviderRequestDefaults } from "../../services/providerRequestDefaults.ts";
-import { resolvePublicCred } from "../../utils/publicCreds.ts";
+import { resolvePublicCred } from "../../utils/publicCreds";
 import { buildGitLabOAuthEndpoints, GITLAB_DUO_DEFAULT_BASE_URL } from "@/lib/oauth/gitlab";
 
 // ── Types ─────────────────────────────────────────────────────────────────

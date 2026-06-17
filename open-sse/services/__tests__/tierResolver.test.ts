@@ -12,7 +12,7 @@ import {
   getTierStats,
   classifyTiers,
 } from "../tierResolver.ts";
-import { PROVIDER_TIER } from "../tierTypes.ts";
+import { PROVIDER_TIER } from "../tierTypes";
 
 describe("TierResolver", () => {
   // Reset cache between tests

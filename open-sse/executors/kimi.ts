@@ -2,7 +2,7 @@
 import { DefaultExecutor } from "./default.ts";
 import {  ExecuteInput, type ProviderCredentials } from "./base.ts";
 import { applyProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
-import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../translator/helpers/claudeHelper.ts";
+import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../translator/helpers/claudeHelper";
 type JsonRecord = Record<string, unknown>;
 
 function hasActiveKimiThinking(body: JsonRecord): boolean {

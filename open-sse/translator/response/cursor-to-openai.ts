@@ -3,7 +3,7 @@
  * CursorExecutor already emits OpenAI format - this is a passthrough
  */
 import { register } from "../registry.ts";
-import { FORMATS } from "../formats.ts";
+import { FORMATS } from "../formats";
 
 /**
  * Convert Cursor response to OpenAI format

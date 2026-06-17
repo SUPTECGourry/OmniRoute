@@ -717,7 +717,7 @@ async function getFreshCookiesWithWarmup(
   chatPageUrl: string,
   cookieDomain: string,
   signal: AbortSignal | null,
-  warmupPromise: Promise<import("./browserPool.ts").PooledContext | null> | null
+  warmupPromise: Promise<import("./browserPool").PooledContext | null> | null
 ): Promise<string | null> {
   if (warmupPromise) {
     try {

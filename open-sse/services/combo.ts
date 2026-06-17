@@ -3971,7 +3971,7 @@ export async function handleComboChat({
             const { estimateTokens } = await import("./contextManager.ts");
             const estimatedTokens = estimateTokens(JSON.stringify(attemptBody));
             if (estimatedTokens > (config.fallbackCompressionThreshold ?? 1000)) {
-              const { applyCompression } = await import("./compression/strategySelector.ts");
+              const { applyCompression } = await import("./compression/strategySelector");
               const compressionResult = applyCompression(
                 attemptBody,
                 config.fallbackCompressionMode as CompressionMode,

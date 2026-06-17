@@ -1,5 +1,5 @@
 import dns from "node:dns/promises";
-import { detectIpLiteralFamily, stripIpv6Brackets } from "./proxyFamily.ts";
+import { detectIpLiteralFamily, stripIpv6Brackets } from "./proxyFamily";
 
 export type FamilyLookupFn = (
   hostname: string

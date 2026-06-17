@@ -4,7 +4,7 @@ import {
   loadRtkFilters,
   type RtkFilterLoadDiagnostic,
 } from "./filterLoader.ts";
-import { applyLineFilter } from "./lineFilter.ts";
+import { applyLineFilter } from "./lineFilter";
 
 export interface RtkFilterTestOutcome {
   filterId: string;

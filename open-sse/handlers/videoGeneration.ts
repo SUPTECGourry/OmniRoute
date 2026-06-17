@@ -32,7 +32,7 @@ import {
   extractComfyOutputFiles,
 } from "../utils/comfyuiClient.ts";
 import { saveCallLog } from "@/lib/usageDb";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 /**
  * Handle video generation request

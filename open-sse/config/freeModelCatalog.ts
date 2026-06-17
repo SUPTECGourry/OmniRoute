@@ -1,6 +1,6 @@
 import type { TosVerdict } from "./freeTierCatalog.ts";
 export { FREE_MODEL_BUDGETS } from "./freeModelCatalog.data.ts";
-import { FREE_MODEL_BUDGETS } from "./freeModelCatalog.data.ts";
+import { FREE_MODEL_BUDGETS } from "./freeModelCatalog.data";
 
 export type FreeModelFreeType =
   | "recurring-daily"

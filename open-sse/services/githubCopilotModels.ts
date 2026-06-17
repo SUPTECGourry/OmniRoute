@@ -17,7 +17,7 @@
  * A safe fallback to the existing static catalog is preserved for
  * offline/unauthed/failed refresh so the import flow never breaks.
  */
-import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
+import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles";
 
 export const GITHUB_COPILOT_MODELS_URL = "https://api.githubcopilot.com/models";
 

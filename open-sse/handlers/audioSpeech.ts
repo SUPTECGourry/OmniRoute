@@ -30,7 +30,7 @@ import {
   isJsonObject,
   parseKieResultJson,
 } from "../utils/kieTask.ts";
-import { signAwsRequest } from "../utils/awsSigV4.ts";
+import { signAwsRequest } from "../utils/awsSigV4";
 
 /**
  * Return a CORS error response from an upstream fetch failure

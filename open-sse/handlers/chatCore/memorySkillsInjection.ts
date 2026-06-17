@@ -7,7 +7,7 @@ import {
 import { injectMemory, shouldInjectMemory } from "@/lib/memory/injection";
 import { injectSkills } from "@/lib/skills/injection";
 import { FORMATS } from "../../translator/formats.ts";
-import { detectCachingContext } from "../../services/compression/cachingAware.ts";
+import { detectCachingContext } from "../../services/compression/cachingAware";
 
 export function getSkillsProviderForFormat(
   format: string

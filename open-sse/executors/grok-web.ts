@@ -26,7 +26,7 @@ import {
   isCloudflareChallenge,
   type TlsFetchResult,
 } from "../services/grokTlsClient.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 

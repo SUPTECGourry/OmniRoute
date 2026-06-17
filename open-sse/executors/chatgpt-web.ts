@@ -27,7 +27,7 @@ import {
   getChatGptImageConversationContext,
   __resetChatGptImageCacheForTesting,
   type ChatGptImageConversationContext,
-} from "../services/chatgptImageCache.ts";
+} from "../services/chatgptImageCache";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 

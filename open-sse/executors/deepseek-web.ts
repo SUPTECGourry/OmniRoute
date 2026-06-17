@@ -5,7 +5,7 @@ import {
   parseToolCallsFromText,
   type OpenAIToolCall,
 } from "../translator/webTools.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 export const DEEPSEEK_WEB_BASE = "https://chat.deepseek.com";
 const DEEPSEEK_API_BASE = `${DEEPSEEK_WEB_BASE}/api`;

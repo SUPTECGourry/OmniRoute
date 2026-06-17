@@ -6,7 +6,7 @@ import {
   DEFAULT_CAVEMAN_CONFIG,
   DEFAULT_RTK_CONFIG,
   DEFAULT_COMPRESSION_LANGUAGE_CONFIG,
-} from "./types.ts";
+} from "./types";
 
 const CHARS_PER_TOKEN = 4;
 

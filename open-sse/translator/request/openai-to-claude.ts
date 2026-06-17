@@ -5,7 +5,7 @@ import { supportsClaudeMaxEffort, supportsXHighEffort } from "../../config/provi
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { sanitizeToolId } from "../helpers/schemaCoercion.ts";
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
-import { capMaxOutputTokens } from "../../../src/lib/modelCapabilities.ts";
+import { capMaxOutputTokens } from "../../../src/lib/modelCapabilities";
 
 // Prefix for Claude OAuth tool names to avoid conflicts
 // Can be disabled per-request via body._disableToolPrefix = true

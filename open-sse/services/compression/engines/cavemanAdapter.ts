@@ -9,7 +9,7 @@ import {
   DEFAULT_ULTRA_CONFIG,
   type CavemanIntensity,
 } from "../types.ts";
-import type { CompressionEngine, EngineConfigField, EngineValidationResult } from "./types.ts";
+import type { CompressionEngine, EngineConfigField, EngineValidationResult } from "./types";
 
 const CAVEMAN_INTENSITIES: CavemanIntensity[] = ["lite", "full", "ultra"];
 

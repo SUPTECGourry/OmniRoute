@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from "../config/constants.ts";
+import { HTTP_STATUS } from "../config/constants";
 
 type StreamReadinessLogger = {
   debug?: (tag: string, message: string) => void;

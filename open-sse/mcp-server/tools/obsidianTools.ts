@@ -5,7 +5,7 @@ import {
   getObsidianBaseUrl,
   getObsidianConfigForApiKey,
 } from "../../../src/lib/db/obsidian.ts";
-import type { ObsidianClient, SyncServerClient } from "../../../src/lib/obsidian/api.ts";
+import type { ObsidianClient, SyncServerClient } from "../../../src/lib/obsidian/api";
 
 type McpExtra = {
   authInfo?: { clientId?: string; scopes?: string[] };

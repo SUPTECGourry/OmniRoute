@@ -10,7 +10,7 @@ import {
   getPromptCacheCreationTokens,
   getPromptCacheReadTokens,
 } from "@/lib/usage/tokenAccounting";
-import { FORMATS } from "../translator/formats.ts";
+import { FORMATS } from "../translator/formats";
 
 // ANSI color codes
 export const COLORS = {

@@ -14,7 +14,7 @@
 import { getModelContextLimit } from "../../src/lib/modelCapabilities";
 import { parseModel } from "./model.ts";
 import { CONTEXT_OVERFLOW_REGEX } from "./errorClassifier.ts";
-import { getRegistryEntry } from "../config/providerRegistry.ts";
+import { getRegistryEntry } from "../config/providerRegistry";
 
 // ── Model Family Definitions ─────────────────────────────────────────────────
 

@@ -13,7 +13,7 @@ vi.mock("../audit.ts", () => ({
   logToolCall: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../../../src/lib/db/core.ts", async (importOriginal) => {
+vi.mock("../../../src/lib/db/core", async (importOriginal) => {
   const actual = await importOriginal<any>();
   return {
     ...actual,

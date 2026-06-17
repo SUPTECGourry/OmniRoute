@@ -30,7 +30,7 @@
  */
 
 import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
-import { registerMonitorFetcher } from "./quotaMonitor.ts";
+import { registerMonitorFetcher } from "./quotaMonitor";
 
 const CROF_USAGE_URL = "https://crof.ai/usage_api/";
 const CACHE_TTL_MS = 60_000;

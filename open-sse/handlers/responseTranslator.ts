@@ -3,7 +3,7 @@ import {
   buildGeminiThoughtSignatureKey,
   storeGeminiThoughtSignature,
 } from "../services/geminiThoughtSignatureStore.ts";
-import { containsTextualToolCallMarker } from "../utils/textualToolCall.ts";
+import { containsTextualToolCallMarker } from "../utils/textualToolCall";
 
 type JsonRecord = Record<string, unknown>;
 

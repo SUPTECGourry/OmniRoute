@@ -134,7 +134,7 @@ export {
   getErrorInfo,
   matchErrorRuleByStatus,
   matchErrorRuleByText,
-} from "./errorConfig.ts";
+} from "./errorConfig";
 
 // Configurable backoff steps for rate limits (Phase 1 — enhanced rate limiting)
 // Used for per-model lockouts with increasing severity

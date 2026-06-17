@@ -13,7 +13,7 @@
  *   - Skip if the array elements are not "scalar-ish" at top level (i.e. objects, not nested arrays of arrays).
  */
 
-import { encodeTabularBlock, kindOf, wrapTabular } from "./tabular.ts";
+import { encodeTabularBlock, kindOf, wrapTabular } from "./tabular";
 
 /** Default minimum number of rows to trigger compaction. */
 export const DEFAULT_MIN_ROWS = 8;

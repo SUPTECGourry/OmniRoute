@@ -14,7 +14,7 @@ import {
   getAntigravityUserAgent,
   GITHUB_COPILOT_CHAT_USER_AGENT,
   getQwenOauthHeaders,
-} from "./providerHeaderProfiles.ts";
+} from "./providerHeaderProfiles";
 import { normalizeCliCompatProviderId } from "@/shared/utils/cliCompat";
 
 export interface CliFingerprint {

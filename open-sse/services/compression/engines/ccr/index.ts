@@ -44,7 +44,7 @@ import type {
   EngineConfigField,
   EngineValidationResult,
 } from "../types.ts";
-import type { CompressionResult } from "../../types.ts";
+import type { CompressionResult } from "../../types";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 

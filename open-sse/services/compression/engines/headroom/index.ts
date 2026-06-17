@@ -41,7 +41,7 @@ import {
   TABULAR_MARKER_RE,
 } from "./tabular.ts";
 
-export { encodeTabular, decodeTabular } from "./tabular.ts";
+export { encodeTabular, decodeTabular } from "./tabular";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 

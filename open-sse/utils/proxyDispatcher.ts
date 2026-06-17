@@ -3,7 +3,7 @@ import { Agent, ProxyAgent, type Dispatcher } from "undici";
 import { socksDispatcher } from "fetch-socks";
 import { getUpstreamTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
 import { stripIpv6Brackets, detectIpLiteralFamily, parseProxyFamily } from "./proxyFamily.ts";
-import { createSocksDispatcherWithFamily } from "./socksConnectorWithFamily.ts";
+import { createSocksDispatcherWithFamily } from "./socksConnectorWithFamily";
 
 const DISPATCHER_CACHE_KEY = Symbol.for("omniroute.proxyDispatcher.cache");
 const DEFAULT_DISPATCHER_KEY = Symbol.for("omniroute.proxyDispatcher.default");

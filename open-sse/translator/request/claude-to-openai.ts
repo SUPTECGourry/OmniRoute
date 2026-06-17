@@ -1,6 +1,6 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
-import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
+import { adjustMaxTokens } from "../helpers/maxTokensHelper";
 
 type JsonRecord = Record<string, unknown>;
 const TOOL_CHOICE_ANY = ["a", "n", "y"].join("");

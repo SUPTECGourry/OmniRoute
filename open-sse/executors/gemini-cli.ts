@@ -7,7 +7,7 @@ import { obfuscateSensitiveWords } from "../services/antigravityObfuscation.ts";
 import {
   shouldStripCloudCodeThinking,
   stripCloudCodeThinkingConfig,
-} from "../services/cloudCodeThinking.ts";
+} from "../services/cloudCodeThinking";
 
 const LOAD_CODE_ASSIST_URL = "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist";
 const ONBOARD_USER_URL = "https://cloudcode-pa.googleapis.com/v1internal:onboardUser";

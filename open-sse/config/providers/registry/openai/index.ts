@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../shared.ts";
-import { REASONING_UNSUPPORTED } from "../../shared.ts";
+import { REASONING_UNSUPPORTED } from "../../shared";
 
 export const openaiProvider: RegistryEntry = {
   id: "openai",

@@ -7,7 +7,7 @@ import {
 import {
   parseTextualToolCallCandidate,
   containsTextualToolCallMarker,
-} from "../../utils/textualToolCall.ts";
+} from "../../utils/textualToolCall";
 
 type GeminiToOpenAIState = {
   functionIndex: number;

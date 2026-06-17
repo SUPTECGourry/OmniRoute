@@ -1,6 +1,6 @@
 import type { PersistedEvalRun } from "../../src/lib/db/evals.ts";
 import { listModelEvalRunsForRouting } from "../../src/lib/db/evals.ts";
-import { parseModel } from "./model.ts";
+import { parseModel } from "./model";
 
 type EvalRoutingLogger = {
   info?: (...args: unknown[]) => void;

@@ -21,7 +21,7 @@
 
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
 
-import { tlsFetchChatGpt, __setTlsFetchOverrideForTesting } from "../chatgptTlsClient.ts";
+import { tlsFetchChatGpt, __setTlsFetchOverrideForTesting } from "../chatgptTlsClient";
 
 const PROXY_ENV_KEYS = [
   "OMNIROUTE_TLS_PROXY_URL",

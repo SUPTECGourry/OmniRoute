@@ -21,7 +21,7 @@ import {
   getReasoningCacheEntries,
   getReasoningCacheStats,
   setReasoningCache,
-} from "../../src/lib/db/reasoningCache.ts";
+} from "../../src/lib/db/reasoningCache";
 
 // ──────────────── Provider/Model Detection ────────────────
 

@@ -6,7 +6,7 @@ import { FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { prepareToolMessages, buildToolAwareResult } from "../translator/webTools.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { tryBackedChat } from "../services/browserBackedChat.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 export const DUCKDUCKGO_BASE = "https://duckduckgo.com";
 const DUCKAI_BASE = "https://duck.ai";

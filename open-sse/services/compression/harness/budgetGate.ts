@@ -1,4 +1,4 @@
-import type { EvalReport } from "./runner.ts";
+import type { EvalReport } from "./runner";
 
 /**
  * Tokens-per-task gate (N4). The harness measures the average compressed token

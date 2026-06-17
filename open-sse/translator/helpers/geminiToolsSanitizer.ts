@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 
-import { cleanJSONSchemaForAntigravity } from "./geminiHelper.ts";
+import { cleanJSONSchemaForAntigravity } from "./geminiHelper";
 
 type GeminiFunctionDeclaration = {
   name: string;

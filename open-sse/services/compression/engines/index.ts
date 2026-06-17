@@ -4,7 +4,7 @@ import { rtkEngine } from "./rtk/index.ts";
 import { sessionDedupEngine } from "./session-dedup/index.ts";
 import { headroomEngine } from "./headroom/index.ts";
 import { ccrEngine } from "./ccr/index.ts";
-import { llmlinguaEngine } from "./llmlingua/index.ts";
+import { llmlinguaEngine } from "./llmlingua/index";
 
 let registered = false;
 

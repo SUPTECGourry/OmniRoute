@@ -5,7 +5,7 @@
  * Most specific wins.
  */
 
-import { MAX_TIMER_TIMEOUT_MS } from "../../src/shared/utils/runtimeTimeouts.ts";
+import { MAX_TIMER_TIMEOUT_MS } from "../../src/shared/utils/runtimeTimeouts";
 
 /**
  * Maximum number of concurrent pre-screen checks (provider profile + availability)

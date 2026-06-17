@@ -36,7 +36,7 @@ import type {
   CcBridgeTransformsConfig,
   ReplaceTextOp,
   TransformOp as BaseTransformOp,
-} from "./ccBridgeTransforms.ts";
+} from "./ccBridgeTransforms";
 
 // Re-export base DSL types so external callers depend only on systemTransforms.
 export {

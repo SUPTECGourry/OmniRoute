@@ -604,4 +604,4 @@ export {
   detectCommandType,
 } from "./commandDetector.ts";
 export { runRtkFilterTests } from "./verify.ts";
-export { maybePersistRtkRawOutput, readRtkRawOutput, redactRtkRawOutput } from "./rawOutput.ts";
+export { maybePersistRtkRawOutput, readRtkRawOutput, redactRtkRawOutput } from "./rawOutput";

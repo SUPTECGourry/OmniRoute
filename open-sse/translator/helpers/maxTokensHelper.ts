@@ -1,4 +1,4 @@
-import { DEFAULT_MAX_TOKENS, DEFAULT_MIN_TOKENS } from "../../config/constants.ts";
+import { DEFAULT_MAX_TOKENS, DEFAULT_MIN_TOKENS } from "../../config/constants";
 
 /**
  * Adjust max_tokens based on request context

@@ -18,7 +18,7 @@
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { firecrawlFetch } from "../executors/firecrawl-fetch.ts";
 import { jinaReaderFetch } from "../executors/jina-reader-fetch.ts";
-import { tavilyFetch } from "../executors/tavily-fetch.ts";
+import { tavilyFetch } from "../executors/tavily-fetch";
 
 export type WebFetchFormat = "markdown" | "html" | "links" | "screenshot";
 

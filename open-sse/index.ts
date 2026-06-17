@@ -167,4 +167,4 @@ export {
   parseModelFromRegistry,
   getAllModelsFromRegistry,
   buildAuthHeaders,
-} from "./config/registryUtils.ts";
+} from "./config/registryUtils";

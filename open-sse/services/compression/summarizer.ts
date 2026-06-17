@@ -1,4 +1,4 @@
-import type { Summarizer, SummarizerOpts } from "./types.ts";
+import type { Summarizer, SummarizerOpts } from "./types";
 
 const COMPRESSED_MARKER_RE = /^\[COMPRESSED:/;
 const INTENT_TRIGGERS =

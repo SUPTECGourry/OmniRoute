@@ -20,7 +20,7 @@
  */
 
 import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
-import { registerMonitorFetcher } from "./quotaMonitor.ts";
+import { registerMonitorFetcher } from "./quotaMonitor";
 
 // Bailian quota hosts (international / china fallback)
 const BAILIAN_QUOTA_HOSTS = {

@@ -27,7 +27,7 @@ import {
   type ExecuteInput,
 } from "./base.ts";
 import { FETCH_TIMEOUT_MS } from "../config/constants.ts";
-import { buildErrorBody } from "../utils/error.ts";
+import { buildErrorBody } from "../utils/error";
 import { getSupervisor } from "@/lib/services/registry";
 import { getOrCreateApiKey } from "@/lib/services/apiKey";
 

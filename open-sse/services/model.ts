@@ -1,5 +1,5 @@
 import { PROVIDER_ID_TO_ALIAS, PROVIDER_MODELS } from "../config/providerModels.ts";
-import { resolveWildcardAlias } from "./wildcardRouter.ts";
+import { resolveWildcardAlias } from "./wildcardRouter";
 
 type ProviderModelAliasMap = Record<string, Record<string, string>>;
 type ModelAliasValue = string | { provider?: string; model?: string };

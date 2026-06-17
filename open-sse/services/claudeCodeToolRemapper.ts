@@ -10,7 +10,7 @@
  * - Response path: TitleCase → lowercase (for clients expecting lowercase)
  */
 
-import { EXTRA_TOOL_RENAME_MAP } from "./claudeCodeExtraRemap.ts";
+import { EXTRA_TOOL_RENAME_MAP } from "./claudeCodeExtraRemap";
 
 const TOOL_RENAME_MAP: Record<string, string> = {
   ...EXTRA_TOOL_RENAME_MAP,

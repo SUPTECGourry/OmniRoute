@@ -8,7 +8,7 @@
  * - Handles retry logic for failed requests
  */
 
-import { getCfClearanceToken, getCacheStatus } from "./claudeTurnstileSolver.ts";
+import { getCfClearanceToken, getCacheStatus } from "./claudeTurnstileSolver";
 
 export interface CookieRefreshOptions {
   force?: boolean;

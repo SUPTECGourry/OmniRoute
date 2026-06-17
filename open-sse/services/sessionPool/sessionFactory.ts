@@ -11,7 +11,7 @@
 
 import { FingerprintRotator } from "./fingerprintRotator.ts";
 import { Session } from "./session.ts";
-import type { PoolConfig } from "./types.ts";
+import type { PoolConfig } from "./types";
 
 export class SessionFactory {
   private rotator = new FingerprintRotator();

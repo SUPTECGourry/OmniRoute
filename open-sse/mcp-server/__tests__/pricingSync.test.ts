@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { syncPricingInput, syncPricingTool, MCP_TOOLS, MCP_TOOL_MAP } from "../schemas/tools.ts";
+import { syncPricingInput, syncPricingTool, MCP_TOOLS, MCP_TOOL_MAP } from "../schemas/tools";
 
 describe("omniroute_sync_pricing MCP tool schema", () => {
   it("should be registered in MCP_TOOLS", () => {

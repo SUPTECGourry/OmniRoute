@@ -1,4 +1,4 @@
-import { runCompressionEval, type CompressFn, type EvalCase, type EvalReport } from "./runner.ts";
+import { runCompressionEval, type CompressFn, type EvalCase, type EvalReport } from "./runner";
 
 /**
  * Replay-bench over real transcripts (TV3). Instead of synthetic prompts, feed

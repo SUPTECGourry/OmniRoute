@@ -23,7 +23,7 @@ const SOURCE_EXT = ["ts", "tsx", "js", "jsx", "mjs", "cjs"] as const;
 
 function looksLikeAbsolutePath(tok: string): boolean {
   // POSIX: "/<...>.ts" (optionally followed by :line[:col]).
-  // Windows: "C:\<...>.ts" or "C:/<...>.ts".
+  // Windows: "C:\<...>.ts" or "C:/<...>".
   if (tok.length < 4 || tok.length > 2048) return false;
   const isPosix = tok.charCodeAt(0) === 0x2f; // '/'
   const isWindows = tok.length > 2 && tok.charCodeAt(1) === 0x3a && /[A-Za-z]/.test(tok[0]);

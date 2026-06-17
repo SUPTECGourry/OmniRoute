@@ -9,7 +9,7 @@
  */
 
 import { registerQuotaFetcher, type QuotaFetcher } from "./quotaPreflight.ts";
-import { getSessionInfo } from "./sessionManager.ts";
+import { getSessionInfo } from "./sessionManager";
 
 export { registerQuotaFetcher };
 export type { QuotaFetcher };

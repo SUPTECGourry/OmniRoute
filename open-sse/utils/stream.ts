@@ -46,7 +46,7 @@ import {
   stringifyIdValue,
   stripResponsesLifecycleEcho,
 } from "./responsesStreamHelpers.ts";
-import { processBufferedPassthroughLine } from "./passthroughTailProcessor.ts";
+import { processBufferedPassthroughLine } from "./passthroughTailProcessor";
 
 /**
  * Race a response body read against a timeout.

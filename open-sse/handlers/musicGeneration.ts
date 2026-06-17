@@ -25,7 +25,7 @@ import {
 } from "../utils/comfyuiClient.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import { getKieCallbackUrl, isJsonObject, parseKieResultJson } from "../utils/kieTask.ts";
-import { sanitizeErrorMessage } from "../utils/error.ts";
+import { sanitizeErrorMessage } from "../utils/error";
 
 function normalizeKieSunoModel(model: string): string {
   const map: Record<string, string> = {

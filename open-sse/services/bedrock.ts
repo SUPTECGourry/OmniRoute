@@ -4,7 +4,7 @@ import {
   normalizeBedrockDiscoveredModels,
   resolveBedrockRegion,
   type BedrockDiscoveredModel,
-} from "../config/bedrock.ts";
+} from "../config/bedrock";
 
 export type BedrockNativeFetch = (url: string, init: RequestInit) => Promise<Response>;
 

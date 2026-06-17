@@ -8,7 +8,7 @@ import { handleChatCore } from "./chatCore.ts";
 import { convertResponsesApiFormat } from "../translator/helpers/responsesApiHelper.ts";
 import { createResponsesApiTransformStream } from "../transformer/responsesTransformer.ts";
 import { createSseHeartbeatTransform, HEARTBEAT_SHAPES } from "../utils/sseHeartbeat.ts";
-import { SSE_HEARTBEAT_INTERVAL_MS } from "../config/constants.ts";
+import { SSE_HEARTBEAT_INTERVAL_MS } from "../config/constants";
 
 /**
  * Handle /v1/responses request

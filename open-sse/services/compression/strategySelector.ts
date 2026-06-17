@@ -19,7 +19,7 @@ import {
   detectCachingContext,
   getCacheAwareStrategy,
   type CachingDetectionContext,
-} from "./cachingAware.ts";
+} from "./cachingAware";
 
 export function checkComboOverride(
   config: CompressionConfig,

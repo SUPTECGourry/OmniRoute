@@ -1,5 +1,5 @@
 import type { CompressionResult, CompressionMode } from "./types.ts";
-import { createCompressionStats } from "./stats.ts";
+import { createCompressionStats } from "./stats";
 
 interface Message {
   role: string;

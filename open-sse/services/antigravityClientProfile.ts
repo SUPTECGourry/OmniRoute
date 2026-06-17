@@ -15,7 +15,7 @@ import {
   ANTIGRAVITY_NODE_API_CLIENT,
   getAntigravityLoadCodeAssistMetadata,
 } from "./antigravityHeaders.ts";
-import { getCachedAntigravityVersion } from "./antigravityVersion.ts";
+import { getCachedAntigravityVersion } from "./antigravityVersion";
 
 export {
   ANTIGRAVITY_CLIENT_PROFILE_VALUES,

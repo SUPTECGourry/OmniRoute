@@ -33,7 +33,7 @@ Generate a JSON object with this exact structure:
   "summary": "A clear, dense summary of what has been discussed and accomplished (max 200 words). Focus on what the AI needs to know to continue seamlessly.",
   "keyDecisions": ["decision1", "decision2"],
   "taskProgress": "Current state of the task: what's done, what's pending, next steps",
-  "activeEntities": ["file1.ts", "feature X", "topic Y"]
+  "activeEntities": ["file1", "feature X", "topic Y"]
 }
 
 Important: Return ONLY the JSON object, no markdown, no explanation.`;

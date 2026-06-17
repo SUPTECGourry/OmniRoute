@@ -9,7 +9,7 @@
  * Based on CLIProxyAPI's antigravity_executor.go line 268.
  */
 
-import { isCreditsDisabled, recordCreditsFailure } from "./antigravity429Engine.ts";
+import { isCreditsDisabled, recordCreditsFailure } from "./antigravity429Engine";
 
 /**
  * Inject enabledCreditTypes into the request body for a credits retry.

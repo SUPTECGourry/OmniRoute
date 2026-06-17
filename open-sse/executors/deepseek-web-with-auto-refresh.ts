@@ -4,7 +4,7 @@ import {
   acquireAccessToken,
   extractUserToken,
   tokenCache,
-} from "./deepseek-web.ts";
+} from "./deepseek-web";
 
 interface AutoRefreshConfig {
   sessionRefreshInterval?: number;

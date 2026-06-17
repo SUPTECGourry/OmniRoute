@@ -23,7 +23,7 @@ import {
   registerQuotaWindows,
   type QuotaFetcher,
   type QuotaInfo,
-} from "./quotaPreflight.ts";
+} from "./quotaPreflight";
 
 // 60s — matches Codex's TTL. Long enough to avoid hammering upstream usage
 // endpoints on every routing decision, short enough that a near-exhausted

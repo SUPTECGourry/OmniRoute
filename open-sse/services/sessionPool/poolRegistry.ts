@@ -13,7 +13,7 @@
  */
 
 import type { SessionPool } from "./sessionPool.ts";
-import type { PoolStats, PoolSessionDetail } from "./types.ts";
+import type { PoolStats, PoolSessionDetail } from "./types";
 
 type PoolEntry = {
   pool: SessionPool;

@@ -11,7 +11,7 @@
 
 import { z } from "zod";
 import { PoolRegistry } from "../../services/sessionPool/poolRegistry.ts";
-import { getWebSessionPoolHealth } from "../../services/webSessionPoolHealth.ts";
+import { getWebSessionPoolHealth } from "../../services/webSessionPoolHealth";
 
 // ─── Input Schemas ─────────────────────────────────────────────────────────
 

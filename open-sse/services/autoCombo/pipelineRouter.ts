@@ -17,7 +17,7 @@ import {
   type FitnessTier,
 } from "../../../src/domain/pipeline.ts";
 import { renderPrompt } from "../../../src/domain/prompts.ts";
-import { getTaskFitness } from "./taskFitness.ts";
+import { getTaskFitness } from "./taskFitness";
 
 // ---------------------------------------------------------------------------
 // Fitness tiers — map pipeline behavior to model fitness thresholds

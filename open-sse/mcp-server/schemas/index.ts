@@ -113,4 +113,4 @@ export {
   type RoutingFactor,
   hashInput,
   summarizeOutput,
-} from "./audit.ts";
+} from "./audit";

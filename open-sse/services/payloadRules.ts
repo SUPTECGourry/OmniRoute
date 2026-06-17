@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { wildcardMatch } from "./wildcardRouter.ts";
+import { wildcardMatch } from "./wildcardRouter";
 
 type JsonRecord = Record<string, unknown>;
 

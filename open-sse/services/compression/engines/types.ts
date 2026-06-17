@@ -1,4 +1,4 @@
-import type { CompressionConfig, CompressionResult } from "../types.ts";
+import type { CompressionConfig, CompressionResult } from "../types";
 
 export type CompressionEngineTarget = "messages" | "tool_results" | "code_blocks";
 

@@ -2,7 +2,7 @@ import type { AgingThresholds, Summarizer } from "./types.ts";
 import { DEFAULT_AGGRESSIVE_CONFIG } from "./types.ts";
 import { applyLiteCompression } from "./lite.ts";
 import { cavemanCompress } from "./caveman.ts";
-import { extractTextContent, replaceTextContent, type ChatMessageLike } from "./messageContent.ts";
+import { extractTextContent, replaceTextContent, type ChatMessageLike } from "./messageContent";
 
 const COMPRESSED_MARKER_RE = /^\[COMPRESSED:/;
 

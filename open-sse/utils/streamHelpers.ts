@@ -11,7 +11,7 @@
  * expects its native format and normalization would lose format-specific metadata.
  */
 
-import { FORMATS } from "../translator/formats.ts";
+import { FORMATS } from "../translator/formats";
 
 type SSEPayloadOptions = {
   eventType?: string;

@@ -1,6 +1,6 @@
 import type { CompressionStats } from "./types.ts";
 import { extractPreservedBlocks } from "./preservation.ts";
-import { validateCompression } from "./validation.ts";
+import { validateCompression } from "./validation";
 
 export interface CompressionDiffSegment {
   type: "same" | "removed" | "added";

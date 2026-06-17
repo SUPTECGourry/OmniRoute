@@ -13,7 +13,7 @@
 import type { ProviderCandidate, ScoredProvider } from "./scoring.ts";
 import { scorePool } from "./scoring.ts";
 import { getTaskFitness } from "./taskFitness.ts";
-import { clamp01 } from "../../utils/number.ts";
+import { clamp01 } from "../../utils/number";
 
 export interface SlaRoutingPolicy {
   targetP95Ms?: number;

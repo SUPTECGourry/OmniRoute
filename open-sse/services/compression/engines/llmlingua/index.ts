@@ -54,7 +54,7 @@ import type {
 } from "../types.ts";
 import type { CompressionResult } from "../../types.ts";
 import { workerBackend } from "./worker.ts";
-import { LLMLINGUA_MODELS, DEFAULT_LLMLINGUA_MODEL } from "./constants.ts";
+import { LLMLINGUA_MODELS, DEFAULT_LLMLINGUA_MODEL } from "./constants";
 
 // ─── backend abstraction ──────────────────────────────────────────────────────
 

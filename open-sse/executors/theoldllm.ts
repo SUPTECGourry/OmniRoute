@@ -1,5 +1,5 @@
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
-import type { ProviderCredentials } from "./base.ts";
+import type { ProviderCredentials } from "./base";
 
 const API_BASE = "https://theoldllm.vercel.app";
 const API_PATH = "/api/chatgpt";

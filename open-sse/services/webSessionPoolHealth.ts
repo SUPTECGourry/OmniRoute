@@ -16,7 +16,7 @@ import {
   getProviderCooldownRemainingMs,
 } from "./accountFallback.ts";
 import { getAllCircuitBreakerStatuses } from "../../src/shared/utils/circuitBreaker.ts";
-import type { PoolStats, PoolSessionDetail } from "./sessionPool/types.ts";
+import type { PoolStats, PoolSessionDetail } from "./sessionPool/types";
 
 // ─── Dependency Injection (for testability) ─────────────────────────────────
 

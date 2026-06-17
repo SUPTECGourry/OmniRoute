@@ -7,7 +7,7 @@
 import { isOpenAIResponsesStoreEnabled } from "@/lib/providers/requestDefaults";
 import { FORMATS } from "../formats.ts";
 import { generateToolCallId } from "../helpers/toolCallHelper.ts";
-import { register } from "../registry.ts";
+import { register } from "../registry";
 
 type JsonRecord = Record<string, unknown>;
 const RESPONSES_STORE_MARKER = "_omnirouteResponsesStore";

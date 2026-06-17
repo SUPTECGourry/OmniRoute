@@ -4,7 +4,7 @@ import {
   GPT_5_4_CODEX_CAPABILITIES,
   getCodexDefaultHeaders,
   resolvePublicCred,
-} from "../../shared.ts";
+} from "../../shared";
 
 export const codexProvider: RegistryEntry = {
   id: "codex",

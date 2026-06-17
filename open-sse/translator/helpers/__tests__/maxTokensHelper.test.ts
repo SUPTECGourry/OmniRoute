@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { adjustMaxTokens } from "../maxTokensHelper.ts";
+import { adjustMaxTokens } from "../maxTokensHelper";
 
 describe("adjustMaxTokens - negative values", () => {
   it("clamps large negative max_tokens to 1", () => {

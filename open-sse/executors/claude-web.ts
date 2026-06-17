@@ -26,7 +26,7 @@ import { getCfClearanceToken } from "../services/claudeTurnstileSolver.ts";
 import { normalizeSessionCookieHeader } from "@/lib/providers/webCookieAuth";
 import { randomUUID } from "crypto";
 import { sanitizeErrorMessage } from "../utils/error.ts";
-import { tryBackedChat } from "../services/browserBackedChat.ts";
+import { tryBackedChat } from "../services/browserBackedChat";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const CLAUDE_WEB_API_BASE = "https://claude.ai/api";

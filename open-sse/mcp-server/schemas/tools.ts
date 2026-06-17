@@ -13,7 +13,7 @@ import { z } from "zod";
 import {
   AUTO_ROUTING_STRATEGY_VALUES,
   ROUTING_STRATEGY_VALUES,
-} from "../../../src/shared/constants/routingStrategies.ts";
+} from "../../../src/shared/constants/routingStrategies";
 
 // ============ Shared Types ============
 

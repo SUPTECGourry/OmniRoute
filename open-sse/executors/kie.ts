@@ -7,7 +7,7 @@ import {
   type KieTaskState,
 } from "../utils/kieTask.ts";
 
-export type { KieTaskState } from "../utils/kieTask.ts";
+export type { KieTaskState } from "../utils/kieTask";
 
 type KieTaskInput = {
   baseUrl: string;

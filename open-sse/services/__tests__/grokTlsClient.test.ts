@@ -21,7 +21,7 @@
 
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
 
-import { tlsFetchGrok, __setTlsFetchOverrideForTesting } from "../grokTlsClient.ts";
+import { tlsFetchGrok, __setTlsFetchOverrideForTesting } from "../grokTlsClient";
 
 const PROXY_ENV_KEYS = [
   "OMNIROUTE_TLS_PROXY_URL",

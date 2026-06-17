@@ -31,7 +31,7 @@
  */
 
 import type { ClientHttp2Session, ClientHttp2Stream } from "node:http2";
-import { encodeExecMcpResult } from "../utils/cursorAgentProtobuf.ts";
+import { encodeExecMcpResult } from "../utils/cursorAgentProtobuf";
 
 const DEFAULT_IDLE_TTL_MS = 5 * 60 * 1000;
 

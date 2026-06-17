@@ -1,5 +1,5 @@
 import { DEFAULT_CAVEMAN_OUTPUT_MODE_CONFIG, type CavemanOutputModeConfig } from "./types.ts";
-import { extractTextContent } from "./messageContent.ts";
+import { extractTextContent } from "./messageContent";
 
 interface ChatMessage {
   role: string;

@@ -28,7 +28,7 @@ import { getAccessToken } from "../services/tokenRefresh.ts";
 import { sanitizeResponsesInputItems } from "../services/responsesInputSanitizer.ts";
 import { getThinkingBudgetConfig, ThinkingMode } from "../services/thinkingBudget.ts";
 import { CORS_HEADERS } from "../utils/cors.ts";
-import * as prl from "../utils/providerRequestLogging.ts";
+import * as prl from "../utils/providerRequestLogging";
 import { createRequire } from "module";
 
 // ─── wreq-js lazy loader ───────────────────────────────────────────────────

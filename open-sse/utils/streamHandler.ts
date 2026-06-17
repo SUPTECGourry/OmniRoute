@@ -1,6 +1,6 @@
 import { trackPendingRequest } from "@/lib/usageDb";
 import { FORMATS } from "../translator/formats.ts";
-import { PENDING_REQUEST_CLEARED_MARKER } from "./stream.ts";
+import { PENDING_REQUEST_CLEARED_MARKER } from "./stream";
 
 // Stream handler with disconnect detection - shared for all providers
 

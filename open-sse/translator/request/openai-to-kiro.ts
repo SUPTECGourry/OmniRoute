@@ -3,7 +3,7 @@
  * Converts OpenAI Chat Completions format to Kiro/AWS CodeWhisperer format
  */
 import { register } from "../registry.ts";
-import { FORMATS } from "../formats.ts";
+import { FORMATS } from "../formats";
 import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 
 function parseToolInput(value: unknown) {

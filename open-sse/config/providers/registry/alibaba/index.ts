@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../shared.ts";
-import { ALIBABA_DASHSCOPE_MODELS } from "../../shared.ts";
+import { ALIBABA_DASHSCOPE_MODELS } from "../../shared";
 
 export const alibabaProvider: RegistryEntry = {
   id: "alibaba",

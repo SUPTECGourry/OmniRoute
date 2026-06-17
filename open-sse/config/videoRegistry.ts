@@ -6,7 +6,7 @@
  */
 
 import { parseModelFromRegistry, getAllModelsFromRegistry } from "./registryUtils.ts";
-import { RUNWAYML_SUPPORTED_VIDEO_MODELS } from "./runway.ts";
+import { RUNWAYML_SUPPORTED_VIDEO_MODELS } from "./runway";
 
 interface VideoModel {
   id: string;

@@ -443,7 +443,7 @@ export {
   DEFAULT_TEXT_REPLACEMENTS,
   CLAUDE_AGENT_SDK_IDENTITY,
 } from "./ccBridgeTransforms.ts";
-export type { TransformOp, CcBridgeTransformsConfig } from "./ccBridgeTransforms.ts";
+export type { TransformOp, CcBridgeTransformsConfig } from "./ccBridgeTransforms";
 
 export function resolveClaudeCodeCompatibleEffort(
   sourceBody?: Record<string, unknown> | null,

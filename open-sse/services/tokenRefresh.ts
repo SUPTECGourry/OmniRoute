@@ -1610,7 +1610,7 @@ export async function getAccessToken(
         try {
           await effectiveOnPersist(result);
         } catch (persistErr) {
-          const { sanitizeErrorMessage } = await import("../utils/error.ts");
+          const { sanitizeErrorMessage } = await import("../utils/error");
           log?.error?.(
             "TOKEN_REFRESH",
             `Layer 2 onPersist callback failed for ${provider}: ${sanitizeErrorMessage(persistErr instanceof Error ? persistErr : new Error(String(persistErr)))}`

@@ -6,7 +6,7 @@
  * to a single browser identity for rate-limiting purposes.
  */
 
-import { type Fingerprint } from "./types.ts";
+import { type Fingerprint } from "./types";
 
 // ─── Profiles ──────────────────────────────────────────────────────────────
 

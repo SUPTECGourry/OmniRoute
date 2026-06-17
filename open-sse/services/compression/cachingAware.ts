@@ -6,7 +6,7 @@
  * @exports CachingContext, CacheAwareStrategy, detectCachingContext, getCacheAwareStrategy
  */
 
-import { providerSupportsCaching } from "../../utils/cacheControlPolicy.ts";
+import { providerSupportsCaching } from "../../utils/cacheControlPolicy";
 
 type JsonRecord = Record<string, unknown>;
 

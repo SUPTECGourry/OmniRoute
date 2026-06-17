@@ -7,7 +7,7 @@ import { CORS_HEADERS } from "../utils/cors.ts";
  */
 
 import { getRerankProvider, parseRerankModel, RERANK_PROVIDERS } from "../config/rerankRegistry.ts";
-import { errorResponse } from "../utils/error.ts";
+import { errorResponse } from "../utils/error";
 
 /**
  * Build authorization header for a rerank provider

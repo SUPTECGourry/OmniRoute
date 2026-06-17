@@ -359,7 +359,7 @@ export class BaseExecutor {
 
   // Session pool support — subclasses can set poolConfig to opt in
   protected poolConfig?: PoolConfig;
-  private _pool: import("../services/sessionPool/sessionPool.ts").SessionPool | null = null;
+  private _pool: import("../services/sessionPool/sessionPool").SessionPool | null = null;
 
   constructor(provider: string, config: ProviderConfig) {
     this.provider = provider;

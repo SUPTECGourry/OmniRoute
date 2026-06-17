@@ -5,7 +5,7 @@
  * Uses account health scores from accountFallback.js.
  */
 
-import { getAccountHealth } from "./accountFallback.ts";
+import { getAccountHealth } from "./accountFallback";
 import crypto from "crypto";
 
 /**

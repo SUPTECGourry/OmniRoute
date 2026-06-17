@@ -1,4 +1,4 @@
-import { ANTHROPIC_VERSION_HEADER } from "./anthropicHeaders.ts";
+import { ANTHROPIC_VERSION_HEADER } from "./anthropicHeaders";
 
 type JsonRecord = Record<string, unknown>;
 

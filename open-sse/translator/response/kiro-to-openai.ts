@@ -3,7 +3,7 @@
  * Converts Kiro/AWS CodeWhisperer streaming events to OpenAI SSE format
  */
 import { register } from "../registry.ts";
-import { FORMATS } from "../formats.ts";
+import { FORMATS } from "../formats";
 
 /**
  * Parse Kiro SSE event and convert to OpenAI format

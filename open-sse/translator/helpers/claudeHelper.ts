@@ -1,6 +1,6 @@
 // Claude helper functions for translator
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
-import { lookupReasoning, recordReplay } from "../../services/reasoningCache.ts";
+import { lookupReasoning, recordReplay } from "../../services/reasoningCache";
 
 // Placeholder thinking text used as last-resort fallback when:
 //   - Target upstream is a non-Anthropic Claude-shape provider

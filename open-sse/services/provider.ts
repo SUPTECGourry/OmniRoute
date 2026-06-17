@@ -5,7 +5,7 @@ import {
   buildClaudeCodeCompatibleHeaders,
   CLAUDE_CODE_COMPATIBLE_DEFAULT_CHAT_PATH,
   joinClaudeCodeCompatibleUrl,
-} from "./claudeCodeCompatible.ts";
+} from "./claudeCodeCompatible";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
 
 const OPENAI_COMPATIBLE_PREFIX = "openai-compatible-";

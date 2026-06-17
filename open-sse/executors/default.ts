@@ -33,7 +33,7 @@ import { LOCAL_PROVIDERS } from "@/shared/constants/providers";
 import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
 
-import type { PoolConfig } from "../services/sessionPool/types.ts";
+import type { PoolConfig } from "../services/sessionPool/types";
 
 /**
  * Apply operator-configured per-provider custom headers onto an outgoing header

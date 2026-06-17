@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../shared.ts";
-import { CURSOR_REGISTRY_VERSION, getCursorRegistryHeaders } from "../../shared.ts";
+import { CURSOR_REGISTRY_VERSION, getCursorRegistryHeaders } from "../../shared";
 
 export const cursorProvider: RegistryEntry = {
   id: "cursor",

@@ -12,7 +12,7 @@
  */
 
 import { Session } from "./session.ts";
-import { SessionPool } from "./sessionPool.ts";
+import { SessionPool } from "./sessionPool";
 
 export interface WebExecutorRequest {
   url: string;

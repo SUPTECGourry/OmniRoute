@@ -17,7 +17,7 @@
  */
 
 import { registerQuotaFetcher, registerQuotaWindows, type QuotaInfo } from "./quotaPreflight.ts";
-import { registerMonitorFetcher } from "./quotaMonitor.ts";
+import { registerMonitorFetcher } from "./quotaMonitor";
 
 /**
  * Stable identifiers for Codex's quota windows. These match the quota keys

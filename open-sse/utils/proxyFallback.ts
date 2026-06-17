@@ -8,7 +8,7 @@
  */
 
 import { fetch as undiciFetch } from "undici";
-import { createProxyDispatcher, normalizeProxyUrl } from "./proxyDispatcher.ts";
+import { createProxyDispatcher, normalizeProxyUrl } from "./proxyDispatcher";
 import { resolveProxyForScopeFromRegistry, listProxies, listOneproxyProxies } from "@/lib/localDb";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 

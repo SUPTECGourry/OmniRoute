@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 
 export const huggingfaceProvider: RegistryEntry = {
   id: "huggingface",

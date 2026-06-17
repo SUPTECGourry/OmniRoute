@@ -29,7 +29,7 @@ import {
 } from "../../src/shared/utils/classify429";
 import { resolveProviderId } from "../../src/shared/constants/providers";
 import { resolveUseUpstream429BreakerHints } from "../../src/shared/utils/providerHints";
-import { isRpdExhausted, isRpmExhausted } from "./geminiRateLimitTracker.ts";
+import { isRpdExhausted, isRpmExhausted } from "./geminiRateLimitTracker";
 
 export type ProviderProfile = {
   baseCooldownMs: number;

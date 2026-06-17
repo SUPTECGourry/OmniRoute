@@ -1,5 +1,5 @@
 import { estimateCompressionTokens } from "../stats.ts";
-import { extractPreservedBlocks } from "../preservation.ts";
+import { extractPreservedBlocks } from "../preservation";
 
 /**
  * Compression eval harness — measurement primitives (C1).
