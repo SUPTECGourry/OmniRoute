@@ -16,7 +16,7 @@ FROM base AS builder
 RUN --mount=type=cache,target=/var/cache/apt,sharing=shared \
   --mount=type=cache,target=/var/lib/apt/lists,sharing=shared \
   apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ \
+  && apt-get install -y --no-install-recommends python3 python-is-python3 make g++ libatomic1 libgomp1 \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
@@ -33,10 +33,27 @@ ENV NPM_CONFIG_LEGACY_PEER_DEPS=true
 # are reproducible.
 RUN test -f package-lock.json \
   || (echo "package-lock.json is required for reproducible Docker builds" >&2 && exit 1)
+
+# Split steps for clearer error logs in GHCR build output
 RUN --mount=type=cache,target=/root/.npm \
-  npm ci --no-audit --no-fund --legacy-peer-deps --ignore-scripts \
-  && npm rebuild better-sqlite3 \
-  && node -e "require('better-sqlite3')(':memory:').close()"
+  set -ex; \
+  npm ci --no-audit --no-fund --legacy-peer-deps --ignore-scripts || { \
+    echo '=== npm ci FAILED ==='; \
+    ls -l /root/.npm/_logs/ 2>/dev/null || true; \
+    cat /root/.npm/_logs/* 2>/dev/null | tail -200 || true; \
+    exit 1; \
+  }
+
+RUN --mount=type=cache,target=/root/.npm \
+  npm rebuild better-sqlite3 || { \
+    echo '=== npm rebuild better-sqlite3 FAILED ==='; \
+    exit 1; \
+  }
+
+RUN node -e "require('better-sqlite3')(':memory:').close()" || { \
+    echo '=== better-sqlite3 smoke test FAILED ==='; \
+    exit 1; \
+  }
 
 # Force-install all Linux platform packages for sqlite-vec (declared as
 # optionalDependencies of "sqlite-vec"). `npm ci --ignore-scripts` can cause
