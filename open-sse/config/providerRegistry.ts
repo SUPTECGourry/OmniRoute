@@ -7,7 +7,6 @@ export * from "./providers/shared.ts";
 export { REGISTRY } from "./providers/index.ts";
 import { REGISTRY } from "./providers/index.ts";
 import {
-<<<<<<< HEAD
   ANTHROPIC_BETA_API_KEY,
   ANTHROPIC_BETA_CLAUDE_OAUTH,
   ANTHROPIC_VERSION_HEADER,
@@ -4478,23 +4477,6 @@ const _REGISTRY_EAGER: Record<string, RegistryEntry> = {
 };
 
 export const REGISTRY: Record<string, RegistryEntry> = _REGISTRY_EAGER;
-=======
-  RegistryModel,
-  REASONING_UNSUPPORTED,
-  RegistryOAuth,
-  RegistryEntry,
-  LegacyProvider,
-  KIMI_CODING_SHARED,
-  buildModels,
-  ALIBABA_DASHSCOPE_MODELS,
-  GPT_5_5_CONTEXT_LENGTH,
-  GPT_5_5_CODEX_CAPABILITIES,
-  GPT_5_4_CODEX_CAPABILITIES,
-  CHAT_OPENAI_COMPAT_MODELS,
-  mapStainlessOs,
-  mapStainlessArch,
-} from "./providers/shared.ts";
->>>>>>> upstream/main
 
 // ── Generator Functions ───────────────────────────────────────────────────
 
