@@ -3,9 +3,9 @@
  * Modularized into `open-sse/config/providers/`
  */
 
-export * from "./providers/shared.ts";
-export { REGISTRY } from "./providers/index.ts";
-import { REGISTRY } from "./providers/index.ts";
+export * from "./providers/shared";
+export { REGISTRY } from "./providers/index";
+import { REGISTRY } from "./providers/index";
 import {
   RegistryModel,
   REASONING_UNSUPPORTED,
@@ -21,7 +21,7 @@ import {
   CHAT_OPENAI_COMPAT_MODELS,
   mapStainlessOs,
   mapStainlessArch,
-} from "./providers/shared.ts";
+} from "./providers/shared";
 
 // ── Generator Functions ───────────────────────────────────────────────────
 

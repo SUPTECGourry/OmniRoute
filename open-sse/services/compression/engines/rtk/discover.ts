@@ -9,7 +9,7 @@
  * DROP candidates (high-frequency noise) or PRESERVE candidates (errors/summaries).
  */
 
-import { normalizeLine } from "./grouper";
+import { normalizeLine } from "./grouper.ts";
 
 // ---------------------------------------------------------------------------
 // Extended normalization for cross-sample mining

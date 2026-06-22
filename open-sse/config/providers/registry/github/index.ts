@@ -1,5 +1,9 @@
-import type { RegistryEntry } from "../../shared.ts";
-import { GPT_5_5_CODEX_CAPABILITIES, getGitHubCopilotChatHeaders } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
+import {
+  GPT_5_5_CODEX_CAPABILITIES,
+  getGitHubCopilotChatHeaders,
+  resolvePublicCred,
+} from "../../shared";
 
 export const githubProvider: RegistryEntry = {
   id: "github",
@@ -10,9 +14,20 @@ export const githubProvider: RegistryEntry = {
   responsesBaseUrl: "https://api.githubcopilot.com/responses",
   authType: "oauth",
   authHeader: "bearer",
+  // GitHub Copilot is a public device-flow OAuth client: it has a public client_id but
+  // NO client_secret. Populate clientId so token refresh carries it (9router#442) — without
+  // it, refresh requests omit/garble client_id and GitHub rejects them. Embedded via
+  // resolvePublicCred per Hard Rule #11 (never a string literal).
+  oauth: {
+    clientIdEnv: "GITHUB_OAUTH_CLIENT_ID",
+    clientIdDefault: resolvePublicCred("github_copilot_id"),
+  },
   defaultContextLength: 128000,
   headers: getGitHubCopilotChatHeaders(),
   models: [
+    // 9router#98 — Copilot still serves GPT-4o via chat/completions; keep it
+    // alongside the GPT-5.x family so apps that hard-code `gpt-4o` resolve here.
+    { id: "gpt-4o", name: "GPT-4o", contextLength: 128000 },
     { id: "gpt-5-mini", name: "GPT-5 Mini", targetFormat: "openai-responses" },
     { id: "gpt-5.3-codex", name: "GPT-5.3 Codex", targetFormat: "openai-responses" },
     { id: "gpt-5.4-mini", name: "GPT-5.4 Mini", targetFormat: "openai-responses" },

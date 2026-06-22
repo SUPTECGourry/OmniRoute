@@ -9,7 +9,7 @@ import { randomUUID } from "node:crypto";
 import { BaseExecutor } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { buildBedrockNativeConverseUrl, resolveBedrockRegion } from "../config/bedrock.ts";
-import * as prl from "../utils/providerRequestLogging";
+import * as prl from "../utils/providerRequestLogging.ts";
 
 const encoder = new TextEncoder();
 

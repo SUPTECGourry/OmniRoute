@@ -22,7 +22,7 @@ import {
 import { buildAuthHeaders } from "../config/registryUtils.ts";
 import { kieExecutor } from "../executors/kie.ts";
 import { vertexTranscribe } from "../executors/vertexMedia.ts";
-import { errorResponse } from "../utils/error";
+import { errorResponse } from "../utils/error.ts";
 
 type TranscriptionCredentials = {
   apiKey?: string;

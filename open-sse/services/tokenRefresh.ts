@@ -1484,6 +1484,7 @@ export function supportsTokenRefresh(provider) {
     "windsurf",
     "devin-cli",
     "gitlab-duo",
+    "xai-oauth",
   ]);
   if (explicitlySupported.has(provider)) return true;
   const config = PROVIDERS[provider];

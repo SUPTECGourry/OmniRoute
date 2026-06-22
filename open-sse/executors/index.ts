@@ -208,4 +208,4 @@ export { QwenWebExecutor } from "./qwen-web.ts";
 export { TheOldLlmExecutor } from "./theoldllm.ts";
 export { ChipotleExecutor } from "./chipotle.ts";
 export { LMArenaExecutor } from "./lmarena.ts";
-export { MimocodeExecutor } from "./mimocode";
+export { MimocodeExecutor } from "./mimocode.ts";

@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 
 export const muse_spark_webProvider: RegistryEntry = {
   id: "muse-spark-web",

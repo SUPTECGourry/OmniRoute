@@ -23,10 +23,35 @@ import { assertNoStale } from "./lib/allowlist.mjs";
 
 const cwd = process.cwd();
 
-// Arquivos que carregam configuração de credencial de upstream. O escopo é restrito
-// de propósito: estes são os únicos pontos onde client_id/secret públicos vivem.
-// Adicionar um novo arquivo de config de credencial? Inclua-o aqui.
-const SCANNED_FILES = ["open-sse/config/providerRegistry.ts", "src/lib/oauth/constants/oauth.ts"];
+// 6A.8: Instead of a static hardcoded list, scan the two credential-bearing subtrees
+// dynamically so new files (new executor, new OAuth provider) are caught automatically.
+// Anchor files (providerRegistry.ts, oauth.ts) are the canonical credential config;
+// the broader scan covers new additions in open-sse/ and src/lib/oauth/.
+// Exclusions: test files, node_modules, .next.
+const SCAN_ROOTS = [path.join(cwd, "open-sse"), path.join(cwd, "src", "lib", "oauth")];
+
+function walkTs(dir, acc = []) {
+  if (!fs.existsSync(dir)) return acc;
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) {
+      if (e.name !== "node_modules" && e.name !== ".next") walkTs(p, acc);
+    } else if (/\.tsx?$/.test(e.name) && !/\.test\.tsx?$/.test(e.name)) {
+      acc.push(p);
+    }
+  }
+  return acc;
+}
+
+function collectScannedFiles() {
+  const files = [];
+  for (const root of SCAN_ROOTS) {
+    for (const abs of walkTs(root)) {
+      files.push(path.relative(cwd, abs).replace(/\\/g, "/"));
+    }
+  }
+  return files;
+}
 
 // Chaves de objeto cujo valor é uma credencial. Atribuir qualquer uma destas a uma
 // string literal não-vazia viola a Hard Rule #11.
@@ -56,15 +81,15 @@ const ENV_KEY_RE = /(clientId|clientSecret|apiKey)Env\s*:/;
 //
 // 6A.8: Expanded scope to open-sse/** + src/lib/oauth/**. Newly discovered FPs:
 //
-//   open-sse/services/usage.ts L546: `getMiniMaxUsage(apiKey: string, provider: "minimax" | "minimax-cn")`
+//   open-sse/services/usage.ts L582: `getMiniMaxUsage(apiKey: string, provider: "minimax" | "minimax-cn")`
 //   The CRED_KEY_RE matches `apiKey:` in the TypeScript function-parameter type annotation.
 //   "minimax" and "minimax-cn" are provider-name strings in the type annotation, NOT credentials.
 //   This is a false positive (the gate was designed for object-literal assignments, not fn params).
 //   TODO(6A.8): Consider tightening CRED_KEY_RE to exclude function-signature contexts — but
 //   that adds complexity; the FP rate is low (1 file). Frozen by file:line:value key.
 export const KNOWN_LITERAL_CREDS = new Set([
-  "open-sse/services/usage.ts:546:minimax", // TODO(6A.8): pre-existing FP — TS fn-param type, not a credential (moved 543→546 by #3838 usage.ts comment)
-  "open-sse/services/usage.ts:546:minimax-cn", // TODO(6A.8): pre-existing FP — TS fn-param type, not a credential (moved 543→546 by #3838 usage.ts comment)
+  "open-sse/services/usage.ts:582:minimax", // TODO(6A.8): pre-existing FP — TS fn-param type, not a credential (moved 543→547 by #3838/#4293, then 547→582 by the v3.8.33 usage.ts growth)
+  "open-sse/services/usage.ts:582:minimax-cn", // TODO(6A.8): pre-existing FP — TS fn-param type, not a credential (moved 543→547 by #3838/#4293, then 547→582 by the v3.8.33 usage.ts growth)
 ]);
 
 /**

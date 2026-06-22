@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import {
   BaseExecutor,
   setUserAgentHeader,
@@ -5,7 +6,7 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
-import { getModelTargetFormat } from "../config/providerModels";
+import { getModelTargetFormat } from "../config/providerModels.ts";
 
 export class OpencodeExecutor extends BaseExecutor {
   _requestFormat: string | null = null;
@@ -106,6 +107,20 @@ export class OpencodeExecutor extends BaseExecutor {
           findClientHeader("x-session-affinity") || findClientHeader("x-session-id");
         if (sessionAffinity) {
           headers["x-opencode-session"] = sessionAffinity;
+
+          // #4465: a custom-named provider only reaches this fallback because the
+          // OpenCode CLI did NOT emit the x-opencode-* set (it only does so when the
+          // provider id starts with "opencode"). It therefore also dropped
+          // x-opencode-request, a per-request correlation id. Synthesize one so these
+          // users are not disadvantaged versus opencode-prefixed providers on the
+          // opencode.ai upstream. x-opencode-client / x-opencode-project are NOT
+          // fabricated: their valid values are opencode-internal and inventing them
+          // could be rejected upstream — they remain forward-only above. Scoped to this
+          // executor (opencode.ai/zen) and only to the fallback path, so the direct
+          // OpenCode CLI flow (which controls its own request id) is untouched.
+          if (!headers["x-opencode-request"]) {
+            headers["x-opencode-request"] = randomUUID();
+          }
         }
       }
     }

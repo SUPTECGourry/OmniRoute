@@ -421,27 +421,6 @@ test("hasStreamReadinessSignal accepts chat completion structural chunks without
     ),
     true
   );
-  // #3612: chunk with valid choices but NO object/type field (some OA-compatible backends
-  // omit object) — must be accepted as a readiness signal when delta.role is present
-  assert.equal(
-    hasStreamReadinessSignal(
-      `data: ${JSON.stringify({
-        id: "chatcmpl-xyz",
-        choices: [{ index: 0, delta: { role: "assistant" } }],
-      })}\n\n`
-    ),
-    true
-  );
-  // object present but a different (non-chat-chunk) type must still be rejected
-  assert.equal(
-    hasStreamReadinessSignal(
-      `data: ${JSON.stringify({
-        object: "chat.completion",
-        choices: [{ index: 0, delta: { role: "assistant" } }],
-      })}\n\n`
-    ),
-    false
-  );
 });
 
 test("ensureStreamReadiness preserves buffered chunks when stream starts", async () => {

@@ -28,7 +28,7 @@
  *    caller can save it directly without rename.
  */
 
-import { discoverRepeatedNoise, discoverNormalizeLine, type CommandSample } from "./discover";
+import { discoverRepeatedNoise, discoverNormalizeLine, type CommandSample } from "./discover.ts";
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -106,7 +106,7 @@ const SUMMARY_PATTERN =
  *   "npm install"  → "npm-install"
  *   "pip install"  → "pip-install"
  */
-function commandToId(command: string): string {
+export function commandToId(command: string): string {
   return command
     .trim()
     .toLowerCase()

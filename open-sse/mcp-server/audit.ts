@@ -7,7 +7,7 @@
  */
 
 import { hashInput, summarizeOutput } from "./schemas/audit.ts";
-import { isNativeSqliteLoadError } from "../../src/lib/db/core";
+import { isNativeSqliteLoadError } from "../../src/lib/db/core.ts";
 
 // ============ Database Connection ============
 

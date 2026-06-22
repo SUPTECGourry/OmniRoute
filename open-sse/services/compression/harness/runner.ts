@@ -1,4 +1,4 @@
-import { measureCompression, type CompressionMeasurement } from "./measure";
+import { measureCompression, type CompressionMeasurement } from "./measure.ts";
 
 /**
  * Offline eval runner (C1). Feeds a corpus of known inputs through a compression

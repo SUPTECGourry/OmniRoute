@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from "../config/constants";
+import { HTTP_STATUS } from "../config/constants.ts";
 
 type StreamReadinessLogger = {
   debug?: (tag: string, message: string) => void;
@@ -75,61 +75,18 @@ function isPingEventType(type: string): boolean {
   return /^(?:ping|keepalive|heartbeat)$/i.test(type);
 }
 
-function hasChatCompletionToolCallStart(value: unknown): boolean {
-  // Accept a tool_call item if it has a non-empty id (fully-formed chunk) OR if it
-  // carries a numeric index (first OpenAI streaming chunk — id/name arrive in later
-  // chunks). Either form signals that a tool call has started. (#3612)
-  const hasToolCallStart = (item: unknown) =>
-    isRecord(item) && (hasNonEmptyString(item.id) || typeof item.index === "number");
-  if (Array.isArray(value)) return value.some(hasToolCallStart);
-  return hasToolCallStart(value);
+function getPayloadType(payload: unknown, eventType = ""): string {
+  if (!isRecord(payload)) return eventType;
+  const type = payload.type ?? payload.event ?? payload.object;
+  return typeof type === "string" ? type : eventType;
 }
 
-function hasChatCompletionFunctionCallStart(value: unknown): boolean {
-  return isRecord(value) && hasNonEmptyString(value.name);
-}
-
-function hasChatCompletionChunkStartPayload(payload: Record<string, unknown>): boolean {
-  // If object or type is PRESENT and is clearly a non-chat-chunk type, reject early.
-  // If both are absent (many OA-compatible backends omit object), we fall through and
-  // let the choices structure decide. (#3612)
-  const obj = payload.object;
-  const typ = payload.type;
-  const hasForeignObject =
-    (typeof obj === "string" && obj !== "chat.completion.chunk") ||
-    (typeof typ === "string" && typ !== "chat.completion.chunk");
-  if (hasForeignObject) return false;
-
-  const choices = payload.choices;
-  if (!Array.isArray(choices) || choices.length === 0) return false;
-
-  return choices.some((choice) => {
-    if (!isRecord(choice)) return false;
-    const delta = choice.delta;
-    if (!isRecord(delta)) return false;
-
-    return (
-      hasNonEmptyString(delta.role) ||
-      hasChatCompletionToolCallStart(delta.tool_calls) ||
-      hasChatCompletionFunctionCallStart(delta.function_call)
-    );
-  });
-}
-
-function hasAcceptedStreamStartPayload(payload: unknown, eventType = ""): boolean {
-  if (!isRecord(payload)) return false;
-
-  // Anthropic/Claude streams can legitimately start with lifecycle frames and
-  // OpenAI Responses streams can do the same before the first text/tool delta
-  // arrives. Treating structurally valid lifecycle frames as readiness prevents
-  // false 504s while ping-only/generic-empty zombie streams still fail below.
-  const type = typeof payload.type === "string" ? payload.type : eventType;
-  if (type === "message_start" && isRecord(payload.message)) return true;
-  if (type === "content_block_start" && isRecord(payload.content_block)) return true;
-  if (hasOpenAIResponseLifecyclePayload(payload, type)) return true;
-  if (hasChatCompletionChunkStartPayload(payload)) return true;
-
-  return false;
+function hasNonPingStructuredPayload(payload: unknown, eventType = ""): boolean {
+  const type = getPayloadType(payload, eventType);
+  if (isPingEventType(eventType) || isPingEventType(type)) return false;
+  if (Array.isArray(payload)) return payload.length > 0;
+  if (isRecord(payload)) return Object.keys(payload).length > 0;
+  return payload !== null && payload !== undefined;
 }
 
 export function hasUsefulStreamContent(text: string): boolean {

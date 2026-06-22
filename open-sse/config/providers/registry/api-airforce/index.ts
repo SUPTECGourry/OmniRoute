@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
 
 export const api_airforceProvider: RegistryEntry = {
   id: "api-airforce",

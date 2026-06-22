@@ -1,5 +1,5 @@
-import type { RegistryEntry } from "../../shared.ts";
-import { CHAT_OPENAI_COMPAT_MODELS } from "../../shared.ts";
+import type { RegistryEntry } from "../../shared";
+import { CHAT_OPENAI_COMPAT_MODELS } from "../../shared";
 
 export const codestralProvider: RegistryEntry = {
   id: "codestral",

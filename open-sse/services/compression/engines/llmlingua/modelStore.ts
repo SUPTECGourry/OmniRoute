@@ -17,7 +17,7 @@ import {
   DEFAULT_LLMLINGUA_MODEL,
   LLMLINGUA_MODELS,
   type LlmlinguaModelEntry,
-} from "./constants";
+} from "./constants.ts";
 
 /** A minimal structural type for the transformers.js `env` object (avoids importing the native dep here). */
 export interface TransformersEnvLike {

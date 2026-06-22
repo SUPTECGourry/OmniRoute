@@ -1,4 +1,4 @@
-import { antigravityUserAgent } from "../services/antigravityHeaders.ts";
+import { antigravityUserAgent } from "../services/antigravityHeaders";
 
 export const GITHUB_COPILOT_API_VERSION = "2025-04-01";
 export const GITHUB_COPILOT_EDITOR_VERSION = "vscode/1.117.0";

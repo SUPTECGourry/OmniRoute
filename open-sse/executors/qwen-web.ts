@@ -28,7 +28,7 @@
  */
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { makeExecutorErrorResult as makeErrorResult } from "../utils/error.ts";
-import { prepareToolMessages, buildToolAwareResult } from "../translator/webTools";
+import { prepareToolMessages, buildToolAwareResult } from "../translator/webTools.ts";
 import { buildQwenCookieHeader, extractQwenToken } from "@/lib/providers/webCookieAuth";
 
 const BASE_URL = "https://chat.qwen.ai";
