@@ -2,7 +2,7 @@ import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../request/openai-to-claude.ts";
 import { hasToolCallShim, applyToolCallShimToBuffer } from "../helpers/toolCallShim.ts";
-import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments";
+import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 
 // Helper: stop thinking block if started
 function stopThinkingBlock(state, results) {

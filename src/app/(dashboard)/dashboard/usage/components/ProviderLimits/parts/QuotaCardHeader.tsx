@@ -22,11 +22,6 @@ interface Props {
   resolvedPlan: string | null;
   emailsVisible: boolean;
   hasStaleData: boolean;
-/** Disabled when loading. */
-  refreshing: boolean;
-  onRefresh: () => void;
-  onOpenCutoff: () => void;
-  hasCutoffOverrides: boolean;
   /** Toggle the connection's active state (routing on/off). */
   onToggleActive: (nextActive: boolean) => void;
   /** True while the active-state PUT is in flight. */
@@ -41,10 +36,6 @@ export default function QuotaCardHeader({
   resolvedPlan,
   emailsVisible,
   hasStaleData,
-refreshing,
-  onRefresh,
-  onOpenCutoff,
-  hasCutoffOverrides,
   onToggleActive,
   togglingActive,
 }: Props) {
@@ -137,23 +128,6 @@ refreshing,
         <button
           type="button"
           disabled={togglingActive}
-onClick={(e) => {
-            e.stopPropagation();
-            if (togglingActive) return;
-            onToggleActive(!isActive);
-          }}
-          title={toggleActiveLabel}
-          aria-label={toggleActiveLabel}
-          className={`p-1 rounded-md cursor-pointer transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed ${
-            isActive ? "text-text-muted" : "text-rose-500"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[14px]">
-            {isActive ? "toggle_on" : "toggle_off"}
-          </span>
-        </button>
-        <button
-          type="button"
           onClick={(e) => {
             e.stopPropagation();
             if (togglingActive) return;

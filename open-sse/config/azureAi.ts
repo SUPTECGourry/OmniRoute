@@ -1,4 +1,4 @@
-import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
+import { stripTrailingSlashes } from "../utils/urlSanitize";
 
 export const AZURE_AI_DEFAULT_BASE_URL = "https://example-resource.services.ai.azure.com/openai/v1";
 

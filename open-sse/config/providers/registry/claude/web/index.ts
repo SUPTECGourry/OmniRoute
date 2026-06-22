@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../../shared.ts";
+import type { RegistryEntry } from "../../../shared";
 
 export const claude_webProvider: RegistryEntry = {
   id: "claude-web",

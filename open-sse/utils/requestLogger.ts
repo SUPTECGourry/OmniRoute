@@ -1,5 +1,5 @@
 import { getPendingById } from "@/lib/usage/usageHistory";
-import { sanitizeErrorMessage } from "./error";
+import { sanitizeErrorMessage } from "./error.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -243,8 +243,18 @@ function makeStreamChunkMethods(options: RequestLoggerOptions, captureChunks: bo
     pendingPushed = true;
     try {
       const pending = getPendingById();
-for (const entry of pending.values()) {
-        if (entry?.model === options.model && entry.provider === (options.provider || "")) {
+      const exactEntry = options.requestId ? pending.get(options.requestId) : null;
+      if (exactEntry) {
+        exactEntry.streamChunks = { ...streamChunks };
+        return;
+      }
+
+      for (const entry of pending.values()) {
+        if (
+          entry?.connectionId === options.connectionId &&
+          entry?.model === options.model &&
+          entry?.provider === (options.provider || "")
+        ) {
           entry.streamChunks = { ...streamChunks };
           return;
         }

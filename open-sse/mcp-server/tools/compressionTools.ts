@@ -243,7 +243,7 @@ import {
   compressionComboStatsInput,
 } from "../schemas/tools.ts";
 import { handleCcrRetrieve } from "../../services/compression/engines/ccr/index.ts";
-import { resolveCallerScopeContext } from "../scopeEnforcement";
+import { resolveCallerScopeContext } from "../scopeEnforcement.ts";
 
 const ccrRetrieveInput = z.object({
   hash: z

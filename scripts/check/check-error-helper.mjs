@@ -22,7 +22,14 @@ import { pathToFileURL } from "node:url";
 import { assertNoStale } from "./lib/allowlist.mjs";
 
 const cwd = process.cwd();
-const SCAN_DIRS = [path.join(cwd, "open-sse/executors"), path.join(cwd, "open-sse/handlers")];
+
+// Directories to scan (Hard Rule #12 applies to ALL error-response-building surfaces).
+// 6A.8: expanded from executors+handlers to include MCP server tools and API route files.
+const SCAN_DIRS = [
+  path.join(cwd, "open-sse/executors"),
+  path.join(cwd, "open-sse/handlers"),
+  path.join(cwd, "open-sse/mcp-server"),
+];
 
 // Glob-style pattern for API route files under src/app/api/ (matched by path test below).
 const IS_API_ROUTE = /^src\/app\/api\/.+\/route\.tsx?$/;
@@ -129,7 +136,9 @@ function forwardsRawError(source) {
     if (m && !/sanitize/i.test(line)) tainted.add(m[1]);
   }
   const taintedUse =
-    tainted.size > 0 ? new RegExp(String.raw`\b(?:${[...tainted].join("|")})\b`) : null;
+    tainted.size > 0
+      ? new RegExp(String.raw`\b(?:${[...tainted].join("|")})\b`)
+      : null;
 
   // Pass 2: scan for leak lines.
   for (let i = 0; i < lines.length; i++) {

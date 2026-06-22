@@ -9,12 +9,12 @@
  *
  * Header order and body field order were captured via mitmproxy traffic analysis.
  */
-import { isClaudeCodeCompatible } from "../services/provider.ts";
+import { isClaudeCodeCompatible } from "../services/provider";
 import {
   getAntigravityUserAgent,
   GITHUB_COPILOT_CHAT_USER_AGENT,
   getQwenOauthHeaders,
-} from "./providerHeaderProfiles.ts";
+} from "./providerHeaderProfiles";
 import { normalizeCliCompatProviderId } from "@/shared/utils/cliCompat";
 
 export interface CliFingerprint {
@@ -49,11 +49,11 @@ export const CLI_FINGERPRINTS: Record<string, CliFingerprint> = {
       "instructions",
       "store",
       "reasoning",
+      "prompt_cache_key",
       "tools",
       "tool_choice",
       "include",
       "service_tier",
-      "prompt_cache_key",
       "client_metadata",
       "parallel_tool_calls",
       "metadata",

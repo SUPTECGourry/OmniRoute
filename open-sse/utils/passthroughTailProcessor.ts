@@ -6,7 +6,7 @@ import {
   pushUniqueResponsesOutputItems,
   stringifyIdValue,
   stripResponsesLifecycleEcho,
-} from "./responsesStreamHelpers";
+} from "./responsesStreamHelpers.ts";
 
 type JsonRecord = Record<string, unknown>;
 

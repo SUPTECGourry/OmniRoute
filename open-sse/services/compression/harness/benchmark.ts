@@ -35,7 +35,7 @@ import {
   checkTokensPerTaskGate,
   type BudgetBaseline,
   type BudgetGateResult,
-} from "./budgetGate";
+} from "./budgetGate.ts";
 
 // Register all built-in engines once (idempotent).
 registerBuiltinCompressionEngines();
@@ -283,4 +283,36 @@ export function runBenchmarkGate(
     const gate = checkTokensPerTaskGate(report, baseline, tolerancePercent);
     return { engine, gate };
   });
+}
+
+// ── CLI helpers ────────────────────────────────────────────────────────────────
+
+/**
+ * Deterministic engines suitable for the sandbox A/B. `llmlingua` is excluded because its real
+ * compression is async-only and needs the MobileBERT ONNX model at runtime; add it once the
+ * model is provisioned (the framework is engine-agnostic).
+ */
+export const DEFAULT_BENCHMARK_ENGINES: string[] = [
+  "lite",
+  "caveman",
+  "aggressive",
+  "ultra",
+  "rtk",
+  "session-dedup",
+  "headroom",
+  "ccr",
+];
+
+/**
+ * Render an A/B summary (from {@link compareReports}) as a GitHub-flavored markdown table,
+ * best-first with the top engine bolded. Pure — used by the `bench:compression` CLI.
+ */
+export function formatBenchmarkTable(rows: EngineSummaryRow[]): string {
+  const header = "| Engine | Mean Savings % | Mean Retention | Total Compressed Tokens |";
+  const sep = "| --- | ---: | ---: | ---: |";
+  const body = rows.map((r, i) => {
+    const engine = i === 0 ? `**${r.engine}**` : r.engine;
+    return `| ${engine} | ${r.meanSavingsPercent.toFixed(1)} | ${r.meanRetention.toFixed(3)} | ${r.totalCompressedTokens} |`;
+  });
+  return [header, sep, ...body].join("\n");
 }

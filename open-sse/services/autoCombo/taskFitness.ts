@@ -19,7 +19,7 @@ import {
   getModelIntelligenceBySource,
   setUserFitnessOverrideEntry,
   deleteUserFitnessOverrideEntry,
-} from "../../../src/lib/db/modelIntelligence";
+} from "../../../src/lib/db/modelIntelligence.ts";
 
 const FITNESS_TABLE: Record<string, Record<string, number>> = {
   coding: {

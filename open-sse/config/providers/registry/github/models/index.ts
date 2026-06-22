@@ -1,4 +1,4 @@
-import type { RegistryEntry } from "../../../shared.ts";
+import type { RegistryEntry } from "../../../shared";
 
 export const github_modelsProvider: RegistryEntry = {
   id: "github-models",

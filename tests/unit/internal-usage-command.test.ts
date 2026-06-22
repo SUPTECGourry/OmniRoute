@@ -113,6 +113,68 @@ test("buildUsageCommandText formats cached Claude usage windows exactly", async 
   );
 });
 
+test("buildUsageCommandText formats API key USD limits when fair usage is enabled", async () => {
+  const text = await buildUsageCommandText(
+    {
+      id: "key-limited",
+      name: "limited",
+      allowedConnections: ["conn-claude"],
+      usageLimitEnabled: true,
+      dailyUsageLimitUsd: 10,
+      weeklyUsageLimitUsd: 50,
+    },
+    {
+      now: () => NOW,
+      getApiKeyUsageLimitStatus: async () => ({
+        enabled: true,
+        dailyLimitUsd: 10,
+        weeklyLimitUsd: 50,
+        dailySpentUsd: 2,
+        weeklySpentUsd: 5.25,
+        dailyWindowStartIso: "2026-06-16T03:00:00.000Z",
+        dailyResetAtIso: "2026-06-17T03:00:00.000Z",
+        weeklyWindowStartIso: "2026-06-09T12:00:00.000Z",
+        weeklyResetAtIso: "2026-06-23T12:00:00.000Z",
+        dailyExceeded: false,
+        weeklyExceeded: false,
+      }),
+      getProviderConnectionById: async () => {
+        throw new Error("provider connection lookup must not run for fair usage output");
+      },
+      getProviderConnections: async () => {
+        throw new Error("provider connection lookup must not run for fair usage output");
+      },
+      getProviderLimitsCache: () => null,
+      getAllProviderLimitsCache: () => {
+        throw new Error("provider cache lookup must not run for fair usage output");
+      },
+      isValidApiKey: async () => true,
+      getApiKeyMetadata: async () => null,
+    }
+  );
+
+  assert.equal(
+    text,
+    [
+      "Cota diaria",
+      "$10.00",
+      "Gasto diario",
+      "$2.00",
+      "Uso diario",
+      "20%",
+      "Resets in 15h",
+      "",
+      "Cota semanal",
+      "$50.00",
+      "Gasto semanal",
+      "$5.25",
+      "Uso semanal",
+      "11%",
+      "Resets in 7d",
+    ].join("\n")
+  );
+});
+
 test("handleInternalUsageCommand returns disabled response locally without provider routing", async () => {
   const response = await handleInternalUsageCommand(
     new Request("http://localhost/v1/chat/completions", {

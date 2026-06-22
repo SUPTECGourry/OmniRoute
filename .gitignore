@@ -23,6 +23,11 @@ coverage/
 .build/**
 .out/**
 
+# Stryker mutation testing — ephemeral sandbox + generated reports (never commit)
+.stryker-tmp/
+reports/mutation/
+stryker-output-*.json
+
 
 # Memory Bank and Cursor rules (local-only AI agent context)
 memory-bank/
@@ -44,37 +49,11 @@ docs/new-features/
 
 # dependencies
 node_modules/
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-.data/
-.next-playwright/
-.agents/
-/workflows/
-.omo/
+# Also ignore a root node_modules SYMLINK (worktree setups symlink it from the main
+# checkout). The trailing-slash pattern above only matches a directory, so without this
+# a symlink named node_modules could be staged by `git add -A` and committed.
+/node_modules
 *.map
-
-# devbox
-.devbox/
-
-# testing
-coverage/
-coverage**
-
-# next.js
-.next/
-/out/
-
-# production
-/build
-/app
-cloud/*
-
-# misc
 .DS_Store
 
 # Obsidian sync plugin — committed for community distribution
@@ -183,6 +162,9 @@ typescript
 # Superpowers plans/specs (internal tooling, not project code)
 docs/superpowers/
 
+# TIA test-impact map — generated at runtime in CI (build-test-impact-map.mjs), never committed (~21MB)
+config/quality/test-impact-map.json
+
 # GitNexus local index
 .gitnexus
 .worktrees
@@ -233,8 +215,11 @@ pr_reviews*.json
 
 # internal setup prompts with personal credentials — never commit
 CODEX-SETUP-PROMPT.md
-# Quality ratchet — métricas efêmeras (baseline é commitado, métricas não)
-quality-metrics.json
+# Quality ratchet — métricas efêmeras (baseline commitado em config/quality/; métricas não)
+config/quality/quality-metrics.json
+
+# Runtime logs (diretório local, nunca versionado)
+/logs/
 -home-diegosouzapw-dev-automações-bots-yt-downloader-20260504 .txt
 -home-diegosouzapw-dev-automações-bots-yt-downloader-20260410 .txt
 docs/prompts/AGENT-OWNERSHIP-PROTOCOL.omniroute.md

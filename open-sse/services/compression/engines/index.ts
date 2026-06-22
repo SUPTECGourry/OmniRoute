@@ -4,12 +4,15 @@ import { rtkEngine } from "./rtk/index.ts";
 import { sessionDedupEngine } from "./session-dedup/index.ts";
 import { headroomEngine } from "./headroom/index.ts";
 import { ccrEngine } from "./ccr/index.ts";
-import { llmlinguaEngine } from "./llmlingua/index";
+import { llmlinguaEngine } from "./llmlingua/index.ts";
 
 let registered = false;
 
 export function registerBuiltinCompressionEngines(): void {
-  if (registered) return;
+  // The `registered` latch is a fast-path to skip the loop, but it must not block
+  // re-registration after clearCompressionEngineRegistry() empties the map (tests do this).
+  // Re-run when the registry was cleared so the builtins are restored.
+  if (registered && getCompressionEngine(liteEngine.id)) return;
   registered = true;
 
   if (!getCompressionEngine(liteEngine.id)) registerCompressionEngine(liteEngine);

@@ -1,5 +1,5 @@
 import { estimateCompressionTokens } from "../stats.ts";
-import { extractPreservedBlocks } from "../preservation";
+import { extractPreservedBlocks } from "../preservation.ts";
 
 /**
  * Compression eval harness — measurement primitives (C1).
@@ -63,6 +63,9 @@ export function computeRetention(original: string, compressed: string): Retentio
   const entities = extractEntities(original);
   if (entities.length === 0) {
     return { total: 0, survived: 0, score: 1, lost: [] };
+  }
+  if (compressed === original) {
+    return { total: entities.length, survived: entities.length, score: 1, lost: [] };
   }
   const lost: string[] = [];
   let survived = 0;

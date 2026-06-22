@@ -50,7 +50,7 @@ export default function QuotaCard({
   togglingActive,
 }: QuotaCardProps) {
   const isActive = connection.isActive ?? true;
-const quotas = quota?.quotas ?? [];
+  const quotas = quota?.quotas ?? EMPTY_QUOTAS;
   const cardStatus = useMemo<CardStatus>(() => worstStatus(quotas), [quotas]);
   const tierMeta = useMemo(
     () =>
@@ -84,10 +84,6 @@ const quotas = quota?.quotas ?? [];
         resolvedPlan={resolvedPlan}
         emailsVisible={emailsVisible}
         hasStaleData={hasStaleData}
-refreshing={loading}
-        onRefresh={onRefresh}
-        onOpenCutoff={onOpenCutoff}
-        hasCutoffOverrides={hasOverrides}
         onToggleActive={onToggleActive}
         togglingActive={togglingActive}
       />
