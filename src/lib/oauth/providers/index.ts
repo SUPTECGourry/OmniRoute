@@ -12,6 +12,7 @@
 
 import { claude } from "./claude";
 import { codex } from "./codex";
+import { xaiOAuth } from "./xai-oauth";
 import { gemini } from "./gemini";
 import { antigravity } from "./antigravity";
 import { agy } from "./agy";
@@ -30,6 +31,7 @@ import { windsurf } from "./windsurf";
 export const PROVIDERS = {
   claude,
   codex,
+  "xai-oauth": xaiOAuth,
   "gemini-cli": gemini,
   antigravity,
   agy,

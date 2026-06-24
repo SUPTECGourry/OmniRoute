@@ -154,13 +154,16 @@ export const oauthExchangeSchema = z.object({
   code: z.string().trim().min(1),
   redirectUri: z.string().trim().min(1),
   codeVerifier: z.string().trim().min(1).optional(),
+  codeChallenge: z.string().trim().min(1).optional(),
   state: z.string().nullable().optional(),
+  connectionId: z.string().optional(),
 });
 
 export const oauthPollSchema = z.object({
   deviceCode: z.string().trim().min(1),
   codeVerifier: z.string().optional(),
   extraData: z.unknown().optional(),
+  connectionId: z.string().optional(),
 });
 
 /** Import a raw API token (e.g. WINDSURF_API_KEY) without going through the browser OAuth flow. */

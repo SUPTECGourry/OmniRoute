@@ -47,11 +47,12 @@ import { V0VercelWebExecutor } from "./v0-vercel-web.ts";
 import { KimiWebExecutor } from "./kimi-web.ts";
 import { DoubaoWebExecutor } from "./doubao-web.ts";
 import { QwenWebExecutor } from "./qwen-web.ts";
-import { KimiExecutor } from "./kimi.ts"
+import { KimiExecutor } from "./kimi.ts";
 import { TheOldLlmExecutor } from "./theoldllm.ts";
 import { ChipotleExecutor } from "./chipotle.ts";
 import { LMArenaExecutor } from "./lmarena.ts";
 import { MimocodeExecutor } from "./mimocode.ts";
+import { XaiOAuthExecutor } from "./xai-oauth.ts";
 
 const executors = {
   antigravity: new AntigravityExecutor(),
@@ -93,6 +94,9 @@ const executors = {
   "perplexity-web": new PerplexityWebExecutor(),
   "pplx-web": new PerplexityWebExecutor(), // Alias
   "grok-web": new GrokWebExecutor(),
+  "xai-oauth": new XaiOAuthExecutor(),
+  "grok-oauth": new XaiOAuthExecutor(),
+  "xai-grok-oauth": new XaiOAuthExecutor(),
   "claude-web": new ClaudeWebWithAutoRefresh(),
   "cw-web": new ClaudeWebWithAutoRefresh(), // Alias
   "gemini-web": new GeminiWebExecutor(),
@@ -172,6 +176,7 @@ export { CodexExecutor } from "./codex.ts";
 export { CursorExecutor } from "./cursor.ts";
 export { TraeExecutor } from "./trae.ts";
 export { DefaultExecutor } from "./default.ts";
+export { XaiOAuthExecutor } from "./xai-oauth.ts";
 export { BedrockExecutor } from "./bedrock.ts";
 export { GlmExecutor } from "./glm.ts";
 export { PollinationsExecutor } from "./pollinations.ts";

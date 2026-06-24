@@ -63,6 +63,7 @@ import {
   WATSONX_DEFAULT_BASE_URL,
   buildWatsonxModelsUrl,
 } from "@omniroute/open-sse/config/watsonx.ts";
+import { validateXaiApiEndpoint } from "@omniroute/open-sse/config/xaiOAuth.ts";
 import {
   getClientVisibleAntigravityModelName,
   isUserCallableAntigravityModelId,
@@ -155,6 +156,7 @@ const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // was unclassified, so import served the 5-entry hardcoded catalog instead of the
   // live `https://ai-gateway.vercel.sh/v1/models` list. Falls back to local on error.
   "vercel-ai-gateway",
+  "xai-oauth",
   // #4239 / #4155 / #3841: OpenAI-compatible aggregators whose real catalog lives
   // on the upstream `/v1/models` list — serve it live, fall back to the seeded
   // registry catalog on error (same case as zenmux).
@@ -1221,11 +1223,14 @@ export async function GET(
       }
 
       // T39: Try multiple endpoint formats
-      const endpoints = [
-        `${base}/v1/models`,
-        `${base}/models`,
-        `${baseUrl.replace(/\/$/, "")}/models`, // Original fallback
-      ];
+      const endpoints =
+        provider === "xai-oauth" && typeof registryEntry?.modelsUrl === "string"
+          ? [validateXaiApiEndpoint(registryEntry.modelsUrl, "xAI OAuth models endpoint")]
+          : [
+              `${base}/v1/models`,
+              `${base}/models`,
+              `${baseUrl.replace(/\/$/, "")}/models`, // Original fallback
+            ];
 
       // Remove duplicates
       const uniqueEndpoints = [...new Set(endpoints)];

@@ -14,6 +14,11 @@ import { getCliRuntimeStatus } from "@/shared/services/cliRuntime";
 // Use the shared open-sse token refresh with built-in dedup/race-condition cache
 import { getAccessToken } from "@omniroute/open-sse/services/tokenRefresh.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import {
+  XAI_OAUTH_MODELS_URL,
+  XAI_OAUTH_TIER_GATE_MESSAGE,
+  isXaiOAuthTierGateResponse,
+} from "@omniroute/open-sse/config/xaiOAuth.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import { logProxyEvent } from "@/lib/proxyLogger";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
@@ -57,6 +62,13 @@ const OAUTH_TEST_CONFIG = {
     body: JSON.stringify({ model: "gpt-5.3-codex", input: [], stream: false, store: false }),
     // 400 = bad request, but auth was accepted; only 401/403 means the token is bad.
     acceptStatuses: [400],
+    refreshable: true,
+  },
+  "xai-oauth": {
+    url: XAI_OAUTH_MODELS_URL,
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
     refreshable: true,
   },
   "gemini-cli": {
@@ -554,7 +566,8 @@ export async function testOAuthConnection(
     // 400 because the probe body is invalid. A 400 from such a provider means auth
     // succeeded; only 401/403 means the token is bad.
     const accepted =
-      res.ok || (Array.isArray(config.acceptStatuses) && config.acceptStatuses.includes(res.status));
+      res.ok ||
+      (Array.isArray(config.acceptStatuses) && config.acceptStatuses.includes(res.status));
     if (accepted) {
       return {
         valid: true,
@@ -576,6 +589,21 @@ export async function testOAuthConnection(
           diagnosis: makeDiagnosis("ok", "upstream", null, null),
         };
       }
+    }
+
+    if (isXaiOAuthTierGateResponse(connection.provider, res.status)) {
+      return {
+        valid: false,
+        error: XAI_OAUTH_TIER_GATE_MESSAGE,
+        refreshed,
+        statusCode: 403,
+        diagnosis: makeDiagnosis(
+          "upstream_auth_error",
+          "upstream",
+          XAI_OAUTH_TIER_GATE_MESSAGE,
+          "xai_oauth_tier_gate"
+        ),
+      };
     }
 
     // If 401/403 and we haven't tried refresh yet, only attempt refresh
@@ -618,15 +646,24 @@ export async function testOAuthConnection(
         // #1444: a fresh token that still gets a 401 because the account itself was
         // deactivated must be labeled account_deactivated, not a generic auth error.
         const retryBody = await retryRes.text().catch(() => "");
-        const error = isAccountDeactivatedMessage(retryBody)
-          ? "Account deactivated by the provider"
-          : `API returned ${retryRes.status} after token refresh`;
+        const error = isXaiOAuthTierGateResponse(connection.provider, retryRes.status)
+          ? XAI_OAUTH_TIER_GATE_MESSAGE
+          : isAccountDeactivatedMessage(retryBody)
+            ? "Account deactivated by the provider"
+            : `API returned ${retryRes.status} after token refresh`;
         return {
           valid: false,
           error,
           refreshed: true,
           statusCode: retryRes.status,
-          diagnosis: classifyFailure({ error, statusCode: retryRes.status }),
+          diagnosis: isXaiOAuthTierGateResponse(connection.provider, retryRes.status)
+            ? makeDiagnosis(
+                "upstream_auth_error",
+                "upstream",
+                XAI_OAUTH_TIER_GATE_MESSAGE,
+                "xai_oauth_tier_gate"
+              )
+            : classifyFailure({ error, statusCode: retryRes.status }),
         };
       }
       const error = "Token expired and refresh failed";

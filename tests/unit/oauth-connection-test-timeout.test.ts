@@ -68,7 +68,7 @@ function withDeadline<T>(p: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     p,
     new Promise<T>((_resolve, reject) =>
-      setTimeout(() => reject(new Error(`test deadline exceeded (${ms}ms) — probe hung`)), ms).unref()
+      setTimeout(() => reject(new Error(`test deadline exceeded (${ms}ms) — probe hung`)), ms)
     ),
   ]);
 }

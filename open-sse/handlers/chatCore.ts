@@ -113,6 +113,7 @@ import {
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
   STREAM_RECOVERY,
 } from "../config/constants.ts";
+import { XAI_OAUTH_TIER_GATE_MESSAGE, isXaiOAuthTierGateResponse } from "../config/xaiOAuth.ts";
 import { createRecoverableStream, makeContinuationBody } from "../services/streamRecovery.ts";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import {
@@ -2829,6 +2830,7 @@ export async function handleChatCore({
     (providerResponse.status === HTTP_STATUS.UNAUTHORIZED ||
       providerResponse.status === HTTP_STATUS.FORBIDDEN ||
       isQwenExpiredError) &&
+    !isXaiOAuthTierGateResponse(provider, providerResponse.status) &&
     !hadStreamOptions // Skip refresh if failure may be from stream_options removal, not auth
   ) {
     // Fix A: wrap refreshCredentials in runWithOnPersist so the persist callback
@@ -2953,7 +2955,21 @@ export async function handleChatCore({
           }
         }
         if (!alreadyRotated) {
-          await onCredentialsRefreshed({ testStatus: "expired", isActive: false });
+          const refreshProviderData =
+            provider === "xai-oauth" && newCredentials && typeof newCredentials === "object"
+              ? (newCredentials as { providerSpecificData?: Record<string, unknown> })
+                  .providerSpecificData
+              : undefined;
+          await onCredentialsRefreshed({
+            testStatus: "expired",
+            isActive: false,
+            providerSpecificData: refreshProviderData
+              ? {
+                  ...(credentials.providerSpecificData || {}),
+                  ...refreshProviderData,
+                }
+              : undefined,
+          });
         }
       }
     }
@@ -2985,8 +3001,17 @@ export async function handleChatCore({
       upstreamErrorType = details.errorType as string | undefined;
     }
 
+    if (isXaiOAuthTierGateResponse(provider, statusCode)) {
+      message = XAI_OAUTH_TIER_GATE_MESSAGE;
+      upstreamErrorCode = "xai_oauth_tier_gate";
+      upstreamErrorType = "upstream_auth_error";
+    }
+
     // T06/T10/T36: classify provider errors and persist terminal account states.
     let errorType = classifyProviderError(statusCode, message, provider);
+    if (isXaiOAuthTierGateResponse(provider, statusCode)) {
+      errorType = undefined;
+    }
     if (statusCode === 429 && isModelScope()) {
       const decision = classifyModelScope429(message, normalizeHeaders(providerResponse.headers));
       errorType =

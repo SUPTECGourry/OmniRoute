@@ -7,6 +7,12 @@ import { runWithProxyContext } from "../utils/proxyFetch.ts";
 import { serializeRefresh } from "./refreshSerializer.ts";
 import { WINDSURF_CONFIG } from "@/lib/oauth/constants/oauth";
 import { buildGitLabOAuthEndpoints, resolveGitLabOAuthBaseUrl } from "@/lib/oauth/gitlab";
+import {
+  XAI_OAUTH_CLIENT_ID,
+  XAI_OAUTH_TOKEN_URL,
+  buildXaiOAuthDeadRefreshData,
+  validateXaiOAuthEndpoint,
+} from "../config/xaiOAuth.ts";
 
 // Default token expiry buffer (refresh if expires within 5 minutes).
 // Used as fallback for providers without an explicit lead time in
@@ -46,6 +52,7 @@ export const REFRESH_LEAD_MS: Record<string, number> = {
   "gemini-cli": 15 * 60 * 1000,
   antigravity: 15 * 60 * 1000,
   agy: 15 * 60 * 1000, // same Google backend as antigravity (non-rotating refresh tokens)
+  "xai-oauth": 5 * 60 * 1000,
 };
 
 /**
@@ -340,6 +347,100 @@ export async function refreshAccessToken(
     log?.error?.("TOKEN_REFRESH", `Error refreshing token for ${provider}`, {
       error: error.message,
     });
+    return null;
+  }
+}
+
+export async function refreshXaiOAuthToken(
+  refreshToken: string,
+  providerSpecificData: Record<string, unknown> | null | undefined,
+  log: RefreshLogger,
+  proxyConfig: unknown = null
+) {
+  if (providerSpecificData?.refreshTokenDead === true) {
+    const code =
+      typeof providerSpecificData.refreshTokenDeadCode === "string"
+        ? providerSpecificData.refreshTokenDeadCode
+        : "refresh_token_dead";
+    log?.warn?.(
+      "TOKEN_REFRESH",
+      `xAI OAuth refresh token is quarantined (${code}); re-authentication required`
+    );
+    return {
+      error: "unrecoverable_refresh_error",
+      code,
+      providerSpecificData: buildXaiOAuthDeadRefreshData(code),
+    };
+  }
+
+  const tokenEndpoint = validateXaiOAuthEndpoint(
+    typeof providerSpecificData?.tokenEndpoint === "string"
+      ? providerSpecificData.tokenEndpoint
+      : XAI_OAUTH_TOKEN_URL,
+    "xAI token endpoint"
+  );
+
+  try {
+    const response = await runWithProxyContext(proxyConfig, () =>
+      fetch(tokenEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+        body: buildFormParams({
+          grant_type: "refresh_token",
+          refresh_token: refreshToken,
+          client_id: PROVIDERS["xai-oauth"]?.clientId || XAI_OAUTH_CLIENT_ID,
+        }),
+      })
+    );
+
+    if (!response.ok) {
+      const { rawText, code } = await readRefreshErrorBody(response);
+      log?.error?.("TOKEN_REFRESH", "Failed to refresh xAI OAuth token", {
+        status: response.status,
+        error: rawText.slice(0, 300),
+      });
+
+      if (response.status >= 400 && response.status < 500) {
+        const terminalCode = code || `http_${response.status}`;
+        return {
+          error: "unrecoverable_refresh_error",
+          code: terminalCode,
+          providerSpecificData: buildXaiOAuthDeadRefreshData(terminalCode),
+        };
+      }
+
+      return null;
+    }
+
+    const tokens = await response.json();
+    log?.info?.("TOKEN_REFRESH", "Successfully refreshed xAI OAuth token", {
+      hasNewAccessToken: !!tokens.access_token,
+      hasNewRefreshToken: !!tokens.refresh_token,
+      expiresIn: tokens.expires_in,
+    });
+
+    return {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token || refreshToken,
+      expiresIn: tokens.expires_in,
+      tokenType: tokens.token_type,
+      scope: tokens.scope,
+      providerSpecificData: {
+        refreshTokenDead: false,
+        refreshTokenDeadAt: null,
+        refreshTokenDeadCode: null,
+        reauthRequired: false,
+        tokenEndpoint,
+      },
+    };
+  } catch (error) {
+    log?.error?.(
+      "TOKEN_REFRESH",
+      `Network error refreshing xAI OAuth token: ${error instanceof Error ? error.message : String(error)}`
+    );
     return null;
   }
 }
@@ -1411,6 +1512,14 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "codex":
       return await refreshCodexToken(credentials.refreshToken, log, proxyConfig);
 
+    case "xai-oauth":
+      return await refreshXaiOAuthToken(
+        credentials.refreshToken,
+        credentials.providerSpecificData,
+        log,
+        proxyConfig
+      );
+
     case "qwen":
       return await refreshQwenToken(credentials.refreshToken, log, proxyConfig);
 
@@ -1481,6 +1590,7 @@ export function supportsTokenRefresh(provider) {
     "amazon-q",
     "cline",
     "kimi-coding",
+    "xai-oauth",
     "windsurf",
     "devin-cli",
     "gitlab-duo",

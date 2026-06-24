@@ -12,6 +12,11 @@ import {
 import { persistOAuthConnection } from "@/lib/oauth/connectionPersistence";
 import { createDeviceFlowTicket, getDeviceFlowTicketStatus } from "@/lib/oauth/deviceFlowTickets";
 import {
+  XAI_OAUTH_REDIRECT_HOST,
+  XAI_OAUTH_REDIRECT_PORT,
+  buildXaiOAuthRedirectUri,
+} from "@omniroute/open-sse/config/xaiOAuth.ts";
+import {
   createProviderConnection,
   updateProviderConnection,
   getProviderConnections,
@@ -41,9 +46,12 @@ if (!globalThis.__codexCallbackState) {
 if (!globalThis.__windsurfCallbackState) {
   globalThis.__windsurfCallbackState = null;
 }
+if (!globalThis.__xaiOAuthCallbackState) {
+  globalThis.__xaiOAuthCallbackState = null;
+}
 
 /** Providers that use the PKCE browser callback flow (like Codex). */
-const PKCE_CALLBACK_PROVIDERS = new Set(["codex"]);
+const PKCE_CALLBACK_PROVIDERS = new Set(["codex", "xai-oauth"]);
 
 /**
  * Providers whose device flow runs in the user's browser (auth.openai.com blocks
@@ -65,6 +73,12 @@ const RETIRED_PKCE_PROVIDERS = new Set(["windsurf", "devin-cli"]);
 /** Providers that allow direct import of a raw API token (no OAuth exchange). */
 const IMPORT_TOKEN_PROVIDERS = new Set(["windsurf", "devin-cli"]);
 
+function getPkceCallbackStateKey(provider: string): string {
+  if (provider === "codex") return "__codexCallbackState";
+  if (provider === "xai-oauth") return "__xaiOAuthCallbackState";
+  return "__windsurfCallbackState";
+}
+
 /**
  * Constant-time string comparison to prevent timing-oracle attacks (CWE-208).
  * Handles null/undefined safely and different-length strings.
@@ -75,6 +89,28 @@ function safeEqual(a: string | null | undefined, b: string | null | undefined): 
   const bb = Buffer.from(String(b));
   if (ba.length !== bb.length) return false;
   return timingSafeEqual(ba, bb);
+}
+
+function matchesOAuthConnection(
+  provider: string,
+  connectionId: string | undefined,
+  c: any,
+  tokenData: any
+) {
+  if (c.id && safeEqual(connectionId, c.id)) return true;
+  if (c.authType !== "oauth") return false;
+  if (tokenData.email && safeEqual(c.email, tokenData.email)) {
+    if (provider === "codex" && tokenData.providerSpecificData?.workspaceId) {
+      const existingWorkspace = c.providerSpecificData?.workspaceId;
+      return safeEqual(existingWorkspace, tokenData.providerSpecificData.workspaceId);
+    }
+    return true;
+  }
+  if (provider === "xai-oauth" && tokenData.providerSpecificData?.accountId) {
+    const existingAccountId = c.providerSpecificData?.accountId;
+    return safeEqual(existingAccountId, tokenData.providerSpecificData.accountId);
+  }
+  return false;
 }
 
 /**
@@ -146,7 +182,8 @@ export async function GET(
 
     if (action === "authorize") {
       const requestedRedirectUri =
-        searchParams.get("redirect_uri") || "http://localhost:8080/callback";
+        searchParams.get("redirect_uri") ||
+        (provider === "xai-oauth" ? buildXaiOAuthRedirectUri() : "http://localhost:8080/callback");
       const redirectUri = resolveBrowserOAuthRedirectUri(provider, requestedRedirectUri);
       const authData = generateAuthData(provider, redirectUri);
       if (provider === "qoder" && !authData.authUrl) {
@@ -175,7 +212,7 @@ export async function GET(
 
     if (action === "device-code") {
       const providerData = getProvider(provider);
-      if (providerData.flowType !== "device_code") {
+      if (providerData.flowType !== "device_code" && !providerData.supportsDeviceCode) {
         return NextResponse.json(
           { error: "Provider does not support device code flow" },
           { status: 400 }
@@ -196,9 +233,10 @@ export async function GET(
         provider === "kiro" ||
         provider === "amazon-q" ||
         provider === "kimi-coding" ||
-        provider === "kilocode"
+        provider === "kilocode" ||
+        provider === "xai-oauth"
       ) {
-        // GitHub, Kiro/Amazon Q, Kimi Coding, and KiloCode don't use PKCE for device code
+        // GitHub, Kiro/Amazon Q, Kimi Coding, KiloCode, and xAI don't use PKCE for device code
         if ((provider === "kiro" || provider === "amazon-q") && startUrl) {
           const providerOverrideConfig = {
             ...providerData.config,
@@ -268,7 +306,8 @@ async function handleStartCallbackServer(provider: string, searchParams: URLSear
   }
 
   const isWindsurf = provider === "windsurf" || provider === "devin-cli";
-  const stateKey = isWindsurf ? "__windsurfCallbackState" : "__codexCallbackState";
+  const isXaiOAuth = provider === "xai-oauth";
+  const stateKey = getPkceCallbackStateKey(provider);
 
   // Clean up existing server if any
   if (globalThis[stateKey]?.close) {
@@ -281,15 +320,21 @@ async function handleStartCallbackServer(provider: string, searchParams: URLSear
   globalThis[stateKey] = null;
 
   try {
-    // Codex: fixed port 1455. Windsurf/Devin CLI: OS-assigned random port (0)
-    const serverPort = isWindsurf ? 0 : 1455;
-    const { port, close } = await startLocalServer((params) => {
-      if (globalThis[stateKey]) {
-        globalThis[stateKey].callbackParams = params;
-      }
-    }, serverPort);
+    // Codex: fixed port 1455. xAI: prefer 56121 and fall back to random. Windsurf/Devin: random.
+    const serverPort = isWindsurf ? 0 : isXaiOAuth ? XAI_OAUTH_REDIRECT_PORT : 1455;
+    const { port, close } = await startLocalServer(
+      (params) => {
+        if (globalThis[stateKey]) {
+          globalThis[stateKey].callbackParams = params;
+        }
+      },
+      serverPort,
+      isXaiOAuth ? { host: XAI_OAUTH_REDIRECT_HOST, fallbackToRandomPort: true } : undefined
+    );
 
-    const redirectUri = `http://localhost:${port}/auth/callback`;
+    const redirectUri = isXaiOAuth
+      ? buildXaiOAuthRedirectUri(port)
+      : `http://localhost:${port}/auth/callback`;
     const authData = generateAuthData(provider, redirectUri);
 
     globalThis[stateKey] = {
@@ -298,6 +343,7 @@ async function handleStartCallbackServer(provider: string, searchParams: URLSear
       port,
       redirectUri,
       codeVerifier: authData.codeVerifier,
+      codeChallenge: authData.codeChallenge,
       startedAt: Date.now(),
     };
 
@@ -317,6 +363,8 @@ async function handleStartCallbackServer(provider: string, searchParams: URLSear
     return NextResponse.json({
       authUrl: authData.authUrl,
       codeVerifier: authData.codeVerifier,
+      codeChallenge: authData.codeChallenge,
+      state: authData.state,
       redirectUri,
       serverPort: port,
     });
@@ -431,7 +479,7 @@ export async function POST(
     }
 
     if (action === "exchange") {
-      const { code, redirectUri, connectionId, codeVerifier, state } = body;
+      const { code, redirectUri, connectionId, codeVerifier, codeChallenge, state } = body;
       const normalizedState = typeof state === "string" && state.length > 0 ? state : undefined;
       const providerData = getProvider(provider);
 
@@ -452,13 +500,40 @@ export async function POST(
         );
       }
 
+      if (provider === "xai-oauth" && !codeChallenge) {
+        return NextResponse.json(
+          {
+            error: {
+              message: "Invalid request",
+              details: [
+                {
+                  field: "codeChallenge",
+                  message: "Code challenge is required for xAI OAuth exchange",
+                },
+              ],
+            },
+          },
+          { status: 400 }
+        );
+      }
+
       // Resolve proxy for this provider (provider-level → global → direct)
       const proxy = await resolveProxyForProvider(provider);
 
       // Exchange code for tokens (through proxy if configured)
-      const tokenData = await runWithProxyContextOrDirect(proxy, () =>
-        exchangeTokens(provider, code, redirectUri, codeVerifier, normalizedState)
-      );
+      let tokenData;
+      try {
+        tokenData = await runWithProxyContextOrDirect(proxy, () =>
+          exchangeTokens(provider, code, redirectUri, codeVerifier, normalizedState, codeChallenge)
+        );
+      } catch (exchangeErr: any) {
+        return NextResponse.json(
+          {
+            error: sanitizeErrorMessage(exchangeErr?.message) || "OAuth token exchange failed",
+          },
+          { status: 400 }
+        );
+      }
 
       // Normalize: if name is missing, use email or displayName as fallback so accounts
       // always show a real label (e.g. user@gmail.com) instead of "Account #abc123"
@@ -472,19 +547,11 @@ export async function POST(
         : null;
 
       let connection: any;
-      if (tokenData.email) {
+      if (tokenData.email || tokenData.providerSpecificData?.accountId || connectionId) {
         const existing = await getProviderConnections({ provider });
-        const match = existing.find((c: any) => {
-          if (c.id && safeEqual(connectionId, c.id)) return true;
-          // safeEqual: constant-time comparison to prevent timing attacks (CWE-208, finding #258-6/7)
-          if (!safeEqual(c.email, tokenData.email) || c.authType !== "oauth") return false;
-          // For Codex, also check workspaceId to avoid overwriting different workspace connections
-          if (provider === "codex" && tokenData.providerSpecificData?.workspaceId) {
-            const existingWorkspace = c.providerSpecificData?.workspaceId;
-            return safeEqual(existingWorkspace, tokenData.providerSpecificData.workspaceId);
-          }
-          return true;
-        });
+        const match = existing.find((c: any) =>
+          matchesOAuthConnection(provider, connectionId, c, tokenData)
+        );
         const matchId = typeof match?.id === "string" ? match.id : null;
         if (matchId) {
           connection = await updateProviderConnection(matchId, {
@@ -527,8 +594,13 @@ export async function POST(
 
       // Poll for token (through proxy if configured)
       let result;
-      if (provider === "github" || provider === "kimi-coding" || provider === "kilocode") {
-        // For providers that don't use PKCE (GitHub, Kimi Coding, KiloCode), don't pass codeVerifier
+      if (
+        provider === "github" ||
+        provider === "kimi-coding" ||
+        provider === "kilocode" ||
+        provider === "xai-oauth"
+      ) {
+        // For providers that don't use PKCE (GitHub, Kimi Coding, KiloCode, xAI), don't pass codeVerifier
         result = await runWithProxyContextOrDirect(proxy, () =>
           (pollForToken as any)(provider, deviceCode)
         );
@@ -559,19 +631,11 @@ export async function POST(
           : null;
 
         let connection: any;
-        if (result.tokens.email) {
+        if (result.tokens.email || result.tokens.providerSpecificData?.accountId || connectionId) {
           const existing = await getProviderConnections({ provider });
-          const match = existing.find((c: any) => {
-            if (c.id && safeEqual(connectionId, c.id)) return true;
-            // safeEqual: constant-time comparison to prevent timing attacks (CWE-208, finding #258-8/9)
-            if (!safeEqual(c.email, result.tokens.email) || c.authType !== "oauth") return false;
-            // For Codex, also check workspaceId to avoid overwriting different workspace connections
-            if (provider === "codex" && result.tokens.providerSpecificData?.workspaceId) {
-              const existingWorkspace = c.providerSpecificData?.workspaceId;
-              return safeEqual(existingWorkspace, result.tokens.providerSpecificData.workspaceId);
-            }
-            return true;
-          });
+          const match = existing.find((c: any) =>
+            matchesOAuthConnection(provider, connectionId, c, result.tokens)
+          );
           const matchId = typeof match?.id === "string" ? match.id : null;
           if (matchId) {
             connection = await updateProviderConnection(matchId, {
@@ -629,8 +693,7 @@ export async function POST(
         );
       }
 
-      // Windsurf and Devin CLI share __windsurfCallbackState; Codex uses its own slot
-      const stateKey = provider === "codex" ? "__codexCallbackState" : "__windsurfCallbackState";
+      const stateKey = getPkceCallbackStateKey(provider);
 
       if (!globalThis[stateKey]) {
         return NextResponse.json({
@@ -646,7 +709,7 @@ export async function POST(
 
       // Callback received! Extract code and exchange for tokens
       const params = globalThis[stateKey].callbackParams;
-      const { redirectUri, codeVerifier, close } = globalThis[stateKey];
+      const { redirectUri, codeVerifier, codeChallenge, close } = globalThis[stateKey];
 
       // Clean up server
       try {
@@ -678,7 +741,14 @@ export async function POST(
 
         // Exchange code for tokens (through proxy if configured)
         const tokenData = await runWithProxyContextOrDirect(proxy, () =>
-          exchangeTokens(provider, params.code, redirectUri, codeVerifier, params.state)
+          exchangeTokens(
+            provider,
+            params.code,
+            redirectUri,
+            codeVerifier,
+            params.state,
+            codeChallenge
+          )
         );
 
         // Normalize: if name is missing, use email as fallback display label
@@ -692,19 +762,11 @@ export async function POST(
           : null;
 
         let connection: any;
-        if (tokenData.email) {
+        if (tokenData.email || tokenData.providerSpecificData?.accountId || connectionId) {
           const existing = await getProviderConnections({ provider });
-          const match = existing.find((c: any) => {
-            if (c.id && safeEqual(connectionId, c.id)) return true;
-            // safeEqual: constant-time comparison to prevent timing attacks (CWE-208, finding #258-6/7)
-            if (!safeEqual(c.email, tokenData.email) || c.authType !== "oauth") return false;
-            // For Codex, also check workspaceId to avoid overwriting different workspace connections
-            if (provider === "codex" && tokenData.providerSpecificData?.workspaceId) {
-              const existingWorkspace = c.providerSpecificData?.workspaceId;
-              return safeEqual(existingWorkspace, tokenData.providerSpecificData.workspaceId);
-            }
-            return true;
-          });
+          const match = existing.find((c: any) =>
+            matchesOAuthConnection(provider, connectionId, c, tokenData)
+          );
           const matchId = typeof match?.id === "string" ? match.id : null;
           if (matchId) {
             connection = await updateProviderConnection(matchId, {
@@ -739,8 +801,11 @@ export async function POST(
       } catch (exchangeErr: any) {
         console.error("OAuth exchange error:", exchangeErr);
         return NextResponse.json(
-          { success: false, error: "Internal server error" },
-          { status: 500 }
+          {
+            success: false,
+            error: sanitizeErrorMessage(exchangeErr?.message) || "OAuth token exchange failed",
+          },
+          { status: 400 }
         );
       }
     }

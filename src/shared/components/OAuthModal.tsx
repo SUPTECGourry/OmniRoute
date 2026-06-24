@@ -10,7 +10,7 @@ import { parseResponseBody, getErrorMessage } from "@/shared/utils/api";
 
 const GOOGLE_OAUTH_PROVIDERS = new Set(["antigravity", "agy", "gemini-cli"]);
 
-/** Providers that use a local callback server on a random port (PKCE browser flow). */
+/** Providers that default to a local callback server for PKCE browser flow. */
 const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex"]);
 
 /**
@@ -122,6 +122,7 @@ export default function OAuthModal({
             redirectUri: authData.redirectUri,
             connectionId: reauthConnection?.id,
             codeVerifier: authData.codeVerifier,
+            codeChallenge: authData.codeChallenge,
             ...(normalizedState ? { state: normalizedState } : {}),
           }),
         });
@@ -256,6 +257,31 @@ export default function OAuthModal({
     [provider, onSuccess, reauthConnection]
   );
 
+  const startXaiDeviceCodeFallback = useCallback(async () => {
+    if (provider !== "xai-oauth") return;
+    try {
+      setError(null);
+      setIsDeviceCode(true);
+      setStep("waiting");
+
+      const res = await fetch(`/api/oauth/${provider}/device-code`);
+      const data = (await parseResponseBody(res)) as Record<string, unknown>;
+      if (!res.ok) {
+        const errMsg = getErrorMessage(data, res.status, "Device code request failed");
+        throw new Error(errMsg);
+      }
+
+      setDeviceData(data);
+      const verifyUrl = data.verification_uri_complete || data.verification_uri;
+      if (verifyUrl) window.open(verifyUrl as string, "oauth_verify");
+      startPolling(data.device_code, data.codeVerifier, data.interval || 5, null);
+    } catch (err) {
+      setError(err.message);
+      setStep("error");
+      setIsDeviceCode(false);
+    }
+  }, [provider, startPolling]);
+
   // Start OAuth flow
   const startOAuthFlow = useCallback(async () => {
     if (!provider) return;
@@ -317,16 +343,16 @@ export default function OAuthModal({
 
       let forceManual = false;
 
-      // Claude Code and Cline OAuth flows can finish on provider-hosted pages that
-      // show an auth code instead of redirecting back to OmniRoute.
-      // Start directly in manual mode so users always have an input to paste code/url.
-      if (provider === "claude" || provider === "cline") {
+      // Some OAuth flows can finish on provider-hosted pages that show an auth code
+      // instead of redirecting back to OmniRoute. xAI also uses a fixed loopback
+      // redirect that is unreachable from Docker/LAN browsers unless the port is
+      // explicitly exposed, so keep the manual/device-code input visible.
+      if (provider === "claude" || provider === "cline" || provider === "xai-oauth") {
         forceManual = true;
       }
 
-      // PKCE callback server providers (Codex, Windsurf, Devin CLI):
+      // PKCE callback server providers:
       // On localhost, spin up a local callback server and poll for the result.
-      // Codex uses a fixed port 1455; Windsurf/Devin CLI use a random OS-assigned port.
       // On remote the server is unreachable — fall through to standard manual flow.
       if (PKCE_CALLBACK_SERVER_PROVIDERS.has(provider)) {
         if (isTrueLocalhost) {
@@ -401,6 +427,8 @@ export default function OAuthModal({
       let redirectUri: string;
       if (provider === "codex" || provider === "openai") {
         redirectUri = "http://localhost:1455/auth/callback";
+      } else if (provider === "xai-oauth") {
+        redirectUri = "http://127.0.0.1:56121/callback";
       } else if (provider === "windsurf" || provider === "devin-cli") {
         // Remote fallback: use OmniRoute's port with the /auth/callback path Windsurf expects.
         // On true localhost this code is never reached (callback server handles the flow above).
@@ -665,7 +693,12 @@ export default function OAuthModal({
       let errorDescription = null;
 
       try {
-        const url = new URL(input);
+        const url =
+          input.startsWith("?") || input.startsWith("#")
+            ? new URL(
+                `http://127.0.0.1/callback${input.startsWith("#") ? `?${input.slice(1)}` : input}`
+              )
+            : new URL(input);
         code = url.searchParams.get("code");
         state = url.searchParams.get("state") || url.hash.replace(/^#/, "") || state;
         errorParam = url.searchParams.get("error");
@@ -885,7 +918,9 @@ export default function OAuthModal({
                       placeholder={
                         provider === "claude" || provider === "cline"
                           ? "code#state or /callback?code=..."
-                          : placeholderUrl
+                          : provider === "xai-oauth"
+                            ? "?code=...&state=... or bare code"
+                            : placeholderUrl
                       }
                       className="font-mono text-xs"
                     />
@@ -900,6 +935,11 @@ export default function OAuthModal({
                   >
                     {t("connect")}
                   </Button>
+                  {provider === "xai-oauth" && (
+                    <Button onClick={startXaiDeviceCodeFallback} variant="secondary" fullWidth>
+                      Device Code
+                    </Button>
+                  )}
                   <Button onClick={onClose} variant="ghost" fullWidth>
                     {t("cancel")}
                   </Button>

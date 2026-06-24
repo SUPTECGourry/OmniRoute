@@ -544,12 +544,12 @@ Code blocks, URLs, JSON and structured data are **always protected** by the pres
 
 The 9 engines above shrink what goes **in**. Three more layers shape **how**, **when**, and what comes **out**:
 
-- **🪄 Output Styles** *(output-axis steering)* — inject deterministic, cache-safe response-shaping instructions; combinable, each at `lite` / `full` / `ultra` intensity. Adding a style is a one-line registry entry:
+- **🪄 Output Styles** _(output-axis steering)_ — inject deterministic, cache-safe response-shaping instructions; combinable, each at `lite` / `full` / `ultra` intensity. Adding a style is a one-line registry entry:
   - **Terse prose** — drop filler / articles / hedging; keep technical substance exact.
   - **Less code** — "lazy senior dev" YAGNI: smallest working change, no unrequested scaffolding.
   - **Terse CJK (文言)** — classical-Chinese ultra-terse style (locale-gated to `zh`).
-- **🎯 Adaptive context-budget** *(the dial)* — instead of one on/off token threshold, escalate the cheapest, most-lossless engines only as far as needed to **fit the model's context window**. Policy: `reserve-output` (default, model-aware) · `percentage` · `absolute`. Mode: `floor` (guarantee fit) · `replace-autotrigger` (your explicit choice wins) · `off` (legacy threshold).
-- **🎛️ Where compression is decided** *(precedence, high → low)* — per-request `x-omniroute-compression` header › routing-combo override › active named profile › adaptive / auto-trigger › panel default › off. The applied plan echoes back in the `X-OmniRoute-Compression: <mode>; source=<source>` response header.
+- **🎯 Adaptive context-budget** _(the dial)_ — instead of one on/off token threshold, escalate the cheapest, most-lossless engines only as far as needed to **fit the model's context window**. Policy: `reserve-output` (default, model-aware) · `percentage` · `absolute`. Mode: `floor` (guarantee fit) · `replace-autotrigger` (your explicit choice wins) · `off` (legacy threshold).
+- **🎛️ Where compression is decided** _(precedence, high → low)_ — per-request `x-omniroute-compression` header › routing-combo override › active named profile › adaptive / auto-trigger › panel default › off. The applied plan echoes back in the `X-OmniRoute-Compression: <mode>; source=<source>` response header.
 
 Auto-trigger by token threshold, flip on the adaptive dial, pin a named profile, set a one-off per request, or assign a pipeline per routing combo — whichever fits the workload. An opt-in offline **eval harness** (`npm run eval:compression`) scores fidelity vs. savings on a pinned corpus before you promote a change.
 
@@ -777,7 +777,7 @@ Compression: aggressive (~50%) → double your free quota · Cost: $0/mo
 <br/>
 
 **Routing:** 15 strategies · task-aware smart routing · thinking budget controls · wildcard routing · system prompt injection.
-**Compatibility:** OpenAI ↔ Claude ↔ Gemini ↔ Responses API · auto OAuth refresh (PKCE, 8 providers) · multi-account round-robin · Batch + Files API · live OpenAPI 3.0.
+**Compatibility:** OpenAI ↔ Claude ↔ Gemini ↔ Responses API · auto OAuth refresh (PKCE, 20 provider entries, including xAI Grok OAuth) · multi-account round-robin · Batch + Files API · live OpenAPI 3.0.
 **Protocols:** MCP (87 tools, 3 transports, 30 scopes) · A2A (JSON-RPC 2.0, SSE, 6 skills) · ACP · cloud agents (Codex, Devin, Jules).
 **Plugins:** custom plugin marketplace (system-configured registry URL with SSRF-guarded fetch) · install / enable / disable · Notion + Obsidian knowledge-base integrations (WebDAV file server, vault search, note CRUD).
 **Embedded services:** one-click install & lifecycle management of local sidecar services (CLIProxy, NineRouter).
@@ -934,7 +934,7 @@ Compression: aggressive (~50%) → double your free quota · Cost: $0/mo
 | Document                                          | Description                                         |
 | ------------------------------------------------- | --------------------------------------------------- |
 | [API Reference](docs/reference/API_REFERENCE.md)  | All endpoints with examples                         |
-| [OpenAPI Spec](docs/openapi.yaml)       | OpenAPI 3.0 specification                           |
+| [OpenAPI Spec](docs/openapi.yaml)                 | OpenAPI 3.0 specification                           |
 | [MCP Server](open-sse/mcp-server/README.md)       | 87 MCP tools, IDE configs, Python/TS/Go clients     |
 | [MCP Server Guide](docs/frameworks/MCP-SERVER.md) | MCP installation, transports, and tool reference    |
 | [A2A Server](src/lib/a2a/README.md)               | JSON-RPC 2.0 protocol, skills, streaming, task mgmt |
@@ -1089,32 +1089,32 @@ OmniRoute stands on the shoulders of giants. It started as a fork of **[9router]
 
 ### 🗜️ Context & token compression — engines
 
-| Project                                                                      |    ⭐ | How it inspired OmniRoute                                                                                                                                             |
-| ---------------------------------------------------------------------------- | ----: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[Caveman](https://github.com/JuliusBrussee/caveman)** · JuliusBrussee      | 74.5k | The viral "why use many token when few token do trick" project — its caveman-speak philosophy powers our standard compression mode and 30+ filler/condensation rules. |
-| **[RTK – Rust Token Killer](https://github.com/rtk-ai/rtk)** · rtk-ai        | 63.6k | High-performance command-output compression — inspired our RTK engine, JSON filter DSL, raw-output recovery and the stacked RTK → Caveman pipeline.                   |
-| **[headroom](https://github.com/chopratejas/headroom)** · chopratejas        | 33.6k | Reversible context-compression (SmartCrusher) — inspired our `headroom` engine and the `ccr` retrieve-marker pattern.                                                 |
-| **[LLMLingua](https://github.com/microsoft/LLMLingua)** · Microsoft          |  6.3k | Prompt-compression research (LLMLingua / LLMLingua-2) — inspired our async, code-safe, fail-open `llmlingua` engine.                                                  |
-| **[llmlingua-2-js](https://github.com/atjsh/llmlingua-2-js)** · atjsh        |    27 | The JS/ONNX port (MobileBERT / XLM-RoBERTa) used as the worker-thread backend for our LLMLingua engine.                                                               |
-| **[Troglodita](https://github.com/leninejunior/troglodita)** · Lenine Júnior |    15 | PT-BR token compression — powers our pt-BR language pack: pleonasm reduction and filler removal tuned for Brazilian-Portuguese grammar.                               |
-| **[ponytail](https://github.com/DietrichGebert/ponytail)** · DietrichGebert  | 51.4k | The viral "lazy senior dev" YAGNI-coder skill — inspired our **less-code** Output Style: smallest-working-change steering that cuts *generated* code (the output-axis sibling to Caveman's terse prose).                  |
+| Project                                                                      |    ⭐ | How it inspired OmniRoute                                                                                                                                                                                |
+| ---------------------------------------------------------------------------- | ----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[Caveman](https://github.com/JuliusBrussee/caveman)** · JuliusBrussee      | 74.5k | The viral "why use many token when few token do trick" project — its caveman-speak philosophy powers our standard compression mode and 30+ filler/condensation rules.                                    |
+| **[RTK – Rust Token Killer](https://github.com/rtk-ai/rtk)** · rtk-ai        | 63.6k | High-performance command-output compression — inspired our RTK engine, JSON filter DSL, raw-output recovery and the stacked RTK → Caveman pipeline.                                                      |
+| **[headroom](https://github.com/chopratejas/headroom)** · chopratejas        | 33.6k | Reversible context-compression (SmartCrusher) — inspired our `headroom` engine and the `ccr` retrieve-marker pattern.                                                                                    |
+| **[LLMLingua](https://github.com/microsoft/LLMLingua)** · Microsoft          |  6.3k | Prompt-compression research (LLMLingua / LLMLingua-2) — inspired our async, code-safe, fail-open `llmlingua` engine.                                                                                     |
+| **[llmlingua-2-js](https://github.com/atjsh/llmlingua-2-js)** · atjsh        |    27 | The JS/ONNX port (MobileBERT / XLM-RoBERTa) used as the worker-thread backend for our LLMLingua engine.                                                                                                  |
+| **[Troglodita](https://github.com/leninejunior/troglodita)** · Lenine Júnior |    15 | PT-BR token compression — powers our pt-BR language pack: pleonasm reduction and filler removal tuned for Brazilian-Portuguese grammar.                                                                  |
+| **[ponytail](https://github.com/DietrichGebert/ponytail)** · DietrichGebert  | 51.4k | The viral "lazy senior dev" YAGNI-coder skill — inspired our **less-code** Output Style: smallest-working-change steering that cuts _generated_ code (the output-axis sibling to Caveman's terse prose). |
 
 ### 🧩 Compact formats, token research & code-aware tooling
 
-| Project                                                                                        |    ⭐ | How it inspired OmniRoute                                                                                                            |
-| ---------------------------------------------------------------------------------------------- | ----: | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **[TOON](https://github.com/toon-format/toon)** · toon-format                                  | 24.6k | Token-Oriented Object Notation — its columnar, header-plus-rows model shaped our tabular compaction stage.                           |
-| **[GCF – Graph Compact Format](https://github.com/blackwell-systems/gcf)** · Blackwell Systems |    11 | Schema-aware "JSON for LLMs" notation — co-inspired our lossless homogeneous-array compaction with `[N rows]` markers.               |
-| **[token-optimizer-mcp](https://github.com/ooples/token-optimizer-mcp)** · ooples              |   409 | Brotli/SQLite cache + per-session context-delta — inspired our `session-dedup` engine.                                               |
-| **[token-savior](https://github.com/Mibayy/token-savior)** · Mibayy                            |   993 | Bash-output compaction + MCP profiles — inspired our compression bail-out discipline and MCP tool-manifest reduction.                |
-| **[token-saver](https://github.com/ppgranger/token-saver)** · ppgranger                        |   103 | Content-aware, per-file-type output compression with failure-aware bail-out — validated our per-type dispatch and minimum-gain skip. |
-| **[token-optimizer](https://github.com/alexgreensh/token-optimizer)** · alexgreensh            |  1.4k | "Find the ghost tokens" — its offload + recoverable-handle pattern informed our CCR offload thinking.                                |
-| **[TokenMizer](https://github.com/Shweta-Mishra-ai/tokenmizer)** · Shweta-Mishra-ai            |     1 | A session-graph + cross-turn line-dedup blueprint that informed our session-dedup design.                                            |
-| **[OmniCompress](https://github.com/jessefreitas/OmniCompress)** · jessefreitas                |     2 | Rust columnar-JSON + content-addressed retrieve + cross-message dedup — validated our `headroom`/`ccr`/`session-dedup` engine design and the cache-stable "compressed form is position-independent" invariant.            |
-| **[mcp-compressor](https://github.com/atlassian-labs/mcp-compressor)** · Atlassian Labs        |    80 | MCP tool-schema/description compression — informed our MCP tool-manifest cardinality reduction.                                      |
-| **[RepoMapper](https://github.com/pdavis68/RepoMapper)** · pdavis68                            |   182 | Aider-style repo-map ranking — informed our repo-map / retrieval-ranking exploration.                                                |
-| **[quiet-shell-mcp](https://github.com/mrsimpson/quiet-shell-mcp)** · mrsimpson                |     4 | Declarative shell-output reduction over MCP — validated our declarative bash-output compaction.                                      |
-| **[ts-morph](https://github.com/dsherret/ts-morph)** · David Sherret                           |  6.1k | TypeScript Compiler API toolkit — inspired our parser-based comment removal that preserves string, template and regex literals.      |
+| Project                                                                                        |    ⭐ | How it inspired OmniRoute                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------- | ----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[TOON](https://github.com/toon-format/toon)** · toon-format                                  | 24.6k | Token-Oriented Object Notation — its columnar, header-plus-rows model shaped our tabular compaction stage.                                                                                                     |
+| **[GCF – Graph Compact Format](https://github.com/blackwell-systems/gcf)** · Blackwell Systems |    11 | Schema-aware "JSON for LLMs" notation — co-inspired our lossless homogeneous-array compaction with `[N rows]` markers.                                                                                         |
+| **[token-optimizer-mcp](https://github.com/ooples/token-optimizer-mcp)** · ooples              |   409 | Brotli/SQLite cache + per-session context-delta — inspired our `session-dedup` engine.                                                                                                                         |
+| **[token-savior](https://github.com/Mibayy/token-savior)** · Mibayy                            |   993 | Bash-output compaction + MCP profiles — inspired our compression bail-out discipline and MCP tool-manifest reduction.                                                                                          |
+| **[token-saver](https://github.com/ppgranger/token-saver)** · ppgranger                        |   103 | Content-aware, per-file-type output compression with failure-aware bail-out — validated our per-type dispatch and minimum-gain skip.                                                                           |
+| **[token-optimizer](https://github.com/alexgreensh/token-optimizer)** · alexgreensh            |  1.4k | "Find the ghost tokens" — its offload + recoverable-handle pattern informed our CCR offload thinking.                                                                                                          |
+| **[TokenMizer](https://github.com/Shweta-Mishra-ai/tokenmizer)** · Shweta-Mishra-ai            |     1 | A session-graph + cross-turn line-dedup blueprint that informed our session-dedup design.                                                                                                                      |
+| **[OmniCompress](https://github.com/jessefreitas/OmniCompress)** · jessefreitas                |     2 | Rust columnar-JSON + content-addressed retrieve + cross-message dedup — validated our `headroom`/`ccr`/`session-dedup` engine design and the cache-stable "compressed form is position-independent" invariant. |
+| **[mcp-compressor](https://github.com/atlassian-labs/mcp-compressor)** · Atlassian Labs        |    80 | MCP tool-schema/description compression — informed our MCP tool-manifest cardinality reduction.                                                                                                                |
+| **[RepoMapper](https://github.com/pdavis68/RepoMapper)** · pdavis68                            |   182 | Aider-style repo-map ranking — informed our repo-map / retrieval-ranking exploration.                                                                                                                          |
+| **[quiet-shell-mcp](https://github.com/mrsimpson/quiet-shell-mcp)** · mrsimpson                |     4 | Declarative shell-output reduction over MCP — validated our declarative bash-output compaction.                                                                                                                |
+| **[ts-morph](https://github.com/dsherret/ts-morph)** · David Sherret                           |  6.1k | TypeScript Compiler API toolkit — inspired our parser-based comment removal that preserves string, template and regex literals.                                                                                |
 
 ### 🧠 Memory & RAG
 

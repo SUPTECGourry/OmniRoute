@@ -13,15 +13,15 @@ lastUpdated: 2026-06-17
 
 ## TL;DR — how much free inference does OmniRoute actually aggregate?
 
-| Metric | Tokens / month | Meaning |
-|---|---|---|
-| **Documented recurring grant (steady)** | **~1.54B** | Free-tier **pools** (per-model catalog), each shared pool counted **once**. The live source behind `/api/free-tier/summary` and the dashboard's Free-Tier Budget page. **Use this number.** |
-| **+ first month with signup credits** | **~2.15B** | Steady + one-time signup credits (Together $25, Z.AI 20M, DeepSeek 5M, …), deduped per account. **First month only** — does not recur. |
-| **+ permanently free, no published cap** | *un-quantifiable* | `siliconflow`, `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen` — real recurring access, rate/concurrency-limited, **no token cap to count**. Listed, never summed (counting them at `RPM×24/7` is the inflation we reject). |
-| **+ deposit-unlock boost** | **+~24M** | A one-time **$10** OpenRouter top-up raises its free pool from 50 → 1000 req/day. Reported separately so it never inflates the steady number. |
-| Theoretical ceiling (all rate limits, 24/7) | ~10B | Sum of every provider rate limit extrapolated to non-stop use. **Not a guarantee** — do not headline this. |
+| Metric                                      | Tokens / month    | Meaning                                                                                                                                                                                                                                                |
+| ------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Documented recurring grant (steady)**     | **~1.54B**        | Free-tier **pools** (per-model catalog), each shared pool counted **once**. The live source behind `/api/free-tier/summary` and the dashboard's Free-Tier Budget page. **Use this number.**                                                            |
+| **+ first month with signup credits**       | **~2.15B**        | Steady + one-time signup credits (Together $25, Z.AI 20M, DeepSeek 5M, …), deduped per account. **First month only** — does not recur.                                                                                                                 |
+| **+ permanently free, no published cap**    | _un-quantifiable_ | `siliconflow`, `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen` — real recurring access, rate/concurrency-limited, **no token cap to count**. Listed, never summed (counting them at `RPM×24/7` is the inflation we reject). |
+| **+ deposit-unlock boost**                  | **+~24M**         | A one-time **$10** OpenRouter top-up raises its free pool from 50 → 1000 req/day. Reported separately so it never inflates the steady number.                                                                                                          |
+| Theoretical ceiling (all rate limits, 24/7) | ~10B              | Sum of every provider rate limit extrapolated to non-stop use. **Not a guarantee** — do not headline this.                                                                                                                                             |
 
-**Honest headline:** *OmniRoute aggregates **~1.6B documented free tokens per month** (up to ~2.1B in your first month with signup credits) across 40+ free-tier pools — plus a long tail of permanently-free, no-cap providers — and RTK + Caveman compression (15–95% token savings) stretches that further.*
+**Honest headline:** _OmniRoute aggregates **~1.6B documented free tokens per month** (up to ~2.1B in your first month with signup credits) across 40+ free-tier pools — plus a long tail of permanently-free, no-cap providers — and RTK + Caveman compression (15–95% token savings) stretches that further._
 
 > **Why this dropped from the previous ~1.94B.** The 2026-06-17 refresh is an honesty correction, not a loss: `gemini` is now pool-deduped (was inflated by counting each Flash variant separately, 462M → 60M), `cloudflare-ai` corrected to its real 10k-Neurons/day (122M → 30M), `doubao` reclassified as a one-time signup credit (not recurring), and shut-down tiers removed (`github-models` closed to new signups, `chutes`/`phind`/`kluster`/`glhf` discontinued). Partly offset by `llm7` (correct 5M/day → 150M) and new free providers (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 
@@ -40,7 +40,7 @@ A 50-agent web-research pass (official docs + last-7-days news, adversarially ve
 - **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` shut down 2026-06-01 and `2.5 Pro` left the free tier (2026-04); free tier is now **Flash-family only** (2.5/3/3.1/3.5 Flash + Gemma). The catalog now **pools** the Flash family (was inflated by counting each variant separately: 462M → 60M).
 - **Corrected numbers:** `cloudflare-ai` 122M → **30M** (real 10k-Neurons/day), `doubao` reclassified as a one-time signup credit (not recurring), `llm7` 4M → **150M** (documented 5M tokens/day), `together` "-Free" endpoints discontinued → only the **$25** signup credit remains, `longcat` retired 6 legacy models → **LongCat-2.0-Preview** only.
 - **New free providers discovered:** ⭐ **Kilo Code** (`kilo-gateway` — rotating "Auto Free" set: NVIDIA Nemotron 3 family, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 rotating free coding models), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanently free + 20M signup bonus), and `arcee-ai` Trinity Large Preview.
-- **New honest tiers** (see Methodology): a *permanently-free-but-uncapped* category (real recurring access, no token cap to count) and a *deposit-unlock boost* (OpenRouter $10 → +24M/mo), both surfaced **separately** so they never inflate the headline.
+- **New honest tiers** (see Methodology): a _permanently-free-but-uncapped_ category (real recurring access, no token cap to count) and a _deposit-unlock boost_ (OpenRouter $10 → +24M/mo), both surfaced **separately** so they never inflate the headline.
 
 > The detailed per-provider table further down is the **2026-06-05 snapshot**; the deltas above supersede it. The live, canonical source is the per-model catalog `open-sse/config/freeModelCatalog.ts`.
 
@@ -53,6 +53,7 @@ A 50-agent web-research pass (official docs + last-7-days news, adversarially ve
 - Daily token cap → `monthly = daily × 30`. Only RPD documented → `RPD × ~800 output tokens × 30`. Only RPM/TPM (no daily cap) → **uncapped** (see below).
 - **Permanently free, but no published token cap** (`siliconflow`, `glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`): these are real recurring free access, rate/concurrency-limited. We classify them `recurring-uncapped` and **never sum them** — multiplying `RPM × 24/7 × 30d` would produce a fantasy ceiling (the inflation we reject). They are listed so you know they exist.
 - **Deposit-unlock boost:** a one-time small top-up that permanently raises a free quota (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Reported as a separate figure, kept out of the steady headline.
+- **xAI Grok OAuth is subscription-gated, not a free tier.** `xai-oauth` uses SuperGrok / X Premium+ style OAuth credentials and may still return HTTP 403 if xAI has not allowlisted the account for OAuth inference. Use the API-key provider `xai` when that happens.
 - **A note on terms.** Some providers have personal-use or proxy clauses worth a glance before you lean on them (see the [provider-terms table](#tos-attention-table)). Their access is real — we simply don't fold the **un-quantifiable** OAuth/keyless ones (e.g. `gemini-cli`, `agy`, `amazon-q` — they share quota already counted under the base provider) into the headline. None of this is legal advice; you decide.
 
 ---
@@ -65,111 +66,110 @@ A 50-agent web-research pass (official docs + last-7-days news, adversarially ve
 
 > Their free access is real and OmniRoute can route to them; the clauses below are just worth knowing. The OAuth/keyless ones aren't token-quantifiable, so they're not in the headline number (not because they're unusable).
 
-
-| Provider | Note |
-|---|---|
-| `agy` | Google Antigravity ToS explicitly prohibits using third-party software, tools, or services (including proxies) to access the service via OAuth; doing… |
-| `ai21` | ToS §4.2/§8.2 prohibits sublicensing or distributing API access to third parties; §3.3 restricts trial/evaluation products to "internal evaluation on… |
-| `amazon-q` | Product is discontinued for new signups; existing users are subject to AWS Customer Agreement which governs use of managed services — self-hosted pro… |
-| `blackbox` | ToS explicitly prohibits sublicensing, reselling, making the service available to third parties, and building derivative services — a self-hosted per… |
-| `coze` | Coze ToS explicitly restricts use to "personal and non-commercial use" and prohibits renting, distributing, sublicensing, or reselling the service; a… |
+| Provider         | Note                                                                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `agy`            | Google Antigravity ToS explicitly prohibits using third-party software, tools, or services (including proxies) to access the service via OAuth; doing… |
+| `ai21`           | ToS §4.2/§8.2 prohibits sublicensing or distributing API access to third parties; §3.3 restricts trial/evaluation products to "internal evaluation on… |
+| `amazon-q`       | Product is discontinued for new signups; existing users are subject to AWS Customer Agreement which governs use of managed services — self-hosted pro… |
+| `blackbox`       | ToS explicitly prohibits sublicensing, reselling, making the service available to third parties, and building derivative services — a self-hosted per… |
+| `coze`           | Coze ToS explicitly restricts use to "personal and non-commercial use" and prohibits renting, distributing, sublicensing, or reselling the service; a… |
 | `duckduckgo-web` | Duck.ai ToS (duckduckgo.com/duckai/privacy-terms) explicitly prohibits "automated querying and developing or offering AI services" and circumventing … |
 | `featherless-ai` | Individual plans explicitly restricted to "interactive use or proto-typing and experimentation by the purchaser" — inference resale and proxy use req… |
-| `fireworks` | ToS explicitly prohibits proxy/intermediary use, API key transfers, and sublicensing (Sections 2.1 and 2.2(i)(j)); self-hosted personal proxies are n… |
-| `friendliai` | ToS Section 8(e) and 8(f) explicitly prohibit using FriendliAI as a proxy or allowing third-party access on a standalone basis, and forbid reselling/… |
-| `gemini-cli` | Google explicitly prohibits using Gemini CLI's OAuth authentication with third-party software/proxies; violations result in account bans (mass bans w… |
-| `iflytek` | Section 2.4(3) of the iFlytek Spark LLM Service Agreement explicitly prohibits "using any automated or programmatic methods to extract data or output… |
-| `kiro` | Kiro FAQ explicitly prohibits use with "OpenClaw and similar tools that leverage third-party harnesses" — a self-hosted AI proxy (like OmniRoute) rou… |
-| `modal` | ToS Section 1.3 explicitly prohibits "rent, resell or otherwise allow any third party direct access to or use of the Service" — building a self-hoste… |
+| `fireworks`      | ToS explicitly prohibits proxy/intermediary use, API key transfers, and sublicensing (Sections 2.1 and 2.2(i)(j)); self-hosted personal proxies are n… |
+| `friendliai`     | ToS Section 8(e) and 8(f) explicitly prohibit using FriendliAI as a proxy or allowing third-party access on a standalone basis, and forbid reselling/… |
+| `gemini-cli`     | Google explicitly prohibits using Gemini CLI's OAuth authentication with third-party software/proxies; violations result in account bans (mass bans w… |
+| `iflytek`        | Section 2.4(3) of the iFlytek Spark LLM Service Agreement explicitly prohibits "using any automated or programmatic methods to extract data or output… |
+| `kiro`           | Kiro FAQ explicitly prohibits use with "OpenClaw and similar tools that leverage third-party harnesses" — a self-hosted AI proxy (like OmniRoute) rou… |
+| `modal`          | ToS Section 1.3 explicitly prohibits "rent, resell or otherwise allow any third party direct access to or use of the Service" — building a self-hoste… |
 | `muse-spark-web` | Meta ToS explicitly prohibits automated access without prior permission, reverse engineering without written permission, and circumventing technologi… |
-| `nlpcloud` | ToS explicitly prohibits "setting up a proxy or other device that allows others to access the Service through it" and grants only a non-transferable,… |
-| `opencode` | ToS (Anomaly Innovations, Inc.) explicitly restricts use to "your own internal use, and not on behalf of or for the benefit of any third party" — ope… |
-| `qwen-web` | The free OAuth tier is discontinued; no ToS permits a self-hosted proxy using session tokens against chat.qwen.ai. Even before shutdown, automated/pr… |
-| `t3-web` | ToS explicitly restricts accounts to personal use only, prohibits credential sharing with third parties, and bans automated/bot/scraping access — a s… |
+| `nlpcloud`       | ToS explicitly prohibits "setting up a proxy or other device that allows others to access the Service through it" and grants only a non-transferable,… |
+| `opencode`       | ToS (Anomaly Innovations, Inc.) explicitly restricts use to "your own internal use, and not on behalf of or for the benefit of any third party" — ope… |
+| `qwen-web`       | The free OAuth tier is discontinued; no ToS permits a self-hosted proxy using session tokens against chat.qwen.ai. Even before shutdown, automated/pr… |
+| `t3-web`         | ToS explicitly restricts accounts to personal use only, prohibits credential sharing with third parties, and bans automated/bot/scraping access — a s… |
 
 ### ✅ Generally permissive — caution / ambiguous / ok (the rest)
 
-| Provider | ToS | Note |
-|---|---|---|
-| `aimlapi` | ambiguous | ToS grants a non-exclusive use license but does not explicitly permit or prohibit self-hosted proxy or resale; no "pers… |
-| `baichuan` | ambiguous | No explicit prohibition on self-hosted personal proxies found in publicly accessible docs; however, the M3 Plus free pl… |
-| `bluesminds` | ambiguous | No explicit ToS clauses found regarding self-hosted proxying or resale; the pricing page focuses on feature/rate limits… |
-| `bytez` | ambiguous | No explicit ToS page was accessible (404); no public evaluation-only or no-proxy clauses found in docs, but the platfor… |
-| `doubao` | ambiguous | No explicit proxy/resale prohibition found in publicly indexed documentation; Volcengine is a developer-oriented cloud … |
-| `gitlawb-gmi` | ambiguous | No explicit ToS clause found prohibiting self-hosted personal proxy use; the free Nemotron model carries an NVIDIA disc… |
-| `inclusionai` | ambiguous | No explicit ToS found prohibiting proxy/self-hosted use, but the platform is operated by Ant Group (Chinese company) an… |
-| `kluster` | ambiguous | ToS primarily covers website content rights and does not specifically address API proxy use, resale, or self-hosted pro… |
-| `monsterapi` | ambiguous | MonsterAPI's ToS page (monsterapi.ai/terms-of-service) was unreachable during research; no specific proxy/resale/person… |
-| `nous-research` | ambiguous | Nous Portal itself is an aggregator/proxy service; using it as a backend for another self-hosted proxy creates a proxy-… |
-| `ollama-cloud` | ambiguous | ToS prohibits using the service "to develop competing products" but has no explicit ban on self-hosted personal proxies… |
-| `stepfun` | ambiguous | No explicit prohibition on self-hosted personal proxy found, but the Step Plan ToS targets developers using specific co… |
-| `agentrouter` | caution | No published ToS found; platform restricts accepted clients to specific AI coding tools (Claude Code, Codex, Gemini CLI… |
-| `api-airforce` | caution | ToS explicitly prohibits "building competing services without permission" and "credential sharing" — a self-hosted pers… |
-| `arcee-ai` | caution | Free access is via OpenRouter's :free routing layer (not Arcee's direct API terms); OpenRouter ToS permits personal dev… |
-| `baidu` | caution | ToS not explicitly reviewed for proxy/resale clauses, but platform requires real-name authentication (Chinese ID typica… |
-| `baseten` | caution | ToS restricts use to "Customer's internal business purposes" and explicitly prohibits sublicensing, reselling, or allow… |
-| `bazaarlink` | caution | ToS explicitly prohibits reselling or sublicensing API keys to third parties; a self-hosted personal proxy for personal… |
-| `brave-search` | caution | ToS prohibits redistribution, resale, and sublicensing of search results; using the API to "replicate or attempt to rep… |
-| `byteplus` | caution | Tokens are non-transferable and single-account only; no explicit proxy prohibition, but BytePlus reserves the right to … |
-| `cerebras` | caution | ToS grants a non-exclusive, non-transferable, non-sublicensable right for personal or business use; prohibits resale, s… |
-| `cloudflare-ai` | caution | Cloudflare Self-Serve ToS §2.2.1(j) prohibits using Services to "provide a virtual private network or other similar pro… |
-| `cohere` | caution | Cohere explicitly prohibits trial keys for "production or commercial purposes"; a self-hosted personal proxy routing re… |
-| `deepinfra` | caution | ToS allows legal commercial use broadly, but prohibits use "directly or indirectly competitive with any business of the… |
-| `deepseek` | caution | Open Platform ToS (effective 2026-04-29) permits broad use including "derivative product development" and personal/comm… |
-| `dify` | caution | Self-hosted single-user personal proxy is permitted under the modified Apache 2.0 license; however, multi-tenant deploy… |
-| `exa-search` | caution | No explicit "no proxy" or "evaluation only" clauses found; Exa actively offers a reseller partner program allowing API … |
-| `firecrawl` | caution | Cloud API ToS has no explicit personal-proxy prohibition found, but the open-source self-hosted version is AGPL-3.0 (re… |
-| `gemini` | caution | ToS explicitly states the free tier is for "developers building with Google AI models for professional or business purp… |
-| `github-models` | caution | GitHub's Acceptable Use Policy prohibits reselling/proxying the service; GitHub Models ToS delegates to each model's ho… |
-| `glhf` | caution | ToS explicitly prohibits sharing account credentials or making the account available to any third party, which makes a … |
-| `groq` | caution | Services Agreement §6.3 prohibits reselling, sublicensing, or distributing API access; §3.2 bars reselling/leasing acco… |
-| `hackclub` | caution | Service is explicitly scoped to Hack Club teen members building projects/learning; no public ToS found explicitly permi… |
-| `huggingchat` | caution | Hugging Face ToS does not explicitly ban personal self-hosted proxies, but supplemental terms (referenced but not fully… |
-| `huggingface` | caution | ToS grants a limited license to access/use the service; the document does not explicitly permit or forbid a single-user… |
-| `hyperbolic` | caution | ToS grants API access "solely for your own personal or internal business purposes" and explicitly prohibits licensing, … |
-| `inference-net` | caution | ToS explicitly prohibits "sublicense, resell, distribute" and transferring API keys without written consent; a single-u… |
-| `jina-ai` | caution | Free 10M tokens are explicitly non-commercial (CC-BY-NC 4.0 model license); a single-user personal proxy for personal L… |
-| `jina-reader` | caution | ToS prohibits using outputs to build competing services and bans "automated methods to extract information via scraping… |
-| `llm7` | caution | ToS positions the service as for "experimentation, development, and research"; no explicit ban on self-hosted personal … |
-| `longcat` | caution | The API Platform Service Agreement (longcat.chat/platform/private/) permits commercial integration and self-hosted apps… |
-| `mistral` | caution | Consumer ToS explicitly states APIs may only be used for "personal needs" and prohibits making API keys available to th… |
-| `morph` | caution | ToS allows commercial use generally; self-hosted proxy deployments require explicit arrangement with sales. Section 18.… |
-| `nebius` | caution | ToS (Section 5f) explicitly prohibits resale, redistribution, or offering the service "on a standalone basis" — a self-… |
-| `nomic` | caution | ToS grants a non-exclusive, non-transferable API license; Section 6.b prohibits building a competitive service. Using t… |
-| `novita` | caution | ToS prohibits resale and competing services but does not explicitly address personal self-hosted proxies; personal use … |
-| `nscale` | caution | AUP prohibits "copy, modify, duplicate... frame, mirror, republish... distribute all or any part of the Nscale Platform… |
-| `nvidia` | caution | Free tier is explicitly for prototyping/dev/research/evaluation only — production use (serving real end-users) requires… |
-| `openrouter` | caution | ToS explicitly prohibits reselling API access or developing a competing service; single-user self-hosted personal proxy… |
-| `pollinations` | caution | MIT License cited in API docs suggests liberal reuse; no explicit prohibition on self-hosted proxying found. However, u… |
-| `predibase` | caution | Predibase is positioned as an enterprise fine-tuning/serving platform; the free trial is explicitly for exploration and… |
-| `publicai` | caution | ToS (publicai.co/tc) designates services as "primarily for research and educational use"; no explicit proxy or resale p… |
-| `puter` | caution | Puter ToS forbids using services for "commercial purpose" without written consent; a self-hosted personal proxy consumi… |
-| `qoder` | caution | ToS page returned no readable content; Qoder is a coding IDE client (not a public API), and third-party proxy wrappers … |
-| `reka` | caution | Business Terms prohibit sublicensing or distributing access to third parties; a personal single-user proxy is likely fi… |
-| `sambanova` | caution | ToS Section 1.5(c) explicitly prohibits reselling, sublicensing, or making the service available to third parties; a se… |
-| `sensenova` | caution | No explicit proxy or resale prohibition found in reviewed ToS, but the free tier is a promotional beta with no SLA, Sen… |
-| `serper-search` | caution | ToS explicitly prohibits "mirroring materials on any other server as-is with no-value-added" — a simple pass-through pr… |
-| `siliconflow` | caution | ToS (Clause 3.4(e)(f)(p)) explicitly prohibits making the service available to any third party, reselling/sublicensing,… |
-| `sparkdesk` | caution | SparkDesk User Agreement grants only personal, non-commercial use rights; API Interface Policy prohibits automated data… |
-| `tavily-search` | caution | ToS explicitly states the API "may not be transferred, assigned, shared, or otherwise made available to any third party… |
-| `tencent` | caution | Tencent Cloud ToS explicitly prohibits sublicensing or reselling API access; a self-hosted personal proxy for personal … |
-| `together` | caution | ToS Section 4.3(d) explicitly prohibits transferring, distributing, reselling, leasing, or offering the Services on a s… |
-| `uncloseai` | caution | Personal proxy use is plausible but not explicitly permitted; ToS bans building "competing machine learning services wi… |
-| `veoaifree-web` | caution | ToS explicitly bans automated bots or scripts running at "inhuman speeds" and prohibits copying the platform to create … |
-| `vertex` | caution | Google Cloud Service Terms restrict resale to authorized resellers only (Section 14 requires a Reseller Agreement); a s… |
-| `voyage-ai` | caution | ToS grants "personal, non-commercial use" for site content and prohibits credential/account sharing with third parties;… |
-| `360ai` | unknown | ToS for developer API not publicly accessible without registration; access requires application approval which implies … |
-| `chutes` | unknown | ToS page exists at chutes.ai/terms but content was not accessible via fetch; no explicit proxy/resale clauses found in … |
-| `freemodel-dev` | unknown | The Terms of Service page (freemodel.dev/terms) returned only a header with no readable content via WebFetch; no clause… |
-| `gitlawb` | unknown | No ToS or acceptable-use policy found; proxy/resale restrictions unknown — assume caution for self-hosted proxy use. |
-| `liquid` | unknown | No hosted API exists to proxy; open-source model commercial use is free for orgs under $10M annual revenue. No self-hos… |
-| `phind` | unknown | Service is discontinued; ToS is no longer relevant. No proxy use is possible. |
-| `theoldllm` | unknown | No terms of service document was found on the site; proxying, resale, or self-hosted use policy is entirely undocumente… |
-| `yi` | unknown | ToS not publicly accessible without login; no proxy/resale clauses could be reviewed. Self-hosted personal proxy use st… |
-| `comfyui` | ok | GPL-3.0 open-source license explicitly permits self-hosted personal proxy use; Comfy Org ToS confirms commercial use of… |
-| `scaleway` | ok | Scaleway's General Terms of Services are a standard commercial cloud agreement with no explicit prohibition on self-hos… |
-| `sdwebui` | ok | AGPL-3.0 license: free to self-host for personal use with no restrictions on usage volume; a personal proxy using this … |
-| `searxng-search` | ok | AGPL-3.0 open-source license explicitly permits self-hosted personal proxy use with no restriction on usage type, resal… |
+| Provider         | ToS       | Note                                                                                                                     |
+| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `aimlapi`        | ambiguous | ToS grants a non-exclusive use license but does not explicitly permit or prohibit self-hosted proxy or resale; no "pers… |
+| `baichuan`       | ambiguous | No explicit prohibition on self-hosted personal proxies found in publicly accessible docs; however, the M3 Plus free pl… |
+| `bluesminds`     | ambiguous | No explicit ToS clauses found regarding self-hosted proxying or resale; the pricing page focuses on feature/rate limits… |
+| `bytez`          | ambiguous | No explicit ToS page was accessible (404); no public evaluation-only or no-proxy clauses found in docs, but the platfor… |
+| `doubao`         | ambiguous | No explicit proxy/resale prohibition found in publicly indexed documentation; Volcengine is a developer-oriented cloud … |
+| `gitlawb-gmi`    | ambiguous | No explicit ToS clause found prohibiting self-hosted personal proxy use; the free Nemotron model carries an NVIDIA disc… |
+| `inclusionai`    | ambiguous | No explicit ToS found prohibiting proxy/self-hosted use, but the platform is operated by Ant Group (Chinese company) an… |
+| `kluster`        | ambiguous | ToS primarily covers website content rights and does not specifically address API proxy use, resale, or self-hosted pro… |
+| `monsterapi`     | ambiguous | MonsterAPI's ToS page (monsterapi.ai/terms-of-service) was unreachable during research; no specific proxy/resale/person… |
+| `nous-research`  | ambiguous | Nous Portal itself is an aggregator/proxy service; using it as a backend for another self-hosted proxy creates a proxy-… |
+| `ollama-cloud`   | ambiguous | ToS prohibits using the service "to develop competing products" but has no explicit ban on self-hosted personal proxies… |
+| `stepfun`        | ambiguous | No explicit prohibition on self-hosted personal proxy found, but the Step Plan ToS targets developers using specific co… |
+| `agentrouter`    | caution   | No published ToS found; platform restricts accepted clients to specific AI coding tools (Claude Code, Codex, Gemini CLI… |
+| `api-airforce`   | caution   | ToS explicitly prohibits "building competing services without permission" and "credential sharing" — a self-hosted pers… |
+| `arcee-ai`       | caution   | Free access is via OpenRouter's :free routing layer (not Arcee's direct API terms); OpenRouter ToS permits personal dev… |
+| `baidu`          | caution   | ToS not explicitly reviewed for proxy/resale clauses, but platform requires real-name authentication (Chinese ID typica… |
+| `baseten`        | caution   | ToS restricts use to "Customer's internal business purposes" and explicitly prohibits sublicensing, reselling, or allow… |
+| `bazaarlink`     | caution   | ToS explicitly prohibits reselling or sublicensing API keys to third parties; a self-hosted personal proxy for personal… |
+| `brave-search`   | caution   | ToS prohibits redistribution, resale, and sublicensing of search results; using the API to "replicate or attempt to rep… |
+| `byteplus`       | caution   | Tokens are non-transferable and single-account only; no explicit proxy prohibition, but BytePlus reserves the right to … |
+| `cerebras`       | caution   | ToS grants a non-exclusive, non-transferable, non-sublicensable right for personal or business use; prohibits resale, s… |
+| `cloudflare-ai`  | caution   | Cloudflare Self-Serve ToS §2.2.1(j) prohibits using Services to "provide a virtual private network or other similar pro… |
+| `cohere`         | caution   | Cohere explicitly prohibits trial keys for "production or commercial purposes"; a self-hosted personal proxy routing re… |
+| `deepinfra`      | caution   | ToS allows legal commercial use broadly, but prohibits use "directly or indirectly competitive with any business of the… |
+| `deepseek`       | caution   | Open Platform ToS (effective 2026-04-29) permits broad use including "derivative product development" and personal/comm… |
+| `dify`           | caution   | Self-hosted single-user personal proxy is permitted under the modified Apache 2.0 license; however, multi-tenant deploy… |
+| `exa-search`     | caution   | No explicit "no proxy" or "evaluation only" clauses found; Exa actively offers a reseller partner program allowing API … |
+| `firecrawl`      | caution   | Cloud API ToS has no explicit personal-proxy prohibition found, but the open-source self-hosted version is AGPL-3.0 (re… |
+| `gemini`         | caution   | ToS explicitly states the free tier is for "developers building with Google AI models for professional or business purp… |
+| `github-models`  | caution   | GitHub's Acceptable Use Policy prohibits reselling/proxying the service; GitHub Models ToS delegates to each model's ho… |
+| `glhf`           | caution   | ToS explicitly prohibits sharing account credentials or making the account available to any third party, which makes a … |
+| `groq`           | caution   | Services Agreement §6.3 prohibits reselling, sublicensing, or distributing API access; §3.2 bars reselling/leasing acco… |
+| `hackclub`       | caution   | Service is explicitly scoped to Hack Club teen members building projects/learning; no public ToS found explicitly permi… |
+| `huggingchat`    | caution   | Hugging Face ToS does not explicitly ban personal self-hosted proxies, but supplemental terms (referenced but not fully… |
+| `huggingface`    | caution   | ToS grants a limited license to access/use the service; the document does not explicitly permit or forbid a single-user… |
+| `hyperbolic`     | caution   | ToS grants API access "solely for your own personal or internal business purposes" and explicitly prohibits licensing, … |
+| `inference-net`  | caution   | ToS explicitly prohibits "sublicense, resell, distribute" and transferring API keys without written consent; a single-u… |
+| `jina-ai`        | caution   | Free 10M tokens are explicitly non-commercial (CC-BY-NC 4.0 model license); a single-user personal proxy for personal L… |
+| `jina-reader`    | caution   | ToS prohibits using outputs to build competing services and bans "automated methods to extract information via scraping… |
+| `llm7`           | caution   | ToS positions the service as for "experimentation, development, and research"; no explicit ban on self-hosted personal … |
+| `longcat`        | caution   | The API Platform Service Agreement (longcat.chat/platform/private/) permits commercial integration and self-hosted apps… |
+| `mistral`        | caution   | Consumer ToS explicitly states APIs may only be used for "personal needs" and prohibits making API keys available to th… |
+| `morph`          | caution   | ToS allows commercial use generally; self-hosted proxy deployments require explicit arrangement with sales. Section 18.… |
+| `nebius`         | caution   | ToS (Section 5f) explicitly prohibits resale, redistribution, or offering the service "on a standalone basis" — a self-… |
+| `nomic`          | caution   | ToS grants a non-exclusive, non-transferable API license; Section 6.b prohibits building a competitive service. Using t… |
+| `novita`         | caution   | ToS prohibits resale and competing services but does not explicitly address personal self-hosted proxies; personal use … |
+| `nscale`         | caution   | AUP prohibits "copy, modify, duplicate... frame, mirror, republish... distribute all or any part of the Nscale Platform… |
+| `nvidia`         | caution   | Free tier is explicitly for prototyping/dev/research/evaluation only — production use (serving real end-users) requires… |
+| `openrouter`     | caution   | ToS explicitly prohibits reselling API access or developing a competing service; single-user self-hosted personal proxy… |
+| `pollinations`   | caution   | MIT License cited in API docs suggests liberal reuse; no explicit prohibition on self-hosted proxying found. However, u… |
+| `predibase`      | caution   | Predibase is positioned as an enterprise fine-tuning/serving platform; the free trial is explicitly for exploration and… |
+| `publicai`       | caution   | ToS (publicai.co/tc) designates services as "primarily for research and educational use"; no explicit proxy or resale p… |
+| `puter`          | caution   | Puter ToS forbids using services for "commercial purpose" without written consent; a self-hosted personal proxy consumi… |
+| `qoder`          | caution   | ToS page returned no readable content; Qoder is a coding IDE client (not a public API), and third-party proxy wrappers … |
+| `reka`           | caution   | Business Terms prohibit sublicensing or distributing access to third parties; a personal single-user proxy is likely fi… |
+| `sambanova`      | caution   | ToS Section 1.5(c) explicitly prohibits reselling, sublicensing, or making the service available to third parties; a se… |
+| `sensenova`      | caution   | No explicit proxy or resale prohibition found in reviewed ToS, but the free tier is a promotional beta with no SLA, Sen… |
+| `serper-search`  | caution   | ToS explicitly prohibits "mirroring materials on any other server as-is with no-value-added" — a simple pass-through pr… |
+| `siliconflow`    | caution   | ToS (Clause 3.4(e)(f)(p)) explicitly prohibits making the service available to any third party, reselling/sublicensing,… |
+| `sparkdesk`      | caution   | SparkDesk User Agreement grants only personal, non-commercial use rights; API Interface Policy prohibits automated data… |
+| `tavily-search`  | caution   | ToS explicitly states the API "may not be transferred, assigned, shared, or otherwise made available to any third party… |
+| `tencent`        | caution   | Tencent Cloud ToS explicitly prohibits sublicensing or reselling API access; a self-hosted personal proxy for personal … |
+| `together`       | caution   | ToS Section 4.3(d) explicitly prohibits transferring, distributing, reselling, leasing, or offering the Services on a s… |
+| `uncloseai`      | caution   | Personal proxy use is plausible but not explicitly permitted; ToS bans building "competing machine learning services wi… |
+| `veoaifree-web`  | caution   | ToS explicitly bans automated bots or scripts running at "inhuman speeds" and prohibits copying the platform to create … |
+| `vertex`         | caution   | Google Cloud Service Terms restrict resale to authorized resellers only (Section 14 requires a Reseller Agreement); a s… |
+| `voyage-ai`      | caution   | ToS grants "personal, non-commercial use" for site content and prohibits credential/account sharing with third parties;… |
+| `360ai`          | unknown   | ToS for developer API not publicly accessible without registration; access requires application approval which implies … |
+| `chutes`         | unknown   | ToS page exists at chutes.ai/terms but content was not accessible via fetch; no explicit proxy/resale clauses found in … |
+| `freemodel-dev`  | unknown   | The Terms of Service page (freemodel.dev/terms) returned only a header with no readable content via WebFetch; no clause… |
+| `gitlawb`        | unknown   | No ToS or acceptable-use policy found; proxy/resale restrictions unknown — assume caution for self-hosted proxy use.     |
+| `liquid`         | unknown   | No hosted API exists to proxy; open-source model commercial use is free for orgs under $10M annual revenue. No self-hos… |
+| `phind`          | unknown   | Service is discontinued; ToS is no longer relevant. No proxy use is possible.                                            |
+| `theoldllm`      | unknown   | No terms of service document was found on the site; proxying, resale, or self-hosted use policy is entirely undocumente… |
+| `yi`             | unknown   | ToS not publicly accessible without login; no proxy/resale clauses could be reviewed. Self-hosted personal proxy use st… |
+| `comfyui`        | ok        | GPL-3.0 open-source license explicitly permits self-hosted personal proxy use; Comfy Org ToS confirms commercial use of… |
+| `scaleway`       | ok        | Scaleway's General Terms of Services are a standard commercial cloud agreement with no explicit prohibition on self-hos… |
+| `sdwebui`        | ok        | AGPL-3.0 license: free to self-host for personal use with no restrictions on usage volume; a personal proxy using this … |
+| `searxng-search` | ok        | AGPL-3.0 open-source license explicitly permits self-hosted personal proxy use with no restriction on usage type, resal… |
 
 ---
 
@@ -177,79 +177,79 @@ A 50-agent web-research pass (official docs + last-7-days news, adversarially ve
 
 > Regenerated from the per-model catalog (`open-sse/config/freeModelCatalog.ts`), pool-deduped. Sorted by recurring steady tokens/mo. `uncapped*` = permanently free but no published token cap (rate/concurrency-limited) — real access, **not** summed into the headline. `—` = credit-only / keyless / not token-quantifiable.
 
-| Provider | Free type | Steady tokens/mo | First-month credit | ToS | Models |
-|---|---|---|---|---|---|
-| `mistral` | recurring | ~1.00B | — | caution | 5 |
-| `llm7` | recurring | ~150M | — | caution | 4 |
-| `longcat` | recurring | ~150M | — | caution | 1 |
-| `gemini` | recurring | ~60M | — | caution | 6 |
-| `cerebras` | recurring | ~30M | — | caution | 2 |
-| `cloudflare-ai` | recurring | ~30M | — | caution | 6 |
-| `api-airforce` | recurring | ~24M | — | caution | 7 |
-| `ollama-cloud` | recurring | ~20M | — | ambiguous | 8 |
-| `github-models` | recurring | ~18M | — | caution | 14 |
-| `groq` | recurring | ~15M | — | caution | 5 |
-| `inclusionai` | recurring | ~15M | — | ambiguous | 1 |
-| `bluesminds` | recurring | ~7M | — | ambiguous | 22 |
-| `sambanova` | recurring | ~6M | — | caution | 5 |
-| `arcee-ai` | recurring | ~5M | — | caution | 1 |
-| `bazaarlink` | recurring | ~4M | — | caution | 32 |
-| `openrouter` | recurring | ~1M | — | caution | 1 |
-| `cohere` | recurring | ~800K | — | caution | 6 |
-| `huggingchat` | recurring | ~500K | — | caution | 4 |
-| `morph` | recurring | ~400K | — | ok | 2 |
-| `huggingface` | recurring | ~200K | — | caution | 6 |
-| `kiro` | recurring | ~25K | — | avoid | 12 |
-| `glm-cn` | uncapped | uncapped\* | ~20M | ok | 4 |
-| `baidu` | uncapped | uncapped\* | — | caution | 1 |
-| `kilo-gateway` | uncapped | uncapped\* | — | caution | 7 |
-| `opencode-zen` | uncapped | uncapped\* | — | caution | 6 |
-| `siliconflow` | uncapped | uncapped\* | — | caution | 10 |
-| `tencent` | uncapped | uncapped\* | — | caution | 1 |
-| `vertex` | signup credit | — | ~300M | caution | 10 |
-| `agentrouter` | signup credit | — | ~200M | caution | 4 |
-| `predibase` | signup credit | — | ~25M | caution | 1 |
-| `together` | signup credit | — | ~25M | caution | 1 |
-| `doubao` | signup credit | — | ~15M | ambiguous | 1 |
-| `ai21` | signup credit | — | ~10M | avoid | 2 |
-| `deepseek` | signup credit | — | ~5M | ok | 2 |
-| `hyperbolic` | signup credit | — | ~5M | ok | 8 |
-| `nscale` | signup credit | — | ~5M | caution | 6 |
-| `bytez` | signup credit | — | ~1M | ambiguous | 3 |
-| `deepinfra` | signup credit | — | ~1M | caution | 22 |
-| `fireworks` | signup credit | — | ~1M | avoid | 10 |
-| `nebius` | signup credit | — | ~1M | caution | 1 |
-| `qoder` | signup credit | — | ~1M | caution | 14 |
-| `scaleway` | signup credit | — | ~1M | ok | 6 |
-| `novita` | signup credit | — | ~500K | caution | 1 |
-| `agy` | keyless | — | — | avoid | 16 |
-| `baichuan` | keyless | — | — | ambiguous | 1 |
-| `blackbox` | keyless | — | — | avoid | 6 |
-| `coze` | keyless | — | — | avoid | 1 |
-| `duckduckgo-web` | keyless | — | — | avoid | 6 |
-| `freemodel-dev` | keyless | — | — | unknown | 4 |
-| `friendliai` | keyless | — | — | avoid | 2 |
-| `gemini-cli` | keyless | — | — | avoid | 9 |
-| `hackclub` | keyless | — | — | caution | 3 |
-| `iflytek` | keyless | — | — | avoid | 1 |
-| `inference-net` | keyless | — | — | caution | 3 |
-| `liquid` | keyless | — | — | unknown | 1 |
-| `monsterapi` | keyless | — | — | ambiguous | 1 |
-| `muse-spark-web` | keyless | — | — | avoid | 3 |
-| `nlpcloud` | keyless | — | — | avoid | 1 |
-| `nous-research` | keyless | — | — | ambiguous | 2 |
-| `nvidia` | keyless | — | — | caution | 13 |
-| `opencode` | keyless | — | — | avoid | 7 |
-| `pollinations` | keyless | — | — | caution | 31 |
-| `publicai` | keyless | — | — | caution | 3 |
-| `puter` | keyless | — | — | caution | 33 |
-| `qwen-web` | keyless | — | — | avoid | 3 |
-| `reka` | keyless | — | — | caution | 2 |
-| `sensenova` | keyless | — | — | caution | 1 |
-| `sparkdesk` | keyless | — | — | caution | 1 |
-| `stepfun` | keyless | — | — | ok | 1 |
-| `t3-web` | keyless | — | — | avoid | 23 |
-| `uncloseai` | keyless | — | — | caution | 3 |
+| Provider         | Free type     | Steady tokens/mo | First-month credit | ToS       | Models |
+| ---------------- | ------------- | ---------------- | ------------------ | --------- | ------ |
+| `mistral`        | recurring     | ~1.00B           | —                  | caution   | 5      |
+| `llm7`           | recurring     | ~150M            | —                  | caution   | 4      |
+| `longcat`        | recurring     | ~150M            | —                  | caution   | 1      |
+| `gemini`         | recurring     | ~60M             | —                  | caution   | 6      |
+| `cerebras`       | recurring     | ~30M             | —                  | caution   | 2      |
+| `cloudflare-ai`  | recurring     | ~30M             | —                  | caution   | 6      |
+| `api-airforce`   | recurring     | ~24M             | —                  | caution   | 7      |
+| `ollama-cloud`   | recurring     | ~20M             | —                  | ambiguous | 8      |
+| `github-models`  | recurring     | ~18M             | —                  | caution   | 14     |
+| `groq`           | recurring     | ~15M             | —                  | caution   | 5      |
+| `inclusionai`    | recurring     | ~15M             | —                  | ambiguous | 1      |
+| `bluesminds`     | recurring     | ~7M              | —                  | ambiguous | 22     |
+| `sambanova`      | recurring     | ~6M              | —                  | caution   | 5      |
+| `arcee-ai`       | recurring     | ~5M              | —                  | caution   | 1      |
+| `bazaarlink`     | recurring     | ~4M              | —                  | caution   | 32     |
+| `openrouter`     | recurring     | ~1M              | —                  | caution   | 1      |
+| `cohere`         | recurring     | ~800K            | —                  | caution   | 6      |
+| `huggingchat`    | recurring     | ~500K            | —                  | caution   | 4      |
+| `morph`          | recurring     | ~400K            | —                  | ok        | 2      |
+| `huggingface`    | recurring     | ~200K            | —                  | caution   | 6      |
+| `kiro`           | recurring     | ~25K             | —                  | avoid     | 12     |
+| `glm-cn`         | uncapped      | uncapped\*       | ~20M               | ok        | 4      |
+| `baidu`          | uncapped      | uncapped\*       | —                  | caution   | 1      |
+| `kilo-gateway`   | uncapped      | uncapped\*       | —                  | caution   | 7      |
+| `opencode-zen`   | uncapped      | uncapped\*       | —                  | caution   | 6      |
+| `siliconflow`    | uncapped      | uncapped\*       | —                  | caution   | 10     |
+| `tencent`        | uncapped      | uncapped\*       | —                  | caution   | 1      |
+| `vertex`         | signup credit | —                | ~300M              | caution   | 10     |
+| `agentrouter`    | signup credit | —                | ~200M              | caution   | 4      |
+| `predibase`      | signup credit | —                | ~25M               | caution   | 1      |
+| `together`       | signup credit | —                | ~25M               | caution   | 1      |
+| `doubao`         | signup credit | —                | ~15M               | ambiguous | 1      |
+| `ai21`           | signup credit | —                | ~10M               | avoid     | 2      |
+| `deepseek`       | signup credit | —                | ~5M                | ok        | 2      |
+| `hyperbolic`     | signup credit | —                | ~5M                | ok        | 8      |
+| `nscale`         | signup credit | —                | ~5M                | caution   | 6      |
+| `bytez`          | signup credit | —                | ~1M                | ambiguous | 3      |
+| `deepinfra`      | signup credit | —                | ~1M                | caution   | 22     |
+| `fireworks`      | signup credit | —                | ~1M                | avoid     | 10     |
+| `nebius`         | signup credit | —                | ~1M                | caution   | 1      |
+| `qoder`          | signup credit | —                | ~1M                | caution   | 14     |
+| `scaleway`       | signup credit | —                | ~1M                | ok        | 6      |
+| `novita`         | signup credit | —                | ~500K              | caution   | 1      |
+| `agy`            | keyless       | —                | —                  | avoid     | 16     |
+| `baichuan`       | keyless       | —                | —                  | ambiguous | 1      |
+| `blackbox`       | keyless       | —                | —                  | avoid     | 6      |
+| `coze`           | keyless       | —                | —                  | avoid     | 1      |
+| `duckduckgo-web` | keyless       | —                | —                  | avoid     | 6      |
+| `freemodel-dev`  | keyless       | —                | —                  | unknown   | 4      |
+| `friendliai`     | keyless       | —                | —                  | avoid     | 2      |
+| `gemini-cli`     | keyless       | —                | —                  | avoid     | 9      |
+| `hackclub`       | keyless       | —                | —                  | caution   | 3      |
+| `iflytek`        | keyless       | —                | —                  | avoid     | 1      |
+| `inference-net`  | keyless       | —                | —                  | caution   | 3      |
+| `liquid`         | keyless       | —                | —                  | unknown   | 1      |
+| `monsterapi`     | keyless       | —                | —                  | ambiguous | 1      |
+| `muse-spark-web` | keyless       | —                | —                  | avoid     | 3      |
+| `nlpcloud`       | keyless       | —                | —                  | avoid     | 1      |
+| `nous-research`  | keyless       | —                | —                  | ambiguous | 2      |
+| `nvidia`         | keyless       | —                | —                  | caution   | 13     |
+| `opencode`       | keyless       | —                | —                  | avoid     | 7      |
+| `pollinations`   | keyless       | —                | —                  | caution   | 31     |
+| `publicai`       | keyless       | —                | —                  | caution   | 3      |
+| `puter`          | keyless       | —                | —                  | caution   | 33     |
+| `qwen-web`       | keyless       | —                | —                  | avoid     | 3      |
+| `reka`           | keyless       | —                | —                  | caution   | 2      |
+| `sensenova`      | keyless       | —                | —                  | caution   | 1      |
+| `sparkdesk`      | keyless       | —                | —                  | caution   | 1      |
+| `stepfun`        | keyless       | —                | —                  | ok        | 1      |
+| `t3-web`         | keyless       | —                | —                  | avoid     | 23     |
+| `uncloseai`      | keyless       | —                | —                  | caution   | 3      |
 
 ---
 
@@ -341,12 +341,12 @@ A 50-agent web-research pass (official docs + last-7-days news, adversarially ve
 
 ## Glossary
 
-| Term | Meaning |
-|---|---|
-| **RPM / RPD / RPH** | Requests per minute / day / hour |
-| **TPM / TPD** | Tokens per minute / day |
-| **Documented grant** | Provider publishes an explicit daily/monthly token cap (defensible budget) |
-| **Theoretical ceiling** | `rate-limit × 24/7 × 30d` — a maximum, not a granted budget |
-| **Neuron** | Cloudflare compute unit (~1 output token) |
+| Term                    | Meaning                                                                    |
+| ----------------------- | -------------------------------------------------------------------------- |
+| **RPM / RPD / RPH**     | Requests per minute / day / hour                                           |
+| **TPM / TPD**           | Tokens per minute / day                                                    |
+| **Documented grant**    | Provider publishes an explicit daily/monthly token cap (defensible budget) |
+| **Theoretical ceiling** | `rate-limit × 24/7 × 30d` — a maximum, not a granted budget                |
+| **Neuron**              | Cloudflare compute unit (~1 output token)                                  |
 
 > Generated from per-provider research on 2026-06-05. Re-run the research workflow (see `_tasks/features-v3.8.12`) to refresh.

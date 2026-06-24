@@ -773,6 +773,20 @@ export class BaseExecutor {
               "TOKEN",
               `${this.provider.toUpperCase()} | proactive refresh returned unrecoverable sentinel (code=${String(refreshCode ?? "unknown")}); keeping stale credentials, deferring to reactive path.`
             );
+            if (
+              this.provider === "xai-oauth" &&
+              onCredentialsRefreshed &&
+              (refreshed as Record<string, unknown>).providerSpecificData
+            ) {
+              await onCredentialsRefreshed({
+                testStatus: "expired",
+                isActive: false,
+                providerSpecificData: {
+                  ...(credentials.providerSpecificData || {}),
+                  ...((refreshed as Record<string, unknown>).providerSpecificData as JsonRecord),
+                },
+              });
+            }
             // Intentionally NOT spreading the sentinel and NOT persisting
             // expired status. The next upstream call either succeeds (rotation
             // map / DB-staleness saved us) or fails — chatCore.ts then marks

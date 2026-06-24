@@ -28,6 +28,7 @@ const ROTATION_LOCK_GROUP: Record<string, string> = {
   kiro: "kiro",
   "kimi-coding": "kimi-coding",
   qwen: "qwen",
+  "xai-oauth": "xai-oauth",
 };
 
 // Protective settle gap (ms) between two consecutive sibling refreshes when the

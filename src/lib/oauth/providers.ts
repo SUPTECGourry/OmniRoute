@@ -51,9 +51,7 @@ function hasCustomGoogleOAuthCredentials(
       env?.GEMINI_OAUTH_CLIENT_SECRET
     );
     return (
-      hasValue(clientId) &&
-      hasValue(clientSecret) &&
-      clientId !== resolvePublicCred("gemini_id")
+      hasValue(clientId) && hasValue(clientSecret) && clientId !== resolvePublicCred("gemini_id")
     );
   }
 
@@ -179,7 +177,14 @@ export function generateAuthData(providerName, redirectUri) {
 /**
  * Exchange code for tokens
  */
-export async function exchangeTokens(providerName, code, redirectUri, codeVerifier, state) {
+export async function exchangeTokens(
+  providerName,
+  code,
+  redirectUri,
+  codeVerifier,
+  state,
+  codeChallenge
+) {
   const provider = getProvider(providerName);
 
   const tokens = await provider.exchangeToken(
@@ -187,7 +192,8 @@ export async function exchangeTokens(providerName, code, redirectUri, codeVerifi
     code,
     redirectUri,
     codeVerifier,
-    state
+    state,
+    codeChallenge
   );
 
   let extra = null;
@@ -220,7 +226,7 @@ export async function finalizeTokens(providerName, tokens) {
  */
 export async function requestDeviceCode(providerName, codeChallenge, configOverride = null) {
   const provider = getProvider(providerName);
-  if (provider.flowType !== "device_code") {
+  if (provider.flowType !== "device_code" && !provider.supportsDeviceCode) {
     throw new Error(`Provider ${providerName} does not support device code flow`);
   }
   return await provider.requestDeviceCode(configOverride || provider.config, codeChallenge);
@@ -235,7 +241,7 @@ export async function requestDeviceCode(providerName, codeChallenge, configOverr
  */
 export async function pollForToken(providerName, deviceCode, codeVerifier, extraData) {
   const provider = getProvider(providerName);
-  if (provider.flowType !== "device_code") {
+  if (provider.flowType !== "device_code" && !provider.supportsDeviceCode) {
     throw new Error(`Provider ${providerName} does not support device code flow`);
   }
 

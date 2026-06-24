@@ -232,6 +232,19 @@ export const OAUTH_PROVIDERS = {
     subscriptionRisk: true,
     riskNoticeVariant: "oauth",
   },
+  "xai-oauth": {
+    id: "xai-oauth",
+    alias: "grok-oauth",
+    name: "xAI Grok OAuth",
+    icon: "auto_awesome",
+    color: "#1DA1F2",
+    textIcon: "XAI",
+    website: "https://x.ai",
+    subscriptionRisk: true,
+    riskNoticeVariant: "oauth",
+    authHint:
+      "Sign in with a SuperGrok or X Premium+ account. xAI may still reject OAuth inference with HTTP 403 for accounts outside its backend allowlist; use the xai API-key provider if that happens.",
+  },
   github: { id: "github", alias: "gh", name: "GitHub Copilot", icon: "code", color: "#333333" },
   "gitlab-duo": {
     id: "gitlab-duo",

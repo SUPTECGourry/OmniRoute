@@ -170,15 +170,18 @@ const EMBEDDED_DEFAULTS = {
     9, 93, 93, 89, 70, 92, 66, 71, 7, 26, 68, 20, 86, 88, 13, 81, 79, 67, 9, 91, 12, 93, 15, 16, 88,
     69, 23, 4, 20, 21, 64, 84,
   ],
+  // xAI Grok desktop OAuth client (public, PKCE)
+  xai_id: [
+    13, 92, 15, 89, 66, 91, 76, 70, 72, 29, 71, 70, 3, 65, 93, 84, 72, 23, 28, 87, 92, 88, 15, 95,
+    91, 22, 71, 87, 20, 66, 67, 86, 13, 81, 81, 21,
+  ],
   // Kimi coding CLI — moonshot oauth client (public)
   kimi_id: [
     94, 90, 11, 92, 20, 89, 66, 69, 72, 73, 65, 76, 86, 65, 93, 7, 75, 20, 28, 86, 90, 94, 95, 95,
     90, 64, 69, 83, 78, 18, 65, 90, 15, 89, 90, 21,
   ],
   // GitHub Copilot CLI — github oauth app id (public, device flow)
-  github_copilot_id: [
-    38, 27, 95, 71, 16, 90, 69, 67, 4, 29, 72, 22, 90, 91, 12, 0, 75, 19, 8, 87,
-  ],
+  github_copilot_id: [38, 27, 95, 71, 16, 90, 69, 67, 4, 29, 72, 22, 90, 91, 12, 0, 75, 19, 8, 87],
 } as const;
 
 export type EmbeddedDefaultKey = keyof typeof EMBEDDED_DEFAULTS;

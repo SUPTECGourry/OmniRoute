@@ -46,6 +46,8 @@ ALIAS_TO_PROVIDER_ID["xiaomi"] = "xiaomi-mimo";
 // prefix is "llamacpp". Register it so parseModel("llamacpp/<model>") resolves
 // provider = "llama-cpp" instead of the identity fallback ("llamacpp").
 ALIAS_TO_PROVIDER_ID["llamacpp"] = "llama-cpp";
+ALIAS_TO_PROVIDER_ID["grok-oauth"] = "xai-oauth";
+ALIAS_TO_PROVIDER_ID["xai-grok-oauth"] = "xai-oauth";
 
 // Provider-scoped legacy model aliases. Used to normalize provider/model inputs
 // and keep backward compatibility when upstream IDs change.

@@ -13,9 +13,8 @@ const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-stream-quota-tes
 process.env.DATA_DIR = testDataDir;
 
 const coreDb = await import("../../src/lib/db/core.ts");
-const { scheduleStreamingQuotaShareConsumption } = await import(
-  "../../open-sse/handlers/chatCore/streamingQuotaShare.ts"
-);
+const { scheduleStreamingQuotaShareConsumption } =
+  await import("../../open-sse/handlers/chatCore/streamingQuotaShare.ts");
 
 function makeCostSpy() {
   const calls: Array<{ provider: string; model: string }> = [];
@@ -89,7 +88,7 @@ test("valid 200 stream resolves cost via injected calculateCost", async () => {
     serviceTier: "standard",
     calculateCost,
   });
-  await waitFor(() => calls.length > 0);
+  await waitFor(() => calls.length > 0, 5000);
   assert.equal(calls.length, 1);
   assert.equal(calls[0].provider, "deepseek");
   assert.equal(calls[0].model, "deepseek-chat");

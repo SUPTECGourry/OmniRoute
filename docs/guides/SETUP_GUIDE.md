@@ -145,6 +145,11 @@ omniroute providers validate
 2. Open Dashboard → `Endpoints` and create an API key.
 3. (Optional) Open Dashboard → `Combos` and set your fallback chain.
 
+For Grok subscription auth, connect `xai-oauth` from Dashboard → `Providers`.
+If xAI returns HTTP 403 after a successful OAuth login, that account is not
+allowlisted for xAI's OAuth inference surface yet; use the API-key provider
+`xai` instead.
+
 ### 2) Point Your Coding Tool
 
 ```txt

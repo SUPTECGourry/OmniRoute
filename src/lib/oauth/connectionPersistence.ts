@@ -53,17 +53,24 @@ export async function persistOAuthConnection(
     : null;
 
   let connection: any;
-  if (tokenData.email) {
+  if (tokenData.email || tokenData.providerSpecificData?.accountId || connectionId) {
     const existing = await getProviderConnections({ provider });
     const match = existing.find((c: any) => {
       if (c.id && safeEqual(connectionId, c.id)) return true;
-      if (!safeEqual(c.email, tokenData.email) || c.authType !== "oauth") return false;
-      // For Codex, also check workspaceId to avoid overwriting a different workspace.
-      if (provider === "codex" && tokenData.providerSpecificData?.workspaceId) {
-        const existingWorkspace = c.providerSpecificData?.workspaceId;
-        return safeEqual(existingWorkspace, tokenData.providerSpecificData.workspaceId);
+      if (c.authType !== "oauth") return false;
+      if (tokenData.email && safeEqual(c.email, tokenData.email)) {
+        // For Codex, also check workspaceId to avoid overwriting a different workspace.
+        if (provider === "codex" && tokenData.providerSpecificData?.workspaceId) {
+          const existingWorkspace = c.providerSpecificData?.workspaceId;
+          return safeEqual(existingWorkspace, tokenData.providerSpecificData.workspaceId);
+        }
+        return true;
       }
-      return true;
+      if (provider === "xai-oauth" && tokenData.providerSpecificData?.accountId) {
+        const existingAccountId = c.providerSpecificData?.accountId;
+        return safeEqual(existingAccountId, tokenData.providerSpecificData.accountId);
+      }
+      return false;
     });
     const matchId = typeof match?.id === "string" ? match.id : null;
     if (matchId) {

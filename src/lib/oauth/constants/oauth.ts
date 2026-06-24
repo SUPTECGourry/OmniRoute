@@ -17,6 +17,14 @@ import {
   resolvePublicCred,
   resolvePublicCredMulti,
 } from "@omniroute/open-sse/utils/publicCreds.ts";
+import {
+  XAI_OAUTH_AUTHORIZE_URL,
+  XAI_OAUTH_CLIENT_ID,
+  XAI_OAUTH_DEVICE_CODE_URL,
+  XAI_OAUTH_DISCOVERY_URL,
+  XAI_OAUTH_SCOPE,
+  XAI_OAUTH_TOKEN_URL,
+} from "@omniroute/open-sse/config/xaiOAuth.ts";
 import { buildGitLabOAuthEndpoints, GITLAB_DUO_DEFAULT_BASE_URL } from "../gitlab";
 
 /**
@@ -72,6 +80,17 @@ export const CODEX_CONFIG = {
     // the only known tool that sustains multiple Codex OAuth accounts.
     prompt: "login",
   },
+};
+
+// xAI Grok OAuth Configuration (Authorization Code PKCE + device-code fallback)
+export const XAI_OAUTH_CONFIG = {
+  clientId: XAI_OAUTH_CLIENT_ID,
+  discoveryUrl: XAI_OAUTH_DISCOVERY_URL,
+  authorizeUrl: XAI_OAUTH_AUTHORIZE_URL,
+  tokenUrl: XAI_OAUTH_TOKEN_URL,
+  deviceCodeUrl: XAI_OAUTH_DEVICE_CODE_URL,
+  scope: XAI_OAUTH_SCOPE,
+  codeChallengeMethod: "S256",
 };
 
 // Gemini (Google) OAuth Configuration (Standard OAuth2)
@@ -423,6 +442,7 @@ export const OAUTH_TIMEOUT = 300000;
 export const PROVIDERS = {
   CLAUDE: "claude",
   CODEX: "codex",
+  XAI_OAUTH: "xai-oauth",
   GEMINI: "gemini-cli",
   QWEN: "qwen",
   QODER: "qoder",

@@ -394,6 +394,7 @@ export async function checkConnection(conn) {
     "amazon-q",
     "gitlab-duo",
     "claude",
+    "xai-oauth",
   ]);
   const isRotatingProvider = ROTATING_REFRESH_PROVIDERS.has(conn.provider);
   const shouldRefreshByInterval =
@@ -533,6 +534,14 @@ export async function checkConnection(conn) {
         lastErrorType: result.error,
         lastErrorSource: "oauth",
         errorCode: result.error,
+        ...(result.providerSpecificData
+          ? {
+              providerSpecificData: {
+                ...(conn.providerSpecificData || {}),
+                ...result.providerSpecificData,
+              },
+            }
+          : {}),
       });
       logWarn(
         `${LOG_PREFIX} ! ${conn.provider}/${getConnectionLogLabel(conn)} refresh token is invalid (${result.error}), but the current access token is still valid; keeping connection active`
@@ -540,6 +549,7 @@ export async function checkConnection(conn) {
       return;
     }
 
+    const preserveRejectedRefreshToken = conn.provider === "xai-oauth";
     await updateProviderConnection(conn.id, {
       lastHealthCheckAt: now,
       testStatus: "expired",
@@ -551,13 +561,21 @@ export async function checkConnection(conn) {
       lastErrorSource: "oauth",
       errorCode: result.error,
       isActive: false,
+      ...(result.providerSpecificData
+        ? {
+            providerSpecificData: {
+              ...(conn.providerSpecificData || {}),
+              ...result.providerSpecificData,
+            },
+          }
+        : {}),
       // Only rotating-token providers (Codex/OpenAI/etc.) have single-use refresh
       // tokens that are genuinely consumed and worthless after a failed refresh, so
       // clearing them is safe. For non-rotating providers (Google: gemini-cli /
       // antigravity / gemini) the stored refresh_token is the user's only recovery
       // artifact — nulling it caused #3679 (the connection reports "No valid refresh
       // token available" and can never recover even after re-activation). Preserve it.
-      ...(isRotatingProvider ? { refreshToken: null } : {}),
+      ...(isRotatingProvider && !preserveRejectedRefreshToken ? { refreshToken: null } : {}),
     });
     logError(
       `${LOG_PREFIX} ✗ ${conn.provider}/${getConnectionLogLabel(conn)} — ` +

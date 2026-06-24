@@ -9,7 +9,8 @@ import { URL } from "url";
  */
 export function startLocalServer(
   onCallback: (params: Record<string, string>) => void,
-  fixedPort: number | null = null
+  fixedPort: number | null = null,
+  options: { host?: string; fallbackToRandomPort?: boolean } = {}
 ): Promise<{ server: any; port: number; close: () => void }> {
   return new Promise((resolve, reject) => {
     const server = http.createServer((req, res) => {
@@ -67,18 +68,30 @@ export function startLocalServer(
       }
     });
 
-    // Listen on fixed port or find available port
-    const portToUse = fixedPort || 0;
-    server.listen(portToUse, "0.0.0.0", () => {
-      const addr = server.address() as { port: number };
-      resolve({
-        server,
-        port: addr.port,
-        close: () => server.close(),
+    const host = options.host || "0.0.0.0";
+    let attemptedFallback = false;
+    const listen = (portToUse: number) => {
+      server.listen(portToUse, host, () => {
+        const addr = server.address() as { port: number };
+        resolve({
+          server,
+          port: addr.port,
+          close: () => server.close(),
+        });
       });
-    });
+    };
 
     server.on("error", (err: any) => {
+      if (
+        err.code === "EADDRINUSE" &&
+        fixedPort &&
+        options.fallbackToRandomPort &&
+        !attemptedFallback
+      ) {
+        attemptedFallback = true;
+        listen(0);
+        return;
+      }
       if (err.code === "EADDRINUSE" && fixedPort) {
         reject(
           new Error(
@@ -89,6 +102,10 @@ export function startLocalServer(
         reject(err);
       }
     });
+
+    // Listen on fixed port or find available port
+    const portToUse = fixedPort || 0;
+    listen(portToUse);
   });
 }
 
