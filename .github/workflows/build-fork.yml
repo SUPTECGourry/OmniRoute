@@ -2,35 +2,73 @@ name: Publish Fork Image to GHCR
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/xai-grok-oauth]
     tags:
       - "v*"
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
-# Least-privilege default: read-only at the top level; the build job that pushes to
-# GHCR grants packages: write itself (Scorecard TokenPermissions).
 permissions:
   contents: read
 
 env:
-  IMAGE_NAME: ghcr.io/kang-heewon/omniroute
+  IMAGE_NAME: ghcr.io/suptecgourry/omniroute-xoauth-codex
 
 jobs:
-  build:
-    name: Build and Push Fork Image
-    if: github.repository == 'kang-heewon/OmniRoute'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+  validate-build:
+    name: Build Docker (validate only, ${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build only
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: runner-base
+          platforms: ${{ matrix.platform }}
+          push: false
+          cache-from: type=gha,scope=fork-docker-${{ matrix.arch }}
+
+  build:
+    name: Build and push Docker (${{ matrix.platform }})
+    if: github.repository == 'SUPTECGourry/omniroute-xoauth-codex' && github.event_name != 'pull_request'
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+            arch: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            arch: arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -42,30 +80,89 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=sha-
-            type=ref,event=tag
-          labels: |
-            org.opencontainers.image.title=omniroute
-            org.opencontainers.image.description=Unified AI proxy/router — fork image
-            org.opencontainers.image.url=https://github.com/kang-heewon/OmniRoute
-            org.opencontainers.image.source=https://github.com/kang-heewon/OmniRoute
-            org.opencontainers.image.licenses=MIT
-
-      - name: Build and push
+      - name: Build and push platform image by digest
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
           target: runner-base
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          tags: ${{ env.IMAGE_NAME }}
+          cache-from: type=gha,scope=fork-docker-${{ matrix.arch }}
+          cache-to: type=gha,scope=fork-docker-${{ matrix.arch }},mode=max
+        env:
+          DOCKER_BUILDKIT_INLINE_CACHE: 1
+
+      - name: Export digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/digests
+          touch "/tmp/digests/${DIGEST#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Publish multi-arch GHCR manifest
+    needs: build
+    if: github.repository == 'SUPTECGourry/omniroute-xoauth-codex' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          pattern: digests-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Create GHCR manifest
+        run: |
+          set -euo pipefail
+
+          tags=(-t "${IMAGE_NAME}:sha-${GITHUB_SHA}")
+          if [ "${GITHUB_REF_TYPE}" = "branch" ]; then
+            safe_ref="$(printf '%s' "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_.-]+/-/g')"
+            tags+=(-t "${IMAGE_NAME}:${safe_ref}")
+            if [ "${GITHUB_REF_NAME}" = "main" ]; then
+              tags+=(-t "${IMAGE_NAME}:latest")
+            fi
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            tags+=(-t "${IMAGE_NAME}:${GITHUB_REF_NAME}")
+          fi
+
+          refs=()
+          while IFS= read -r digest_file; do
+            refs+=("${IMAGE_NAME}@sha256:$(basename "$digest_file")")
+          done < <(find /tmp/digests -type f | sort)
+
+          if [ "${#refs[@]}" -eq 0 ]; then
+            echo "No image digests were downloaded." >&2
+            exit 1
+          fi
+
+          docker buildx imagetools create "${tags[@]}" "${refs[@]}"
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect "${IMAGE_NAME}:sha-${GITHUB_SHA}"
